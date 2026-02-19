@@ -27,6 +27,7 @@ interface DataTableProps<TData, TValue> {
     data: TData[]
     searchKey: string
     filterFields?: FilterField[]
+    actions?: React.ReactNode
 }
 
 export function DataTable<TData, TValue>({
@@ -34,6 +35,7 @@ export function DataTable<TData, TValue>({
     data,
     searchKey,
     filterFields = [],
+    actions,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -93,6 +95,12 @@ export function DataTable<TData, TValue>({
                         <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text3)] pointer-events-none" />
                     </div>
                 ))}
+
+                {actions && (
+                    <div className="flex items-center gap-2 ml-auto">
+                        {actions}
+                    </div>
+                )}
             </div>
 
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--r)] overflow-hidden shadow-sm">

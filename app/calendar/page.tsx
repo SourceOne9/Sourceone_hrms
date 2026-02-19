@@ -1,12 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar'
-import format from 'date-fns/format'
-import parse from 'date-fns/parse'
-import startOfWeek from 'date-fns/startOfWeek'
-import getDay from 'date-fns/getDay'
-import enUS from 'date-fns/locale/en-US'
+import { Calendar, dateFnsLocalizer, Views, type View } from 'react-big-calendar'
+import { format, parse, startOfWeek, getDay } from 'date-fns'
+import { enUS } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { cn } from "@/lib/utils"
 
@@ -56,7 +53,7 @@ const events = [
 ]
 
 export default function CalendarPage() {
-    const [view, setView] = React.useState(Views.MONTH)
+    const [view, setView] = React.useState<View>(Views.MONTH)
     const [date, setDate] = React.useState(new Date())
 
     const eventStyleGetter = (event: any) => {

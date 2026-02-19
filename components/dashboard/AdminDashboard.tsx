@@ -224,7 +224,7 @@ export function AdminDashboard() {
                                                 contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                                                 itemStyle={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text)' }}
                                                 labelStyle={{ display: 'none' }}
-                                                formatter={(value: number) => [`${value}%`, 'Share']}
+                                                formatter={(value: any) => [`${value}%`, 'Share']}
                                             />
                                         </PieChart>
                                     </ResponsiveContainer>
@@ -261,7 +261,7 @@ export function AdminDashboard() {
                                     <AreaChart
                                         data={hiringData}
                                         margin={{ top: 5, right: 0, left: -20, bottom: 0 }}
-                                        onClick={(e) => {
+                                        onClick={(e: any) => {
                                             if (e && e.activePayload && e.activePayload[0]) {
                                                 setSelectedMonth(e.activePayload[0].payload.month);
                                             }
@@ -290,7 +290,7 @@ export function AdminDashboard() {
                                             contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
                                             labelStyle={{ color: 'var(--text3)', fontSize: '11px', marginBottom: '4px' }}
                                             itemStyle={{ color: '#007aff', fontSize: '12px', fontWeight: 'bold' }}
-                                            formatter={(value: number) => [value, 'New Hires']}
+                                            formatter={(value: any) => [value, 'New Hires']}
                                             cursor={{ stroke: 'var(--text3)', strokeWidth: 1, strokeDasharray: '3 3' }}
                                         />
                                         <Area
@@ -331,7 +331,7 @@ export function AdminDashboard() {
                                             contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
                                             labelStyle={{ display: 'none' }}
                                             itemStyle={{ color: 'var(--text)', fontSize: '12px' }}
-                                            formatter={(value: number, name: string, props: any) => [value, 'Employees']}
+                                            formatter={(value: any, name: any, props: any) => [value, 'Employees']}
                                         />
                                         <Bar
                                             dataKey="count"
