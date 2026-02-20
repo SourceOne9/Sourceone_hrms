@@ -8,6 +8,7 @@ import { DataTable } from "@/components/ui/DataTable"
 import { ColumnDef } from "@tanstack/react-table"
 import { CaretSortIcon, DotsHorizontalIcon, DownloadIcon, PlusIcon } from "@radix-ui/react-icons" // Fallback or use lucide if available
 import { exportToCSV, exportToPDF } from "@/lib/exportUtils"
+import { read, utils } from 'xlsx'
 
 type Employee = {
     id: string
@@ -21,7 +22,7 @@ type Employee = {
     color: string
 }
 
-const employees: Employee[] = [
+const initialEmployees: Employee[] = [
     { id: "1", name: "Michael Johnson", email: "michael.j@emspro.com", dept: "Sales", role: "Sales Representative", status: "Active", start: "Mar 10, 2023", initials: "MJ", color: "from-[#007aff] to-[#5856d6]" },
     { id: "2", name: "Lisa Anderson", email: "lisa.a@emspro.com", dept: "Marketing", role: "Content Strategist", status: "Active", start: "Jan 8, 2023", initials: "LA", color: "from-[#ec4899] to-[#f43f5e]" },
     { id: "3", name: "David Wilson", email: "david.w@emspro.com", dept: "Finance", role: "Financial Analyst", status: "Active", start: "Nov 15, 2022", initials: "DW", color: "from-[#38bdf8] to-[#0ea5e9]" },
@@ -114,6 +115,8 @@ export const columns: ColumnDef<Employee>[] = [
 export default function Employees() {
     const { user, isLoading } = useAuth()
     const router = useRouter()
+    const [employees, setEmployees] = React.useState<Employee[]>(initialEmployees)
+    const fileInputRef = React.useRef<HTMLInputElement>(null)
 
     React.useEffect(() => {
         if (!isLoading && user?.role === 'employee') {
@@ -122,6 +125,40 @@ export default function Employees() {
     }, [user, isLoading, router])
 
     if (isLoading || user?.role === 'employee') return null
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        const reader = new FileReader()
+        reader.onload = (event) => {
+            const bstr = event.target?.result
+            const wb = read(bstr, { type: 'binary' })
+            const wsname = wb.SheetNames[0]
+            const ws = wb.Sheets[wsname]
+            const data = utils.sheet_to_json<any>(ws)
+
+            const newEmployees: Employee[] = data.map((row: any, index: number) => ({
+                id: row.id || `imported-${Date.now()}-${index}`,
+                name: row.Name || row.name || "Unknown",
+                email: row.Email || row.email || "",
+                dept: row.Department || row.dept || "Unassigned",
+                role: row.Role || row.role || "Employee",
+                status: (row.Status === 'Active' || row.Status === 'On Leave' || row.Status === 'Terminated') ? row.Status : 'Active',
+                start: row.Start || row.start || new Date().toLocaleDateString(),
+                initials: (row.Name || row.name || "U").split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+                color: "from-[#007aff] to-[#5856d6]" // Default color
+            }))
+
+            setEmployees(prev => [...prev, ...newEmployees])
+        }
+        reader.readAsBinaryString(file)
+
+        // Reset input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
+    }
 
     const handleExportCSV = () => {
         const exportData = employees.map(({ color, initials, ...rest }) => rest);
@@ -141,6 +178,14 @@ export default function Employees() {
                 <p className="text-[13.5px] text-[var(--text3)] mt-[4px]">Manage and organize your employee records</p>
             </div>
 
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                className="hidden"
+                accept=".xlsx, .xls, .csv"
+            />
+
             <DataTable
                 columns={columns}
                 data={employees}
@@ -151,6 +196,12 @@ export default function Employees() {
                 ]}
                 actions={
                     <>
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="flex items-center gap-2 p-[9px_14px] bg-[var(--surface)] border border-[var(--border)] rounded-[9px] text-[13px] text-[var(--text2)] hover:bg-[var(--bg2)] transition-colors"
+                        >
+                            <DownloadIcon className="w-3.5 h-3.5 rotate-180" /> Import
+                        </button>
                         <button
                             onClick={handleExportCSV}
                             className="flex items-center gap-2 p-[9px_14px] bg-[var(--surface)] border border-[var(--border)] rounded-[9px] text-[13px] text-[var(--text2)] hover:bg-[var(--bg2)] transition-colors"

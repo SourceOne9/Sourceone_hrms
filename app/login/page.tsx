@@ -81,9 +81,9 @@ export default function LoginPage() {
 
                     <div className="flex gap-8">
                         {/* Profile Icon Box */}
-                        <div className="hidden md:flex w-[140px] h-[140px] border border-blue-500/50 items-center justify-center bg-blue-500/5 relative group">
+                        <div className="hidden md:flex w-[140px] h-[140px] border border-blue-500/50 items-center justify-center bg-blue-500/5 relative group overflow-hidden">
                             <div className="absolute inset-0 border border-blue-400/20 scale-90" />
-                            <PersonIcon className="w-20 h-20 text-blue-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.6)]" />
+                            <img src="/logo.svg" alt="EMS Logo" className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(96,165,250,0.6)]" />
 
                             {/* Scanning Line Animation */}
                             <motion.div

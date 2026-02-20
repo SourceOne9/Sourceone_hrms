@@ -60,9 +60,8 @@ export function Sidebar() {
     <aside className="w-[220px] min-w-[220px] bg-[var(--glass-bg)] backdrop-blur-xl border-r border-[var(--border)] flex flex-col relative z-50 h-screen transition-colors duration-300">
       <div className="p-[22px_18px_18px] border-b border-[var(--border)]">
         <div className="flex items-center gap-[11px]">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[#5856d6] flex items-center justify-center text-white font-extrabold text-[15px] shadow-[0_0_20px_var(--glow)] relative overflow-hidden">
-            <span className="relative z-10">EP</span>
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center relative overflow-hidden shrink-0">
+            <img src="/logo.svg" alt="EMS Logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex flex-col">
             <span className="font-bold text-[16px] text-[var(--text)] tracking-tight">EMS Pro</span>
