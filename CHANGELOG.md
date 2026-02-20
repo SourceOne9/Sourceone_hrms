@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-02-20
+
+### Added
+-   **Full Backend API** with 17 RESTful endpoints covering all frontend modules.
+-   **Prisma Schema** expanded to 18 models: `Attendance`, `Payroll`, `ProvidentFund`, `PerformanceReview`, `Training`, `TrainingEnrollment`, `Announcement`, `Ticket`, `CalendarEvent`, `Candidate`.
+-   **NextAuth.js v5** integration with JWT sessions and proper type augmentation (`types/next-auth.d.ts`).
+-   **API Routes** for: Employees, Assets, Documents, Departments, Attendance, Payroll, PF, Performance, Training, Leaves, Resignations, Announcements, Tickets, Events, Recruitment.
+-   **Role-based access control** — Admin-only write operations; employees see only their own data.
+-   **Auto-generated ticket codes** (TKT-YYYY-NNN) for help desk tickets.
+-   **`.env.example`** with all required environment variables documented.
+-   **`API_DOCUMENTATION.md`** with complete endpoint reference.
+
+### Changed
+-   **`README.md`** rewritten to cover full-stack architecture, backend setup, and project structure.
+-   **`lib/auth.ts`** refactored to use typed NextAuth callbacks (no `any` casts).
+-   **Mobile optimization** for Organization Chart page (responsive container, hidden MiniMap).
+
+### Fixed
+-   Eliminated all ESLint errors in backend API files (0 errors, 0 warnings).
+-   Fixed `session.user` type safety across all API routes with proper NextAuth type augmentation.
+
 ## [0.1.0] - 2024-02-19
 
 ### Added

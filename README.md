@@ -1,88 +1,177 @@
-# EMS Pro - Employee Management System
+# EMS Pro – Employee Management System
 
-EMS Pro is a modern, comprehensive Employee Management System designed to streamline HR operations. It offers a premium, user-friendly interface for managing employee records, attendance, payroll, and more.
+EMS Pro is a modern, full-stack Employee Management System built with **Next.js 16**, **Prisma**, and **PostgreSQL**. It provides a premium UI for managing every aspect of HR operations — from hiring to resignation.
+
+---
 
 ## 🚀 Features
 
--   **Dashboard Overview**: Real-time insights into employee statistics, hiring trends, and department distribution.
--   **Employee Management**: centralized database to view, edit, and manage employee profiles.
--   **Attendance & Leave**: Track daily attendance, manage leave requests, and view calendar schedules.
--   **Payroll Management**: Manage salaries, bonuses, and generate payroll reports.
--   **Role-Based Access**: Secure login for Admins and Employees with distinct dashboards and permissions.
--   **Interactive Calendar**: Visual team calendar for holidays, leaves, and events.
--   **Responsive Design**: Built with a mobile-first approach ensuring accessibility across all devices.
+### Core HR
+- **Employee Directory** — Centralized database with search, filter, and export (CSV/PDF)
+- **Attendance Tracking** — Daily check-in/out logs and work-hour calculations
+- **Leave Management** — Submit, approve, and reject leave requests with role-based access
+- **Payroll** — Salary breakdowns with allowances, PF, tax, and net pay
+- **Provident Fund** — Track employee and employer contributions
+
+### Talent & Growth
+- **Recruitment Pipeline** — Kanban-style candidate tracking across hiring stages
+- **Performance Reviews** — Rating system with progress tracking and department views
+- **Training & Development** — Course management with enrollment tracking and completion rates
+
+### Operations
+- **Asset Management** — Track hardware/software assignments with status lifecycle
+- **Document Hub** — Role-filtered document repository (policies, contracts, payslips)
+- **Help Desk** — Ticketing system with auto-generated ticket codes and priority levels
+- **Announcements** — Company-wide news with pinning and priority badges
+
+### Platform
+- **Organization Chart** — Interactive ReactFlow-based hierarchy visualization
+- **Team Calendar** — Full calendar with holidays, leaves, birthdays, and events
+- **Resignation Tracker** — Submit and process resignations with status workflow
+- **Role-Based Access** — Admins manage everything; employees see only their data
+- **Dark Mode** — Full theme support with system preference detection
+- **Responsive Design** — Mobile-optimized across all pages
+
+---
 
 ## 🛠️ Tech Stack
 
--   **Framework**: [Next.js 16](https://nextjs.org/) (App Directory)
--   **Language**: [TypeScript](https://www.typescriptlang.org/)
--   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
--   **UI Components**: [Shadcn UI](https://ui.shadcn.com/) / [Radix UI](https://www.radix-ui.com/)
--   **Charts**: [Recharts](https://recharts.org/)
--   **Calendar**: [React Big Calendar](https://github.com/jquense/react-big-calendar)
--   **State Management**: React Context API
--   **Icons**: [Radix Icons](https://icons.radix-ui.com/)
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | [Next.js 16](https://nextjs.org/) (App Router) |
+| **Language** | [TypeScript 5](https://www.typescriptlang.org/) |
+| **Database** | [PostgreSQL](https://www.postgresql.org/) |
+| **ORM** | [Prisma 7](https://www.prisma.io/) |
+| **Auth** | [NextAuth.js v5](https://authjs.dev/) (JWT strategy) |
+| **Styling** | [Tailwind CSS 3](https://tailwindcss.com/) |
+| **UI** | [Radix UI](https://www.radix-ui.com/) / Custom components |
+| **Charts** | [Recharts](https://recharts.org/) |
+| **Calendar** | [React Big Calendar](https://github.com/jquense/react-big-calendar) |
+| **Org Chart** | [ReactFlow](https://reactflow.dev/) |
+| **State** | React Context API |
+| **Validation** | [Zod](https://zod.dev/) |
+
+---
 
 ## 🏁 Getting Started
 
-Follow these steps to set up the project locally.
-
 ### Prerequisites
 
--   Node.js (v18 or higher)
--   npm or yarn
+- Node.js v18+
+- PostgreSQL database (local or hosted)
+- npm or yarn
 
 ### Installation
 
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/Work-Ashish/Employee-directory.git
-    cd Employee-directory
-    ```
+```bash
+# 1. Clone the repository
+git clone https://github.com/Work-Ashish/Employee-directory.git
+cd Employee-directory
 
-2.  **Install dependencies**
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
+# 2. Install dependencies
+npm install
 
-3.  **Run the development server**
-    ```bash
-    npm run dev
-    ```
+# 3. Set up environment variables
+cp .env.example .env
+# Edit .env with your DATABASE_URL and AUTH_SECRET
 
-4.  **Open the application**
-    Visit [http://localhost:3000](http://localhost:3000) in your browser.
+# 4. Generate Prisma client & push schema
+npm run db:generate
+npx prisma db push
 
-## 🔑 Default Credentials (Local Environment)
+# 5. (Optional) Seed sample data
+npm run db:seed
 
-For testing purposes, the following credentials can be used:
+# 6. Start the development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run db:generate` | Generate Prisma client |
+| `npm run db:migrate` | Run database migrations |
+| `npm run db:seed` | Seed the database |
+| `npm run db:studio` | Open Prisma Studio GUI |
+
+---
+
+## 🔑 Default Credentials
 
 | Role | Email | Password |
-| :--- | :--- | :--- |
+|------|-------|----------|
 | **Admin** | `admin@emspro.com` | `admin` |
-| **User** | `user@emspro.com` | `user` |
+| **Employee** | `user@emspro.com` | `user` |
 
-> **Note**: Passwords are currently mocked in the development environment.
+> Passwords are hashed with bcryptjs. Change them immediately in production.
+
+---
 
 ## 📂 Project Structure
 
 ```
-├── app/                  # Next.js App Router pages and layouts
-│   ├── calendar/         # Team calendar page
-│   ├── dashboard/        # Main dashboard views
-│   ├── employees/        # Employee list and management
-│   ├── login/            # Authentication page
-│   └── ...
-├── components/           # Reusable UI components
-│   ├── dashboard/        # Dashboard-specific widgets
-│   ├── ui/               # Core UI elements (Button, Card, Modal, etc.)
-│   └── ...
-├── context/              # Global state (AuthContext, etc.)
-├── lib/                  # Utilities and helper functions
-└── public/               # Static assets
+├── app/
+│   ├── api/                  # Backend API routes
+│   │   ├── auth/             #   NextAuth handler
+│   │   ├── employees/        #   Employee CRUD + [id] route
+│   │   ├── assets/           #   Asset management
+│   │   ├── documents/        #   Document repository
+│   │   ├── attendance/       #   Attendance tracking
+│   │   ├── payroll/          #   Payroll records
+│   │   ├── pf/               #   Provident fund
+│   │   ├── performance/      #   Performance reviews
+│   │   ├── training/         #   Training courses
+│   │   ├── leaves/           #   Leave requests
+│   │   ├── resignations/     #   Resignation workflow
+│   │   ├── announcements/    #   Company announcements
+│   │   ├── tickets/          #   Help desk tickets
+│   │   ├── events/           #   Calendar events
+│   │   ├── recruitment/      #   Recruitment pipeline
+│   │   └── departments/      #   Department list
+│   ├── admin/                # Admin-only pages
+│   ├── employee/             # Employee dashboard
+│   ├── login/                # Authentication page
+│   └── [module]/             # Feature pages (attendance, payroll, etc.)
+├── components/
+│   ├── ui/                   # Reusable UI (DataTable, Modal, Skeleton)
+│   ├── dashboard/            # Dashboard widgets
+│   └── [module]/             # Feature-specific components
+├── context/                  # AuthContext (global state)
+├── lib/                      # Utilities (auth, prisma, helpers)
+├── prisma/
+│   ├── schema.prisma         # Database schema (18 models)
+│   └── seed.ts               # Database seeder
+├── types/                    # TypeScript type declarations
+│   ├── index.ts              # Shared types
+│   └── next-auth.d.ts        # NextAuth type augmentation
+└── public/                   # Static assets
 ```
+
+---
+
+## 🗄️ Database Schema
+
+The Prisma schema defines **18 models** across 6 domains:
+
+| Domain | Models |
+|--------|--------|
+| **Auth** | `User` |
+| **Core** | `Employee`, `Department` |
+| **HR Ops** | `Attendance`, `Leave`, `Resignation`, `Payroll`, `ProvidentFund` |
+| **Assets & Docs** | `Asset`, `Document` |
+| **Growth** | `PerformanceReview`, `Training`, `TrainingEnrollment` |
+| **Operations** | `Announcement`, `Ticket`, `CalendarEvent`, `Candidate` |
+
+See [`prisma/schema.prisma`](prisma/schema.prisma) for the full schema, and [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md) for endpoint details.
+
+---
 
 ## 📄 License
 

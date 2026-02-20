@@ -1,0 +1,464 @@
+// ─────────────────────────────────────────────────────────────
+// EMS Pro – Prisma Schema
+// ─────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Auth ────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String
+  email          String    @unique
+  hashedPassword String
+  role           Role      @default(EMPLOYEE)
+  avatar         String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  employee       Employee?
+}
+
+// ── Core ────────────────────────────────────────────────────
+
+model Department {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  color     String?
+  createdAt DateTime   @default(now())
+
+  employees  Employee[]
+  candidates Candidate[]
+}
+
+model Employee {
+  id            String       @id @default(cuid())
+  employeeCode  String       @unique
+  firstName     String
+  lastName      String
+  email         String       @unique
+  phone         String?
+  designation   String
+  departmentId  String
+  department    Department   @relation(fields: [departmentId], references: [id])
+  dateOfJoining DateTime
+  salary        Float
+  status        EmployeeStatus @default(ACTIVE)
+  avatarUrl     String?
+  address       String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  userId        String?      @unique
+  user          User?        @relation(fields: [userId], references: [id])
+
+  assets             Asset[]
+  documents          Document[]
+  leaves             Leave[]
+  resignations       Resignation[]
+  attendanceRecords  Attendance[]
+  payrollRecords     Payroll[]
+  pfRecords          ProvidentFund[]
+  performanceReviews PerformanceReview[]
+  trainings          TrainingEnrollment[]
+  tickets            Ticket[]
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ON_LEAVE
+  RESIGNED
+  TERMINATED
+}
+
+// ── Assets ──────────────────────────────────────────────────
+
+model Asset {
+  id           String      @id @default(cuid())
+  name         String
+  type         AssetType
+  serialNumber String      @unique
+  status       AssetStatus @default(AVAILABLE)
+  purchaseDate DateTime
+  value        Float
+  image        String?
+
+  assignedToId String?
+  assignedTo   Employee?   @relation(fields: [assignedToId], references: [id])
+  assignedDate DateTime?
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+enum AssetType {
+  HARDWARE
+  SOFTWARE
+  ACCESSORY
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ASSIGNED
+  MAINTENANCE
+  RETIRED
+}
+
+// ── Documents ───────────────────────────────────────────────
+
+model Document {
+  id         String      @id @default(cuid())
+  title      String
+  category   DocCategory
+  url        String
+  size       String?
+  isPublic   Boolean     @default(false)
+
+  employeeId String?
+  employee   Employee?   @relation(fields: [employeeId], references: [id])
+
+  uploadDate DateTime    @default(now())
+}
+
+enum DocCategory {
+  POLICY
+  CONTRACT
+  PAYSLIP
+  TAX
+  IDENTIFICATION
+}
+
+// ── Leave ───────────────────────────────────────────────────
+
+model Leave {
+  id         String      @id @default(cuid())
+  type       LeaveType
+  startDate  DateTime
+  endDate    DateTime
+  reason     String?
+  status     LeaveStatus @default(PENDING)
+
+  employeeId String
+  employee   Employee    @relation(fields: [employeeId], references: [id])
+
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+enum LeaveType {
+  CASUAL
+  SICK
+  EARNED
+  MATERNITY
+  PATERNITY
+  UNPAID
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ── Resignation ─────────────────────────────────────────────
+
+model Resignation {
+  id         String             @id @default(cuid())
+  reason     String
+  lastDay    DateTime
+  status     ResignationStatus  @default(UNDER_REVIEW)
+
+  employeeId String
+  employee   Employee           @relation(fields: [employeeId], references: [id])
+
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+}
+
+enum ResignationStatus {
+  UNDER_REVIEW
+  NOTICE_PERIOD
+  PROCESSED
+}
+
+// ── Attendance ──────────────────────────────────────────────
+
+model Attendance {
+  id         String           @id @default(cuid())
+  date       DateTime
+  checkIn    DateTime?
+  checkOut   DateTime?
+  workHours  Float?
+  status     AttendanceStatus @default(PRESENT)
+
+  employeeId String
+  employee   Employee         @relation(fields: [employeeId], references: [id])
+
+  createdAt  DateTime         @default(now())
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  HALF_DAY
+  ON_LEAVE
+  WEEKEND
+}
+
+// ── Payroll ─────────────────────────────────────────────────
+
+model Payroll {
+  id          String        @id @default(cuid())
+  month       String
+  basicSalary Float
+  allowances  Float         @default(0)
+  pfDeduction Float         @default(0)
+  tax         Float         @default(0)
+  otherDed    Float         @default(0)
+  netSalary   Float
+  status      PayrollStatus @default(PENDING)
+
+  employeeId  String
+  employee    Employee      @relation(fields: [employeeId], references: [id])
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum PayrollStatus {
+  PENDING
+  PROCESSED
+  PAID
+}
+
+// ── Provident Fund ──────────────────────────────────────────
+
+model ProvidentFund {
+  id                    String   @id @default(cuid())
+  month                 String
+  accountNumber         String
+  basicSalary           Float
+  employeeContribution  Float
+  employerContribution  Float
+  totalContribution     Float
+  status                String   @default("Credited")
+
+  employeeId            String
+  employee              Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt             DateTime @default(now())
+}
+
+// ── Performance ─────────────────────────────────────────────
+
+model PerformanceReview {
+  id          String             @id @default(cuid())
+  rating      Float
+  progress    Int                @default(0)
+  comments    String?
+  reviewDate  DateTime           @default(now())
+  status      PerformanceStatus  @default(PENDING)
+
+  employeeId  String
+  employee    Employee           @relation(fields: [employeeId], references: [id])
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+enum PerformanceStatus {
+  PENDING
+  COMPLETED
+  EXCELLENT
+  GOOD
+  NEEDS_IMPROVEMENT
+}
+
+// ── Training ────────────────────────────────────────────────
+
+model Training {
+  id            String          @id @default(cuid())
+  name          String
+  type          TrainingType
+  description   String?
+  status        TrainingStatus  @default(UPCOMING)
+  progress      Int             @default(0)
+  dueDate       DateTime?
+  participants  Int             @default(0)
+
+  enrollments   TrainingEnrollment[]
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+enum TrainingType {
+  TECHNICAL
+  COMPLIANCE
+  SECURITY
+  SOFT_SKILLS
+  LEADERSHIP
+}
+
+enum TrainingStatus {
+  UPCOMING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model TrainingEnrollment {
+  id          String   @id @default(cuid())
+  score       Int?
+  completed   Boolean  @default(false)
+
+  trainingId  String
+  training    Training @relation(fields: [trainingId], references: [id])
+
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id])
+
+  enrolledAt  DateTime @default(now())
+
+  @@unique([trainingId, employeeId])
+}
+
+// ── Announcements ───────────────────────────────────────────
+
+model Announcement {
+  id        String             @id @default(cuid())
+  title     String
+  content   String
+  author    String
+  category  AnnouncementCategory
+  priority  AnnouncementPriority @default(MEDIUM)
+  isPinned  Boolean             @default(false)
+
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+enum AnnouncementCategory {
+  EVENT
+  POLICY
+  MEETING
+  SYSTEM
+  GENERAL
+}
+
+enum AnnouncementPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// ── Help Desk (Tickets) ─────────────────────────────────────
+
+model Ticket {
+  id         String         @id @default(cuid())
+  ticketCode String         @unique
+  subject    String
+  description String?
+  category   TicketCategory
+  priority   TicketPriority @default(MEDIUM)
+  status     TicketStatus   @default(OPEN)
+
+  employeeId String
+  employee   Employee       @relation(fields: [employeeId], references: [id])
+
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+}
+
+enum TicketCategory {
+  IT
+  HR
+  FINANCE
+  FACILITIES
+  OTHER
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+// ── Calendar Events ─────────────────────────────────────────
+
+model CalendarEvent {
+  id        String        @id @default(cuid())
+  title     String
+  start     DateTime
+  end       DateTime
+  allDay    Boolean       @default(false)
+  type      EventType     @default(EVENT)
+
+  createdAt DateTime      @default(now())
+}
+
+enum EventType {
+  HOLIDAY
+  LEAVE
+  BIRTHDAY
+  EVENT
+  MEETING
+}
+
+// ── Recruitment ─────────────────────────────────────────────
+
+model Candidate {
+  id           String          @id @default(cuid())
+  name         String
+  email        String
+  phone        String?
+  role         String
+  stage        CandidateStage  @default(APPLICATION)
+  status       CandidateStatus @default(NEW)
+  interviewDate DateTime?
+  notes        String?
+
+  departmentId String?
+  department   Department?     @relation(fields: [departmentId], references: [id])
+
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+enum CandidateStage {
+  APPLICATION
+  SCREENING
+  INTERVIEW
+  TECHNICAL_ROUND
+  OFFER
+  HIRED
+  REJECTED
+}
+
+enum CandidateStatus {
+  NEW
+  SCHEDULED
+  EVALUATED
+  PENDING
+  ACCEPTED
+  REJECTED
+}

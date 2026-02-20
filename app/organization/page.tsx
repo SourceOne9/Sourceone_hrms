@@ -114,10 +114,10 @@ export default function Organization() {
     if (isLoading || user?.role === 'employee') return null
 
     return (
-        <div className="h-[calc(100vh-40px)] w-full rounded-xl overflow-hidden border border-[var(--border)] shadow-sm bg-[var(--surface)] animate-in fade-in duration-300">
-            <div className="absolute top-4 left-4 z-10 glass px-4 py-2 pointer-events-none">
-                <h1 className="text-[16px] font-extrabold text-[var(--text)]">Organization Chart</h1>
-                <p className="text-[12px] text-[var(--text3)]">Interactive company hierarchy</p>
+        <div className="h-[calc(100vh-80px)] md:h-[calc(100vh-40px)] w-full rounded-xl overflow-hidden border border-[var(--border)] shadow-sm bg-[var(--surface)] animate-in fade-in duration-300 relative">
+            <div className="absolute top-4 left-4 z-10 glass px-3 py-1.5 md:px-4 md:py-2 pointer-events-none rounded-lg">
+                <h1 className="text-[14px] md:text-[16px] font-extrabold text-[var(--text)]">Organization Chart</h1>
+                <p className="text-[11px] md:text-[12px] text-[var(--text3)]">Interactive company hierarchy</p>
             </div>
             <ReactFlow
                 nodes={nodes}
@@ -132,7 +132,7 @@ export default function Organization() {
             >
                 <Controls className="!bg-[var(--surface)] !border-[var(--border)] !shadow-sm [&>button]:!border-b-[var(--border)] [&>button]:!fill-[var(--text2)] hover:[&>button]:!bg-[var(--bg)]" />
                 <MiniMap
-                    className="!bg-[var(--surface)] !border-[var(--border)] !shadow-sm rounded-lg overflow-hidden"
+                    className="hidden md:block !bg-[var(--surface)] !border-[var(--border)] !shadow-sm rounded-lg overflow-hidden"
                     nodeColor={(n) => {
                         if (n.data?.isRoot) return 'var(--accent)';
                         return 'var(--text4)';
