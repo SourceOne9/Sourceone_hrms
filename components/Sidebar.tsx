@@ -17,13 +17,17 @@ import {
   BackpackIcon,
   SpeakerLoudIcon,
   GearIcon,
-  MixIcon
+  MixIcon,
+  LaptopIcon,
+  FileTextIcon
 } from '@radix-ui/react-icons'
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: DashboardIcon },
   { name: 'Employees', href: '/employees', icon: PersonIcon, badge: 10 },
   { name: 'Organization', href: '/organization', icon: MixIcon }, // New Link
+  { name: 'Assets', href: '/admin/assets', hrefEmployee: '/employee/assets', icon: LaptopIcon }, // New Module
+  { name: 'Documents', href: '/admin/documents', hrefEmployee: '/employee/documents', icon: FileTextIcon }, // New Module
   { name: 'Leave', href: '/leave', icon: CalendarIcon },
   { name: 'Attendance', href: '/attendance', icon: ClockIcon },
   { name: 'Payroll', href: '/payroll', icon: ReaderIcon },
@@ -69,12 +73,14 @@ export function Sidebar() {
 
       <nav className="flex-1 p-[14px_10px] flex flex-col gap-[2px] overflow-y-auto scrollbar-hide">
         {filteredNavItems.map((item) => {
-          const isActive = pathname === item.href
+          // Determine href based on role
+          const href = (user.role === 'employee' && item.hrefEmployee) ? item.hrefEmployee : item.href
+          const isActive = pathname === href
 
           return (
             <Link
               key={item.name}
-              href={item.href}
+              href={href}
               className={cn(
                 "flex items-center gap-[10px] p-[10px_12px] rounded-[10px] cursor-pointer text-[13.5px] font-medium transition-all duration-200 relative overflow-hidden group select-none",
                 isActive
