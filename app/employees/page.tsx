@@ -29,8 +29,8 @@ const employeeSchema = z.object({
     designation: z.string().min(1, "Designation is required"),
     departmentId: z.string().min(1, "Department is required"),
     dateOfJoining: z.string().min(1, "Date of Joining is required"),
-    salary: z.coerce.number().min(0, "Salary must be positive"),
-    status: z.enum(["ACTIVE", "ON_LEAVE", "RESIGNED", "TERMINATED"]).default("ACTIVE"),
+    salary: z.number().min(0, "Salary must be positive"),
+    status: z.enum(["ACTIVE", "ON_LEAVE", "RESIGNED", "TERMINATED"]),
 })
 
 type EmployeeFormData = z.infer<typeof employeeSchema>
@@ -600,7 +600,7 @@ export default function EmployeesPage() {
                             <label className="text-[12px] font-semibold text-[var(--text2)]">Salary (Monthly) *</label>
                             <input
                                 type="number"
-                                {...form.register('salary')}
+                                {...form.register('salary', { valueAsNumber: true })}
                                 disabled={modalMode === "VIEW"}
                                 className="w-full p-2 border border-[var(--border)] rounded-md text-[13px] bg-[var(--bg)] outline-none focus:border-[var(--accent)] disabled:opacity-50"
                             />

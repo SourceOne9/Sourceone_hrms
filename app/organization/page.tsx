@@ -40,8 +40,8 @@ const employeeSchema = z.object({
     designation: z.string().min(1, "Designation is required"),
     departmentId: z.string().min(1, "Department is required"),
     dateOfJoining: z.string().min(1, "Date of Joining is required"),
-    salary: z.coerce.number().min(0, "Salary must be positive"),
-    status: z.enum(["ACTIVE", "ON_LEAVE", "TERMINATED"]).default("ACTIVE"),
+    salary: z.number().min(0, "Salary must be positive"),
+    status: z.enum(["ACTIVE", "ON_LEAVE", "TERMINATED"]),
     managerId: z.string().optional().nullable(),
 })
 
@@ -455,7 +455,7 @@ export default function Organization() {
                             <label className="text-[12px] font-semibold text-[var(--text2)]">Salary *</label>
                             <input
                                 type="number"
-                                {...form.register('salary')}
+                                {...form.register('salary', { valueAsNumber: true })}
                                 className="w-full p-2 border border-[var(--border)] rounded-md text-[13px] bg-[var(--bg)] outline-none focus:border-[var(--accent)]"
                             />
                         </div>

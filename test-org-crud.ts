@@ -2,7 +2,7 @@ import { prisma } from "./lib/prisma"
 import fs from "fs"
 
 async function testCRUD() {
-    const results = [];
+    const results: string[] = [];
     const log = (msg: string) => { console.log(msg); results.push(msg); };
 
     log("Starting DB functionality test for Org Chart CRUD...")
