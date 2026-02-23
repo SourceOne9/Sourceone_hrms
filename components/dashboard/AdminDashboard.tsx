@@ -133,7 +133,6 @@ export function AdminDashboard() {
                             badgeType="neutral"
                             icon="👥"
                             iconClass="bg-[rgba(0,122,255,0.1)]"
-                            glowClass="before:bg-[rgba(0,122,255,0.1)]"
                         />
                         <StatCard
                             label="Active Employees"
@@ -143,7 +142,6 @@ export function AdminDashboard() {
                             badgeType="up"
                             icon="✅"
                             iconClass="bg-[var(--green-dim)]"
-                            glowClass="before:bg-[rgba(52,199,89,0.1)]"
                         />
                         <StatCard
                             label="On Leave"
@@ -151,7 +149,6 @@ export function AdminDashboard() {
                             sub="Employees on leave"
                             icon="🌴"
                             iconClass="bg-[var(--amber-dim)]"
-                            glowClass="before:bg-[rgba(255,149,0,0.1)]"
                         />
                         <StatCard
                             label="Monthly Payroll"
@@ -162,7 +159,6 @@ export function AdminDashboard() {
                             isMoney
                             icon="💵"
                             iconClass="bg-[var(--blue-dim)]"
-                            glowClass="before:bg-[rgba(50,173,230,0.1)]"
                         />
                     </>
                 )}

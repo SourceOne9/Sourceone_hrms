@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 
 export function StatCard({ label, value, sub, badge, badgeType, icon, iconClass, glowClass, isMoney }: any) {
     return (
-        <div className={cn("glass p-5 relative overflow-hidden group cursor-default before:absolute before:-top-8 before:-right-8 before:w-[100px] before:h-[100px] before:rounded-full before:transition-transform before:duration-400 group-hover:before:scale-140", glowClass)}>
+        <div className={cn("glass p-5 relative overflow-hidden group cursor-default", glowClass)}>
             <div className="flex justify-between items-start mb-[14px] relative z-10">
                 <div className="text-[12px] font-semibold text-[var(--text3)] uppercase tracking-[0.6px]">{label}</div>
             </div>

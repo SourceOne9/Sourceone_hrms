@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { CalendarIcon, ClockIcon, BackpackIcon } from "@radix-ui/react-icons"
 import { KudosWidget } from "./KudosWidget"
 import { TimeTracker } from "./TimeTracker"
+import Link from "next/link"
 
 export function EmployeeDashboard() {
     const [loading, setLoading] = React.useState(true)
@@ -55,7 +56,6 @@ export function EmployeeDashboard() {
                             badgeType="up"
                             icon={<ClockIcon className="w-5 h-5" />}
                             iconClass="bg-[var(--blue-dim)] text-[var(--blue)]"
-                            glowClass="before:bg-[rgba(50,173,230,0.1)]"
                         />
                         <StatCard
                             label="Leave Balance"
@@ -65,7 +65,6 @@ export function EmployeeDashboard() {
                             badgeType="neutral"
                             icon={<CalendarIcon className="w-5 h-5" />}
                             iconClass="bg-[var(--green-dim)] text-[var(--green)]"
-                            glowClass="before:bg-[rgba(52,199,89,0.1)]"
                         />
                         <StatCard
                             label="Pending Training"
@@ -75,7 +74,6 @@ export function EmployeeDashboard() {
                             badgeType={data?.stats?.pendingTrainingCount > 0 ? "down" : "up"}
                             icon={<BackpackIcon className="w-5 h-5" />}
                             iconClass="bg-[var(--amber-dim)] text-[var(--amber)]"
-                            glowClass="before:bg-[rgba(255,149,0,0.1)]"
                         />
                         <StatCard
                             label="Review Status"
@@ -85,7 +83,6 @@ export function EmployeeDashboard() {
                             badgeType="neutral"
                             icon={<span className="text-xl">📊</span>}
                             iconClass="bg-[var(--purple-dim)] text-[var(--purple)]"
-                            glowClass="before:bg-[rgba(175,82,222,0.1)]"
                         />
                     </>
                 )}
@@ -143,9 +140,10 @@ export function EmployeeDashboard() {
 
                         <div className="mt-6 pt-4 border-t border-[var(--border)]">
                             <h4 className="text-[12px] font-semibold text-[var(--text2)] mb-2 uppercase tracking-wide">Quick Actions</h4>
-                            <div className="flex gap-2">
-                                <button className="flex-1 py-2 text-[12px] bg-[var(--bg2)] text-[var(--text)] border border-[var(--border)] rounded-lg hover:bg-[var(--bg3)] transition-colors">Apply Leave</button>
-                                <button className="flex-1 py-2 text-[12px] bg-[var(--bg2)] text-[var(--text)] border border-[var(--border)] rounded-lg hover:bg-[var(--bg3)] transition-colors">Raise Ticket</button>
+                            <div className="flex flex-wrap gap-2">
+                                <Link href="/leave" className="flex-1 min-w-[100px] py-2 text-center text-[12px] bg-[var(--bg2)] text-[var(--text)] border border-[var(--border)] rounded-lg hover:bg-[var(--bg3)] transition-colors">Apply Leave</Link>
+                                <Link href="/help-desk" className="flex-1 min-w-[100px] py-2 text-center text-[12px] bg-[var(--bg2)] text-[var(--text)] border border-[var(--border)] rounded-lg hover:bg-[var(--bg3)] transition-colors">Raise Ticket</Link>
+                                <Link href="/resignation" className="flex-1 min-w-[100px] py-2 text-center text-[12px] bg-[var(--red-dim)] text-[var(--red)] border border-[rgba(255,59,48,0.2)] rounded-lg hover:bg-[var(--red)] hover:text-white transition-colors">Resign / Exit</Link>
                             </div>
                         </div>
                     </div>

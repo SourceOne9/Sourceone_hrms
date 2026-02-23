@@ -8,11 +8,11 @@
   --bg2: #e5e5ea;
   --bg3: #d1d1d6;
   --surface: #ffffff;
-  --surface2: rgba(255, 255, 255, 0.85);
-  --surface3: rgba(242, 242, 247, 0.8);
+  --surface2: rgba(255, 255, 255, 0.95);
+  --surface3: rgba(242, 242, 247, 0.95);
   --border: rgba(0, 0, 0, 0.08);
-  --border2: rgba(0, 0, 0, 0.13);
-  --glass-bg: rgba(255, 255, 255, 0.8);
+  --border2: rgba(0, 0, 0, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.98);
 
   /* Apple Blue system accent */
   --accent: #007aff;
@@ -46,11 +46,11 @@
   --r2: 10px;
   --r3: 8px;
 
-  /* Shadows — Apple-style layered */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  /* Shadows — Flattened */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 
   --font: 'Outfit', sans-serif;
   --mono: 'JetBrains Mono', monospace;
@@ -62,11 +62,11 @@
   --bg2: #1c1c1e;
   --bg3: #2c2c2e;
   --surface: #1c1c1e;
-  --surface2: rgba(28, 28, 30, 0.85);
-  --surface3: rgba(44, 44, 46, 0.8);
-  --border: rgba(255, 255, 255, 0.12);
-  --border2: rgba(255, 255, 255, 0.18);
-  --glass-bg: rgba(28, 28, 30, 0.8);
+  --surface2: rgba(28, 28, 30, 0.95);
+  --surface3: rgba(44, 44, 46, 0.95);
+  --border: rgba(255, 255, 255, 0.10);
+  --border2: rgba(255, 255, 255, 0.15);
+  --glass-bg: rgba(28, 28, 30, 0.98);
 
   --accent: #0a84ff;
   --accent2: #409cff;
@@ -92,10 +92,10 @@
   --text3: rgba(235, 235, 245, 0.6);
   --text4: rgba(235, 235, 245, 0.3);
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
 }
 
 body {
@@ -232,14 +232,13 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  box-shadow: var(--shadow);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .glass:hover {
   border-color: var(--border2);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow);
 }
 
 .btn {
@@ -264,28 +263,21 @@ body {
 .btn-primary {
   background: var(--accent);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
 }
 
 .btn-primary:hover {
   background: #0070eb;
-  box-shadow: 0 4px 14px rgba(0, 122, 255, 0.35);
-  transform: translateY(-1px);
 }
 
 .btn-ghost {
-  background: var(--surface);
+  background: transparent;
   color: var(--text2);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid transparent;
 }
 
 .btn-ghost:hover {
-  background: var(--bg);
+  background: var(--bg2);
   color: var(--text);
-  border-color: var(--border2);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
 }
 
 .badge {
