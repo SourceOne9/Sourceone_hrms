@@ -397,6 +397,34 @@ Update candidate stage/status.
 
 ---
 
+## AI Chatbot
+
+### `POST /api/chat`
+Send a message to the Gemini AI assistant.  
+**Auth**: Any authenticated user.
+
+| Field | Type | Required |
+|-------|------|----------|
+| `messages` | array of `{ role: string, content: string }` | ✅ |
+
+---
+
+## Organization
+
+### `GET /api/organization`
+Get the full organization hierarchy.  
+**Auth**: Any authenticated user.
+
+### `PUT /api/organization`
+Update manager-employee relationships (drag-and-drop).  
+**Auth**: Admin only.
+
+| Field | Type | Required |
+|-------|------|----------|
+| `updates` | array of `{ id: string, managerId: string | null }` | ✅ |
+
+---
+
 ## Error Responses
 
 All endpoints return consistent error responses:

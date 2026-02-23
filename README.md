@@ -25,9 +25,11 @@ EMS Pro is a modern, full-stack Employee Management System built with **Next.js 
 - **Announcements** — Company-wide news with pinning and priority badges
 
 ### Platform
-- **Organization Chart** — Interactive ReactFlow-based hierarchy visualization
+- **Organization Chart** — Interactive hierarchy visualization with drag-and-drop management
 - **Team Calendar** — Full calendar with holidays, leaves, birthdays, and events
 - **Resignation Tracker** — Submit and process resignations with status workflow
+- **AI Assistant** — Built-in Gemini-powered chatbot for HR queries and navigation
+- **Command Palette** — Global Ctrl+K utility for rapid navigation and actions
 - **Role-Based Access** — Admins manage everything; employees see only their data
 - **Dark Mode** — Full theme support with system preference detection
 - **Responsive Design** — Mobile-optimized across all pages

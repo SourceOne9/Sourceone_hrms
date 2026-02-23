@@ -24,6 +24,8 @@ This document describes every user-facing flow in EMS Pro, organized by role and
 - [16. Resignation](#16-resignation)
 - [17. Organization Chart](#17-organization-chart)
 - [18. Settings](#18-settings)
+- [19. AI Assistant](#19-ai-assistant)
+- [20. Command Palette](#20-command-palette)
 
 ---
 
@@ -601,6 +603,18 @@ Any user navigates to /organization
   → Nodes are draggable and zoomable
   → MiniMap visible on desktop (hidden on mobile)
   → Zoom controls: +, –, Fit to screen
+
+### 17.2 Manage Hierarchy (Admin)
+
+```
+Admin navigates to /organization
+  → Drags an employee node and drops it onto another node
+  → Relationship modal opens: "Confirm manager change?"
+  → Admin confirms
+  → PUT /api/organization → Records Atomic updates to managerId
+  → Chart refreshes to show new reporting line
+  → Toast: "Hierarchy updated successfully"
+```
 ```
 
 ---
@@ -686,3 +700,65 @@ User switches to "Appearance" tab
 | Resignation | Submit own | Process all |
 | Organization | View | View |
 | Settings | Own profile | Own profile |
+
+---
+
+## 19. AI Assistant
+
+### 19.1 Open Chatbot
+
+```
+User clicks the floating 🤖 button (bottom-right)
+  → AI Chatbot window slides up
+  → Welcome message displayed: "Hey there! 👋 I'm your EMS Pro Assistant..."
+  → Input field auto-focuses
+```
+
+### 19.2 Ask HR Related Questions
+
+```
+User types query: "How is PF calculated?"
+  → Clicks Send (or presses Enter)
+  → POST /api/chat sends messages history + system instructions
+  → Typing indicator shown (animated dots)
+  → System returns Gemini-generated response
+  → Chat auto-scrolls to bottom
+```
+
+### 19.3 Navigate via Assistant
+
+```
+User asks: "Where do I apply for leave?"
+  → Assistant provides answer: "You can apply for leave on the /leave page..."
+  → (In future versions, assistant may provide direct navigation links)
+```
+
+---
+
+## 20. Command Palette
+
+### 20.1 Open Command Palette
+
+```
+User presses Ctrl + K (or Cmd + K on macOS)
+  → Command palette modal opens with backdrop blur
+  → Input field auto-focuses: "Type a command or search..."
+```
+
+### 20.2 Navigate Pages
+
+```
+User types "Employees"
+  → List filters to show "Employees" page
+  → User presses Enter (or clicks item)
+  → Router pushes to /employees
+  → Modal closes automatically
+```
+
+### 20.3 Trigger Quick Actions
+
+```
+User opens palette → Scrolls to "Actions" section
+  → Selects "New Employee" or "Request Leave"
+  → Navigates to the respective page or opens relevant modal
+```
