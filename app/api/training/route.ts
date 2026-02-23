@@ -69,7 +69,7 @@ export async function POST(req: Request) {
                 where: { status: "ACTIVE" },
                 select: { id: true }
             })
-            targetEmployeeIds = allEmployees.map(e => e.id)
+            targetEmployeeIds = allEmployees.map((e: { id: string }) => e.id)
         } else if (assignedEmployeeIds && Array.isArray(assignedEmployeeIds)) {
             targetEmployeeIds = assignedEmployeeIds
         }
