@@ -1,13 +1,21 @@
 import { PrismaClient } from "@prisma/client"
 import { PrismaPg } from "@prisma/adapter-pg"
 import { Pool } from "pg"
+import * as dotenv from 'dotenv'
+
+// Load environment variables for scripts that import this file outside of Next.js
+dotenv.config()
 
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined
 }
 
 function createPrismaClient() {
-    const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/emspro?schema=public"
+    // Make sure we throw an error if DATABASE_URL is somehow missing
+    const connectionString = process.env.DATABASE_URL
+    if (!connectionString) {
+        throw new Error("DATABASE_URL is not set!")
+    }
 
     const pool = new Pool({ connectionString })
     const adapter = new PrismaPg(pool)

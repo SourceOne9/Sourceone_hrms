@@ -158,9 +158,11 @@ export default function EmployeesPage() {
                 setDepartments(deptData)
                 setEmployees(mapApiToTableData(empData))
             } else {
+                console.error("Failed to load data", { empStatus: empRes.status, deptStatus: deptRes.status })
                 toast.error("Failed to load data")
             }
         } catch (error) {
+            console.error("Fetch error:", error)
             toast.error("An error occurred while fetching data")
         } finally {
             setIsLoading(false)
@@ -168,10 +170,10 @@ export default function EmployeesPage() {
     }, [])
 
     React.useEffect(() => {
-        if (!authLoading && user?.role === 'ADMIN') {
+        if (!authLoading) {
             fetchData()
         }
-    }, [authLoading, user, fetchData])
+    }, [authLoading, fetchData])
 
     // Handlers
     const openCreateModal = () => {
@@ -271,12 +273,67 @@ export default function EmployeesPage() {
     }
 
     // Export & Import
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // Implementation for Excel Import remains a stub for UI
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file) return
-        toast.error("Bulk Import Not fully implemented in backend yet.")
-        if (fileInputRef.current) fileInputRef.current.value = ''
+
+        try {
+            const data = await file.arrayBuffer()
+            const workbook = read(data, { type: 'array' })
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+            const jsonData = utils.sheet_to_json(worksheet) as any[]
+
+            if (jsonData.length === 0) {
+                toast.error("File is empty")
+                return
+            }
+
+            toast.loading("Importing employees...", { id: "import" })
+
+            let successCount = 0
+            for (const row of jsonData) {
+                const deptName = String(row['Department'] || row['dept'] || '').toLowerCase()
+                const dept = departments.find(d => d.name.toLowerCase() === deptName)
+
+                const nameParts = String(row['Name'] || row['name'] || '').split(' ')
+
+                let isoDate = new Date().toISOString().split('T')[0]
+                const rawDate = row['Start Date'] || row['Date Of Joining'] || row['startDate'] || row['start']
+                if (rawDate) {
+                    try { isoDate = new Date(rawDate).toISOString().split('T')[0] } catch (e) { }
+                }
+
+                const empData = {
+                    employeeCode: row['Employee Code'] || row['employeeCode'] || `EMP-${Date.now().toString().slice(-4)}${Math.floor(Math.random() * 100)}`,
+                    firstName: row['First Name'] || row['firstName'] || nameParts[0] || 'Unknown',
+                    lastName: row['Last Name'] || row['lastName'] || nameParts.slice(1).join(' ') || 'User',
+                    email: row['Email'] || row['email'] || `user${Math.floor(Math.random() * 1000)}@example.com`,
+                    phone: String(row['Phone'] || row['phone'] || ''),
+                    designation: row['Role'] || row['role'] || row['Position'] || row['designation'] || 'Employee',
+                    departmentId: dept ? dept.id : (departments[0]?.id || ""),
+                    dateOfJoining: isoDate,
+                    salary: parseFloat(row['Salary'] || row['salary']) || 0,
+                    status: "ACTIVE",
+                }
+
+                const res = await fetch('/api/employees', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(empData),
+                })
+
+                if (res.ok) successCount++
+                else console.error("Failed to import row", await res.text())
+            }
+
+            toast.success(`Successfully imported ${successCount} employees`, { id: "import" })
+            fetchData()
+        } catch (error) {
+            console.error(error)
+            toast.error("Failed to import file", { id: "import" })
+        } finally {
+            if (fileInputRef.current) fileInputRef.current.value = ''
+        }
     }
 
     const handleExportCSV = () => {
