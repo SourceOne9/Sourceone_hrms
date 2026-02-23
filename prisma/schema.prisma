@@ -63,6 +63,10 @@ model Employee {
   userId String? @unique
   user   User?   @relation(fields: [userId], references: [id])
 
+  managerId String?
+  manager   Employee?  @relation("EmployeeToManager", fields: [managerId], references: [id])
+  reports   Employee[] @relation("EmployeeToManager")
+
   assets             Asset[]
   documents          Document[]
   leaves             Leave[]

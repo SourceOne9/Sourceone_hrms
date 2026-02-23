@@ -45,6 +45,7 @@ export async function POST(req: Request) {
             salary,
             status,
             address,
+            managerId,
         } = body
 
         const employee = await prisma.employee.create({
@@ -60,6 +61,7 @@ export async function POST(req: Request) {
                 salary: parseFloat(salary),
                 status: status || "ACTIVE",
                 address,
+                managerId,
             },
             include: { department: true },
         })
