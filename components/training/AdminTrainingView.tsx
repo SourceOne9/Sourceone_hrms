@@ -97,6 +97,39 @@ export function AdminTrainingView() {
         }
     }, [])
 
+    const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        // 100MB limit for videos
+        if (file.size > 100 * 1024 * 1024) {
+            toast.error("Video size must be less than 100MB")
+            return
+        }
+
+        const formData = new FormData()
+        formData.append("file", file)
+        formData.append("bucket", "training")
+
+        try {
+            toast.loading("Uploading video...", { id: "video-upload" })
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData
+            })
+
+            if (res.ok) {
+                const { url } = await res.json()
+                form.setValue("videoUrl", url)
+                toast.success("Video uploaded", { id: "video-upload" })
+            } else {
+                toast.error("Upload failed", { id: "video-upload" })
+            }
+        } catch (error) {
+            toast.error("An error occurred")
+        }
+    }
+
     React.useEffect(() => {
         fetchTrainings()
         fetchEmployees()
@@ -384,12 +417,21 @@ export function AdminTrainingView() {
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[12px] font-semibold text-[var(--text2)]">YouTube Video URL</label>
-                            <input
-                                {...form.register('videoUrl')}
-                                className="w-full p-2 border border-[var(--border)] rounded-md text-[13px] bg-[var(--bg)] outline-none focus:border-[var(--accent)]"
-                                placeholder="https://www.youtube.com/watch?v=..."
-                            />
+                            <label className="text-[12px] font-semibold text-[var(--text2)] flex justify-between">
+                                <span>Video URL / Upload</span>
+                                <span className="text-[10px] text-[var(--text3)]">Upload max 100MB</span>
+                            </label>
+                            <div className="flex gap-2">
+                                <input
+                                    {...form.register('videoUrl')}
+                                    className="flex-1 p-2 border border-[var(--border)] rounded-md text-[13px] bg-[var(--bg)] outline-none focus:border-[var(--accent)]"
+                                    placeholder="YouTube URL or Uploaded Link"
+                                />
+                                <label className="shrink-0 px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-md text-[12px] font-semibold cursor-pointer hover:bg-[var(--bg2)] transition-colors">
+                                    📁 Upload
+                                    <input type="file" className="hidden" accept="video/*" onChange={handleVideoUpload} />
+                                </label>
+                            </div>
                         </div>
                     </div>
 

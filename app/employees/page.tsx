@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext"
 import { cn } from "@/lib/utils"
 import { DataTable } from "@/components/ui/DataTable"
 import { ColumnDef } from "@tanstack/react-table"
-import { CaretSortIcon, DownloadIcon, PlusIcon } from "@radix-ui/react-icons"
+import { CaretSortIcon, DownloadIcon, PlusIcon, PersonIcon } from "@radix-ui/react-icons"
 import { exportToCSV, exportToPDF } from "@/lib/exportUtils"
 import { read, utils } from 'xlsx'
 import { Modal } from "@/components/ui/Modal"
@@ -31,6 +31,7 @@ const employeeSchema = z.object({
     dateOfJoining: z.string().min(1, "Date of Joining is required"),
     salary: z.number().min(0, "Salary must be positive"),
     status: z.enum(["ACTIVE", "ON_LEAVE", "RESIGNED", "TERMINATED"]),
+    avatarUrl: z.string().optional().nullable(),
 })
 
 type EmployeeFormData = z.infer<typeof employeeSchema>
@@ -56,6 +57,7 @@ export type EmployeeApiData = {
     dateOfJoining: string
     salary: number
     status: string
+    avatarUrl?: string | null
     department?: Department
     createdAt?: string
 }
@@ -70,6 +72,7 @@ type TableEmployee = {
     start: string
     initials: string
     color: string
+    avatarUrl: string | null
     raw: EmployeeApiData // Keep raw data for editing
 }
 
@@ -99,6 +102,7 @@ const mapApiToTableData = (apiEmployees: EmployeeApiData[]): TableEmployee[] => 
             start: format(new Date(emp.dateOfJoining), "MMM d, yyyy"),
             initials: getInitials(emp.firstName, emp.lastName),
             color: emp.department?.color || "from-[#007aff] to-[#5856d6]",
+            avatarUrl: emp.avatarUrl || null,
             raw: emp,
         }
     })
@@ -180,6 +184,38 @@ export default function EmployeesPage() {
             toast.error(error.message || 'An error occurred')
         } finally {
             setIsDeptCreating(false)
+        }
+    }
+
+    const handleEmployeeAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error("File size must be less than 2MB")
+            return
+        }
+
+        const formData = new FormData()
+        formData.append("file", file)
+        formData.append("bucket", "avatars")
+
+        try {
+            toast.loading("Uploading photo...", { id: "emp-upload" })
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData
+            })
+
+            if (res.ok) {
+                const { url } = await res.json()
+                form.setValue("avatarUrl", url)
+                toast.success("Photo uploaded", { id: "emp-upload" })
+            } else {
+                toast.error("Upload failed", { id: "emp-upload" })
+            }
+        } catch (error) {
+            toast.error("An error occurred", { id: "emp-upload" })
         }
     }
 
@@ -343,7 +379,7 @@ export default function EmployeesPage() {
                 }
             } else {
                 const err = await res.json()
-                toast.error(err.error || 'Operation failed')
+                toast.error(err.details || err.error || 'Operation failed')
             }
         } catch (error) {
             toast.error('An error occurred')
@@ -442,8 +478,13 @@ export default function EmployeesPage() {
             },
             cell: ({ row }) => (
                 <div className="flex items-center gap-[11px] text-[13.5px] text-[var(--text)]">
-                    <div className={cn("w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold text-white shrink-0 bg-gradient-to-br", row.original.color)}>
-                        {row.original.initials}
+                    <div className={cn("w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold text-white shrink-0 overflow-hidden",
+                        !row.original.avatarUrl && (row.original.color || "bg-gray-400"))}>
+                        {row.original.avatarUrl ? (
+                            <img src={row.original.avatarUrl} className="w-full h-full object-cover" />
+                        ) : (
+                            row.original.initials
+                        )}
                     </div>
                     <span className="font-semibold">{row.getValue("name")}</span>
                 </div>
@@ -588,6 +629,25 @@ export default function EmployeesPage() {
                 onClose={() => setIsModalOpen(false)}
                 title={modalMode === "CREATE" ? "Add New Employee" : modalMode === "EDIT" ? "Edit Employee" : "View Employee"}
             >
+                <div className="flex flex-col items-center mb-6 pt-2">
+                    <div className="relative group">
+                        <div className="w-24 h-24 rounded-full bg-[var(--bg2)] border-2 border-[var(--border)] flex items-center justify-center text-[var(--text3)] text-[24px] font-bold overflow-hidden">
+                            {form.watch("avatarUrl") ? (
+                                <img src={form.watch("avatarUrl")!} className="w-full h-full object-cover" />
+                            ) : (
+                                <PersonIcon className="w-10 h-10 opacity-20" />
+                            )}
+                        </div>
+                        {modalMode !== "VIEW" && (
+                            <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-[10px] font-bold opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity rounded-full">
+                                {form.watch("avatarUrl") ? "CHANGE" : "UPLOAD"}
+                                <input type="file" className="hidden" accept="image/*" onChange={handleEmployeeAvatarUpload} />
+                            </label>
+                        )}
+                    </div>
+                    {modalMode !== "VIEW" && <p className="text-[11px] text-[var(--text3)] mt-2">Recommended: Square image, max 2MB</p>}
+                </div>
+
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">

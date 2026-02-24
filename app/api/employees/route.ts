@@ -43,44 +43,77 @@ export async function POST(req: Request) {
         const tempPassword = `${employeeCode}@${year}`
         const hashedPassword = await bcrypt.hash(tempPassword, 12)
 
-        // Create User account first
-        const user = await prisma.user.create({
-            data: {
-                name: `${firstName} ${lastName}`,
-                email,
-                hashedPassword,
-                role: "EMPLOYEE",
-                mustChangePassword: true,
-            },
-        })
+        // Use a transaction to ensure both User and Employee are created or none
+        const result = await prisma.$transaction(async (tx) => {
+            // Create User account first
+            const user = await tx.user.create({
+                data: {
+                    name: `${firstName} ${lastName}`,
+                    email,
+                    hashedPassword,
+                    role: "EMPLOYEE",
+                    mustChangePassword: true,
+                    avatar: body.avatarUrl || null,
+                },
+            })
 
-        // Create Employee and link to User
-        const employee = await prisma.employee.create({
-            data: {
-                employeeCode,
-                firstName,
-                lastName,
-                email,
-                phone,
-                designation,
-                departmentId,
-                dateOfJoining: new Date(dateOfJoining),
-                salary: parseFloat(salary),
-                status: status || "ACTIVE",
-                address,
-                managerId: managerId || null,
-                userId: user.id,
-            },
-            include: { department: true },
+            // Create Employee and link to User
+            const employee = await tx.employee.create({
+                data: {
+                    employeeCode,
+                    firstName,
+                    lastName,
+                    email,
+                    phone,
+                    designation,
+                    departmentId,
+                    dateOfJoining: new Date(dateOfJoining),
+                    salary: parseFloat(salary),
+                    status: status || "ACTIVE",
+                    address,
+                    managerId: managerId || null,
+                    userId: user.id,
+                    avatarUrl: body.avatarUrl || null,
+                },
+                include: { department: true },
+            })
+
+            return { ...employee, tempPassword, username: employeeCode }
         })
 
         // Return employee + temp credentials (one-time only)
+        return NextResponse.json(result, { status: 201 })
+    } catch (error: any) {
+        console.error("[EMPLOYEES_POST] FULL ERROR:", error)
+
+        // Handle unique constraint violations (Prisma P2002)
+        if (error.code === 'P2002') {
+            const target = error.meta?.target || []
+            let message = "A conflict occurred."
+
+            if (target.includes('email')) {
+                message = "An account or employee with this email already exists."
+            } else if (target.includes('employeeCode')) {
+                message = "An employee with this code already exists."
+            }
+
+            return NextResponse.json(
+                { error: "Conflict", details: message },
+                { status: 409 }
+            )
+        }
+
+        // Handle foreign key constraint violations (Prisma P2003)
+        if (error.code === 'P2003') {
+            return NextResponse.json(
+                { error: "Foreign Key Error", details: "Invalid department or manager selected." },
+                { status: 400 }
+            )
+        }
+
         return NextResponse.json(
-            { ...employee, tempPassword, username: employeeCode },
-            { status: 201 }
+            { error: "Internal Server Error", details: error.message },
+            { status: 500 }
         )
-    } catch (error) {
-        console.error("[EMPLOYEES_POST]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }

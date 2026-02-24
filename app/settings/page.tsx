@@ -101,7 +101,7 @@ export default function SettingsPage() {
             const res = await fetch("/api/user/profile", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
+                body: JSON.stringify({ ...data, avatar: user?.avatar }),
             })
             if (res.ok) {
                 toast.success("Profile updated successfully")
@@ -111,6 +111,49 @@ export default function SettingsPage() {
             }
         } catch (error) {
             toast.error("An error occurred")
+        }
+    }
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error("File size must be less than 2MB")
+            return
+        }
+
+        const formData = new FormData()
+        formData.append("file", file)
+        formData.append("bucket", "avatars")
+
+        try {
+            toast.loading("Uploading avatar...", { id: "avatar-upload" })
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData
+            })
+
+            if (res.ok) {
+                const { url } = await res.json()
+                // Update profile with the new avatar URL
+                const updateRes = await fetch("/api/user/profile", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ...profileForm.getValues(), avatar: url })
+                })
+
+                if (updateRes.ok) {
+                    toast.success("Avatar updated successfully", { id: "avatar-upload" })
+                    fetchUser()
+                } else {
+                    toast.error("Failed to save avatar reference", { id: "avatar-upload" })
+                }
+            } else {
+                toast.error("Failed to upload image", { id: "avatar-upload" })
+            }
+        } catch (error) {
+            toast.error("An error occurred during upload", { id: "avatar-upload" })
         }
     }
 
@@ -190,8 +233,14 @@ export default function SettingsPage() {
                         <h2 className="text-[16px] font-bold text-[var(--text)] mb-6">Personal Information</h2>
 
                         <div className="flex items-start gap-6 mb-8">
-                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--accent)] to-[#5856d6] flex items-center justify-center text-white text-[24px] font-bold shadow-lg shrink-0">
-                                {user?.avatar ? <img src={user.avatar} className="w-full h-full rounded-full object-cover" /> : user?.name?.substring(0, 2).toUpperCase() || "AD"}
+                            <div className="relative group">
+                                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--accent)] to-[#5856d6] flex items-center justify-center text-white text-[24px] font-bold shadow-lg shrink-0 overflow-hidden">
+                                    {user?.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : user?.name?.substring(0, 2).toUpperCase() || "AD"}
+                                </div>
+                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-[10px] font-bold opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity rounded-full">
+                                    CHANGE
+                                    <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+                                </label>
                             </div>
                             <div className="flex-1 space-y-4">
                                 <div className="space-y-1.5">

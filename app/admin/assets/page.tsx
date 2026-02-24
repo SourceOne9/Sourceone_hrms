@@ -57,6 +57,7 @@ const EMPTY_FORM = {
     purchaseDate: "",
     value: "",
     assignedToId: "",
+    image: "",
 }
 
 export default function AssetManagement() {
@@ -68,6 +69,33 @@ export default function AssetManagement() {
     const [saving, setSaving] = React.useState(false)
     const [employees, setEmployees] = React.useState<any[]>([])
     const [isImportOpen, setIsImportOpen] = React.useState(false)
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        const formDataUpload = new FormData()
+        formDataUpload.append("file", file)
+        formDataUpload.append("bucket", "assets")
+
+        try {
+            toast.loading("Uploading image...", { id: "asset-upload" })
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formDataUpload
+            })
+
+            if (res.ok) {
+                const { url } = await res.json()
+                setFormData(prev => ({ ...prev, image: url }))
+                toast.success("Image uploaded", { id: "asset-upload" })
+            } else {
+                toast.error("Upload failed", { id: "asset-upload" })
+            }
+        } catch (error) {
+            toast.error("An error occurred")
+        }
+    }
 
     const fetchAssets = React.useCallback(async () => {
         try {
@@ -115,6 +143,7 @@ export default function AssetManagement() {
             purchaseDate: asset.purchaseDate ? asset.purchaseDate.split("T")[0] : "",
             value: String(asset.value),
             assignedToId: asset.assignedToId || "",
+            image: asset.image || "",
         })
         setIsModalOpen(true)
     }
@@ -136,6 +165,7 @@ export default function AssetManagement() {
                 value: formData.value,
                 assignedToId: formData.assignedToId || null,
                 assignedDate: formData.assignedToId ? new Date().toISOString() : null,
+                image: formData.image,
             }
 
             const url = editingAsset ? `/api/assets/${editingAsset.id}` : "/api/assets"
@@ -185,7 +215,16 @@ export default function AssetManagement() {
             accessorKey: "name",
             header: "Asset Name",
             cell: ({ row }) => (
-                <div className="font-semibold text-[var(--text)]">{row.getValue("name")}</div>
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-[var(--bg2)] border border-[var(--border)] overflow-hidden flex items-center justify-center text-[10px] text-[var(--text3)]">
+                        {row.original.image ? (
+                            <img src={row.original.image} className="w-full h-full object-cover" />
+                        ) : (
+                            "No Img"
+                        )}
+                    </div>
+                    <div className="font-semibold text-[var(--text)]">{row.getValue("name")}</div>
+                </div>
             ),
         },
         {
@@ -295,7 +334,23 @@ export default function AssetManagement() {
                 onClose={() => setIsModalOpen(false)}
                 title={editingAsset ? "Edit Asset" : "Add New Asset"}
             >
-                <div className="space-y-4">
+                <div className="space-y-4 pt-4">
+                    <div className="flex flex-col items-center mb-6">
+                        <div className="relative group">
+                            <div className="w-24 h-24 rounded-xl bg-[var(--bg2)] border-2 border-[var(--border)] flex items-center justify-center text-[var(--text3)] overflow-hidden">
+                                {formData.image ? (
+                                    <img src={formData.image} className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-[10px] font-bold opacity-30">NO IMAGE</span>
+                                )}
+                            </div>
+                            <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-[10px] font-bold opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity rounded-xl">
+                                {formData.image ? "CHANGE" : "UPLOAD"}
+                                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                            </label>
+                        </div>
+                    </div>
+
                     <div>
                         <label className={labelClass}>Name *</label>
                         <input

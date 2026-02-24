@@ -81,6 +81,7 @@ export default function DocumentManagement() {
         url: "",
         size: "",
     })
+    const [selectedFile, setSelectedFile] = React.useState<File | null>(null)
 
     // ─── Data Fetching ───────────────────────────────────────
 
@@ -135,22 +136,18 @@ export default function DocumentManagement() {
     // ─── File Handling ───────────────────────────────────────
 
     const processFile = (file: File) => {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            const dataUrl = e.target?.result as string
-            const sizeKB = file.size / 1024
-            const sizeStr = sizeKB < 1024
-                ? `${sizeKB.toFixed(1)} KB`
-                : `${(sizeKB / 1024).toFixed(2)} MB`
-            setForm(p => ({
-                ...p,
-                url: dataUrl,
-                size: sizeStr,
-                title: p.title || file.name.replace(/\.[^/.]+$/, ""),
-            }))
-            setDroppedFileName(file.name)
-        }
-        reader.readAsDataURL(file)
+        const sizeKB = file.size / 1024
+        const sizeStr = sizeKB < 1024
+            ? `${sizeKB.toFixed(1)} KB`
+            : `${(sizeKB / 1024).toFixed(2)} MB`
+
+        setSelectedFile(file)
+        setForm(p => ({
+            ...p,
+            size: sizeStr,
+            title: p.title || file.name.replace(/\.[^/.]+$/, ""),
+        }))
+        setDroppedFileName(file.name)
     }
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -163,13 +160,32 @@ export default function DocumentManagement() {
     // ─── Upload ──────────────────────────────────────────────
 
     const handleUpload = async () => {
-        if (!form.title || !form.url) {
+        if (!form.title || (!selectedFile && !form.url)) {
             toast.error("Please provide a title and file")
             return
         }
 
         setSaving(true)
         try {
+            let fileUrl = form.url
+
+            // If a local file was selected, upload it first
+            if (selectedFile) {
+                toast.loading("Uploading file to storage...", { id: "doc-upload" })
+                const uploadFormData = new FormData()
+                uploadFormData.append("file", selectedFile)
+                uploadFormData.append("bucket", "documents")
+
+                const uploadRes = await fetch("/api/upload", {
+                    method: "POST",
+                    body: uploadFormData
+                })
+
+                if (!uploadRes.ok) throw new Error("File upload failed")
+                const uploadData = await uploadRes.json()
+                fileUrl = uploadData.url
+            }
+
             let payload: any
 
             if (uploadTarget === "all") {
@@ -177,7 +193,7 @@ export default function DocumentManagement() {
                 payload = {
                     title: form.title,
                     category: form.category,
-                    url: form.url,
+                    url: fileUrl,
                     size: form.size || null,
                     isPublic: true,
                 }
@@ -186,8 +202,8 @@ export default function DocumentManagement() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 })
-                if (!res.ok) throw new Error("Failed to upload")
-                toast.success("Policy uploaded for all employees")
+                if (!res.ok) throw new Error("Failed to save document metadata")
+                toast.success("Policy uploaded for all employees", { id: "doc-upload" })
             } else {
                 const ids = Array.from(selectedEmpIds)
                 if (ids.length === 0) {
@@ -198,7 +214,7 @@ export default function DocumentManagement() {
                 payload = {
                     title: form.title,
                     category: form.category,
-                    url: form.url,
+                    url: fileUrl,
                     size: form.size || null,
                     isPublic: false,
                     employeeIds: ids,
@@ -208,15 +224,16 @@ export default function DocumentManagement() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 })
-                if (!res.ok) throw new Error("Failed to upload")
-                toast.success(`Document sent to ${ids.length} employee${ids.length > 1 ? "s" : ""}`)
+                if (!res.ok) throw new Error("Failed to save document metadata")
+                toast.success(`Document sent to ${ids.length} employee${ids.length > 1 ? "s" : ""}`, { id: "doc-upload" })
             }
 
             setIsModalOpen(false)
             resetForm()
             fetchAll()
-        } catch {
-            toast.error("Upload failed")
+        } catch (error: any) {
+            console.error(error)
+            toast.error(error.message || "Upload failed", { id: "doc-upload" })
         } finally {
             setSaving(false)
         }
@@ -224,6 +241,7 @@ export default function DocumentManagement() {
 
     const resetForm = () => {
         setForm({ title: "", category: "POLICY", url: "", size: "" })
+        setSelectedFile(null)
         setDroppedFileName(null)
         setUploadTarget("all")
         setSelectedEmpIds(new Set())
