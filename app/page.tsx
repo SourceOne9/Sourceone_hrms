@@ -2,20 +2,28 @@
 
 import * as React from "react"
 import { useAuth } from "@/context/AuthContext"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { AdminDashboard } from "@/components/dashboard/AdminDashboard"
 import { EmployeeDashboard } from "@/components/dashboard/EmployeeDashboard"
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth()
+  const { data: session } = useSession()
+  const router = useRouter()
 
-  // While loading auth state, we can show a skeleton or nothing
+  // Redirect employees who must change their password on first login
+  React.useEffect(() => {
+    if (session?.user?.mustChangePassword) {
+      router.replace("/change-password")
+    }
+  }, [session, router])
+
   if (isLoading) return null
 
-  // Based on role, render key dashboard
   if (user?.role === 'employee') {
     return <EmployeeDashboard />
   }
 
-  // Default to Admin dashboard (or if user is admin)
   return <AdminDashboard />
 }

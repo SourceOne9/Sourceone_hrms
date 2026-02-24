@@ -4,6 +4,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import toast from "react-hot-toast"
 import { format } from "date-fns"
+import { CsvImportModal } from "@/components/ui/CsvImportModal"
 
 type AttendanceStatus = "PRESENT" | "ABSENT" | "HALF_DAY" | "ON_LEAVE" | "WEEKEND"
 
@@ -62,6 +63,7 @@ export function AdminAttendanceView() {
     const [records, setRecords] = React.useState<AttendanceRecord[]>([])
     const [loading, setLoading] = React.useState(true)
     const [filter, setFilter] = React.useState<"ALL" | AttendanceStatus>("ALL")
+    const [isImportOpen, setIsImportOpen] = React.useState(false)
 
     const fetchRecords = React.useCallback(async () => {
         try {
@@ -88,9 +90,17 @@ export function AdminAttendanceView() {
 
     return (
         <div className="space-y-6 animate-[pageIn_0.3s_cubic-bezier(0.4,0,0.2,1)]">
-            <div className="mb-[26px]">
-                <h1 className="text-[26px] font-extrabold tracking-[-0.5px] text-[var(--text)]">Attendance Tracking</h1>
-                <p className="text-[13.5px] text-[var(--text3)] mt-[4px]">Track daily attendance and work hours</p>
+            <div className="flex items-center justify-between mb-[26px]">
+                <div>
+                    <h1 className="text-[26px] font-extrabold tracking-[-0.5px] text-[var(--text)]">Attendance Tracking</h1>
+                    <p className="text-[13.5px] text-[var(--text3)] mt-[4px]">Track daily attendance and work hours</p>
+                </div>
+                <button
+                    onClick={() => setIsImportOpen(true)}
+                    className="flex items-center gap-2 bg-[var(--surface)] text-[var(--text2)] border border-[var(--border)] px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-[var(--bg2)] transition-colors"
+                >
+                    📥 Import CSV
+                </button>
             </div>
 
             <div className="grid grid-cols-4 gap-4 mb-5">
@@ -219,6 +229,14 @@ export function AdminAttendanceView() {
                     </div>
                 </div>
             </div>
+            <CsvImportModal
+                isOpen={isImportOpen}
+                onClose={() => setIsImportOpen(false)}
+                title="Attendance Records"
+                templateHeaders={["employeeCode", "date", "checkIn", "checkOut", "workHours", "status"]}
+                apiEndpoint="/api/attendance/import"
+                onSuccess={fetchRecords}
+            />
         </div>
     )
 }

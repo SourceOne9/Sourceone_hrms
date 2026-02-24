@@ -1,0 +1,50 @@
+import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+
+// POST /api/payroll/import
+// Body: { rows: Array<{ employeeCode|employeeName, month, basicSalary, allowances, pfDeduction, tax, otherDed, netSalary, status }> }
+export async function POST(req: Request) {
+    try {
+        const { rows } = await req.json()
+        if (!Array.isArray(rows) || rows.length === 0) {
+            return NextResponse.json({ error: "No rows provided" }, { status: 400 })
+        }
+
+        let inserted = 0
+        let skipped = 0
+
+        for (const row of rows) {
+            try {
+                // Find employee by code or name
+                const employeeCode = String(row["employeeCode"] || row["Employee Code"] || "").trim()
+                const employee = await prisma.employee.findFirst({
+                    where: employeeCode
+                        ? { employeeCode }
+                        : { firstName: { contains: String(row["firstName"] || row["First Name"] || ""), mode: "insensitive" } }
+                })
+                if (!employee) { skipped++; continue }
+
+                const basicSalary = parseFloat(String(row["basicSalary"] || row["Basic Salary"] || 0))
+                const allowances = parseFloat(String(row["allowances"] || row["Allowances"] || 0))
+                const pfDeduction = parseFloat(String(row["pfDeduction"] || row["PF Deduction"] || 0))
+                const tax = parseFloat(String(row["tax"] || row["Tax"] || 0))
+                const otherDed = parseFloat(String(row["otherDed"] || row["Other Deductions"] || 0))
+                const netSalary = parseFloat(String(row["netSalary"] || row["Net Salary"] || 0)) ||
+                    basicSalary + allowances - pfDeduction - tax - otherDed
+                const month = String(row["month"] || row["Month"] || "").trim()
+                const statusRaw = String(row["status"] || row["Status"] || "PENDING").trim().toUpperCase()
+                const status = ["PENDING", "PROCESSED", "PAID"].includes(statusRaw) ? statusRaw as "PENDING" | "PROCESSED" | "PAID" : "PENDING"
+
+                await prisma.payroll.create({
+                    data: { employeeId: employee.id, month, basicSalary, allowances, pfDeduction, tax, otherDed, netSalary, status }
+                })
+                inserted++
+            } catch { skipped++ }
+        }
+
+        return NextResponse.json({ inserted, skipped })
+    } catch (error) {
+        console.error("[PAYROLL_IMPORT]", error)
+        return NextResponse.json({ error: "Import failed" }, { status: 500 })
+    }
+}

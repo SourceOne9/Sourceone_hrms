@@ -11,23 +11,32 @@ import Link from "next/link"
 export function EmployeeDashboard() {
     const [loading, setLoading] = React.useState(true)
     const [data, setData] = React.useState<any>(null)
+    const isFirstLoad = React.useRef(true)
 
     const fetchDashboardData = React.useCallback(async () => {
         try {
-            setLoading(true)
-            const res = await fetch('/api/dashboard')
+            if (isFirstLoad.current) setLoading(true)
+            const res = await fetch('/api/dashboard', { cache: 'no-store' })
             if (res.ok) {
-                setData(await res.json())
+                const updatedData = await res.json()
+                setData(updatedData)
+            } else {
+                console.error("Dashboard API returned:", res.status)
             }
         } catch (error) {
             console.error("Dashboard fetch error:", error)
         } finally {
+            isFirstLoad.current = false
             setLoading(false)
         }
     }, [])
 
     React.useEffect(() => {
         fetchDashboardData()
+        const interval = setInterval(() => {
+            fetchDashboardData()
+        }, 10000)
+        return () => clearInterval(interval)
     }, [fetchDashboardData])
 
     return (

@@ -5,9 +5,10 @@ import { Asset, AssetStatus, AssetType } from "@/types"
 import { DataTable } from "@/components/ui/DataTable"
 import { ColumnDef } from "@tanstack/react-table"
 import { Modal } from "@/components/ui/Modal"
+import { CsvImportModal } from "@/components/ui/CsvImportModal"
 import { PlusIcon, LaptopIcon, CubeIcon, ExclamationTriangleIcon, TrashIcon } from "@radix-ui/react-icons"
 import { cn } from "@/lib/utils"
-import toast from "react-hot-toast"
+import { toast } from "sonner"
 
 const STATUS_LABELS: Record<AssetStatus, string> = {
     AVAILABLE: "Available",
@@ -65,6 +66,8 @@ export default function AssetManagement() {
     const [editingAsset, setEditingAsset] = React.useState<Asset | null>(null)
     const [formData, setFormData] = React.useState(EMPTY_FORM)
     const [saving, setSaving] = React.useState(false)
+    const [employees, setEmployees] = React.useState<any[]>([])
+    const [isImportOpen, setIsImportOpen] = React.useState(false)
 
     const fetchAssets = React.useCallback(async () => {
         try {
@@ -79,9 +82,22 @@ export default function AssetManagement() {
         }
     }, [])
 
+    const fetchEmployees = React.useCallback(async () => {
+        try {
+            const res = await fetch("/api/employees")
+            if (res.ok) {
+                const data = await res.json()
+                setEmployees(data)
+            }
+        } catch {
+            console.error("Failed to fetch employees")
+        }
+    }, [])
+
     React.useEffect(() => {
         fetchAssets()
-    }, [fetchAssets])
+        fetchEmployees()
+    }, [fetchAssets, fetchEmployees])
 
     const openCreate = () => {
         setEditingAsset(null)
@@ -140,6 +156,7 @@ export default function AssetManagement() {
             setIsModalOpen(false)
             fetchAssets()
         } catch (error: any) {
+            console.error("Asset save error:", error)
             toast.error(error.message || "Failed to save asset")
         } finally {
             setSaving(false)
@@ -236,12 +253,20 @@ export default function AssetManagement() {
                     <h1 className="text-[26px] font-extrabold tracking-[-0.5px] text-[var(--text)]">Asset Management</h1>
                     <p className="text-[13.5px] text-[var(--text3)] mt-[4px]">Track and manage company hardware and licenses</p>
                 </div>
-                <button
-                    onClick={openCreate}
-                    className="flex items-center gap-2 p-[9px_14px] bg-[var(--accent)] text-white rounded-[9px] text-[13px] font-semibold hover:opacity-90 transition-opacity shadow-[0_2px_8px_rgba(0,122,255,0.25)]"
-                >
-                    <PlusIcon className="w-4 h-4" /> Add Asset
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setIsImportOpen(true)}
+                        className="flex items-center gap-2 bg-[var(--surface)] text-[var(--text2)] border border-[var(--border)] px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-[var(--bg2)] transition-colors"
+                    >
+                        📥 Import CSV
+                    </button>
+                    <button
+                        onClick={openCreate}
+                        className="flex items-center gap-2 p-[9px_14px] bg-[var(--accent)] text-white rounded-[9px] text-[13px] font-semibold hover:opacity-90 transition-opacity shadow-[0_2px_8px_rgba(0,122,255,0.25)]"
+                    >
+                        <PlusIcon className="w-4 h-4" /> Add Asset
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-4 gap-4">
@@ -340,13 +365,19 @@ export default function AssetManagement() {
                             />
                         </div>
                         <div>
-                            <label className={labelClass}>Assign to Employee ID</label>
-                            <input
+                            <label className={labelClass}>Assign to Employee</label>
+                            <select
                                 className={inputClass}
                                 value={formData.assignedToId}
                                 onChange={e => setFormData(p => ({ ...p, assignedToId: e.target.value }))}
-                                placeholder="Employee CUID (optional)"
-                            />
+                            >
+                                <option value="">Unassigned (optional)</option>
+                                {employees.map(emp => (
+                                    <option key={emp.id} value={emp.id}>
+                                        {emp.firstName} {emp.lastName} {emp.employeeCode ? `(${emp.employeeCode})` : ''}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
@@ -366,6 +397,14 @@ export default function AssetManagement() {
                     </div>
                 </div>
             </Modal>
+            <CsvImportModal
+                isOpen={isImportOpen}
+                onClose={() => setIsImportOpen(false)}
+                title="Assets"
+                templateHeaders={["name", "serialNumber", "type", "status", "purchaseDate", "value", "assignedToCode"]}
+                apiEndpoint="/api/admin/assets/import"
+                onSuccess={fetchAssets}
+            />
         </div>
     )
 }

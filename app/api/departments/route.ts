@@ -42,8 +42,20 @@ export async function POST(req: Request) {
         })
 
         return NextResponse.json(department, { status: 201 })
-    } catch (error) {
+    } catch (error: any) {
         console.error("[DEPARTMENTS_POST]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+
+        // Handle unique constraint violation (Prisma P2002)
+        if (error.code === 'P2002') {
+            return NextResponse.json(
+                { error: "Conflict", details: "A department with this name already exists." },
+                { status: 409 }
+            )
+        }
+
+        return NextResponse.json(
+            { error: "Internal Server Error", details: error.message },
+            { status: 500 }
+        )
     }
 }

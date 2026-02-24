@@ -1,21 +1,17 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import bcrypt from "bcryptjs"
 
 // GET /api/employees – List all employees
 export async function GET() {
     try {
-        // Disabled Auth check for Dashboard UI mock:
-        // const session = await auth()
-        // if (!session) {
-        //     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        // }
-
         const employees = await prisma.employee.findMany({
-            include: { department: true },
+            include: {
+                department: true,
+                user: { select: { lastLoginAt: true, mustChangePassword: true } },
+            },
             orderBy: { createdAt: "desc" },
         })
-
         return NextResponse.json(employees)
     } catch (error) {
         console.error("[EMPLOYEES_GET]", error)
@@ -23,15 +19,9 @@ export async function GET() {
     }
 }
 
-// POST /api/employees – Create a new employee
+// POST /api/employees – Create a new employee + auto-create login credentials
 export async function POST(req: Request) {
     try {
-        // Disabled Auth check for Dashboard UI mock:
-        // const session = await auth()
-        // if (!session || session.user?.role !== "ADMIN") {
-        //     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        // }
-
         const body = await req.json()
         const {
             employeeCode,
@@ -48,6 +38,23 @@ export async function POST(req: Request) {
             managerId,
         } = body
 
+        // Generate temp password: EmployeeCode@Year (e.g. EMP001@2026)
+        const year = new Date().getFullYear()
+        const tempPassword = `${employeeCode}@${year}`
+        const hashedPassword = await bcrypt.hash(tempPassword, 12)
+
+        // Create User account first
+        const user = await prisma.user.create({
+            data: {
+                name: `${firstName} ${lastName}`,
+                email,
+                hashedPassword,
+                role: "EMPLOYEE",
+                mustChangePassword: true,
+            },
+        })
+
+        // Create Employee and link to User
         const employee = await prisma.employee.create({
             data: {
                 employeeCode,
@@ -61,12 +68,17 @@ export async function POST(req: Request) {
                 salary: parseFloat(salary),
                 status: status || "ACTIVE",
                 address,
-                managerId,
+                managerId: managerId || null,
+                userId: user.id,
             },
             include: { department: true },
         })
 
-        return NextResponse.json(employee, { status: 201 })
+        // Return employee + temp credentials (one-time only)
+        return NextResponse.json(
+            { ...employee, tempPassword, username: employeeCode },
+            { status: 201 }
+        )
     } catch (error) {
         console.error("[EMPLOYEES_POST]", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })

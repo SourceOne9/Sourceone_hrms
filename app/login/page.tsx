@@ -1,15 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { useAuth } from "@/context/AuthContext"
 import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { EnvelopeClosedIcon, LockClosedIcon, CheckIcon } from "@radix-ui/react-icons"
 import { motion } from "framer-motion"
 
 export default function LoginPage() {
-    const { login } = useAuth()
-    const [email, setEmail] = React.useState("admin@emspro.com")
-    const [password, setPassword] = React.useState("admin")
+    const router = useRouter()
+    const [email, setEmail] = React.useState("")
+    const [password, setPassword] = React.useState("")
     const [loading, setLoading] = React.useState(false)
     const [googleLoading, setGoogleLoading] = React.useState(false)
     const [error, setError] = React.useState("")
@@ -19,14 +19,20 @@ export default function LoginPage() {
         e.preventDefault()
         setError("")
         setLoading(true)
-
         try {
-            const success = await login(email)
-            if (!success) {
-                setError("Invalid credentials")
+            const result = await signIn("credentials", {
+                email: email.trim(),
+                password,
+                redirect: false,
+            })
+            if (result?.error) {
+                setError("Invalid Employee ID / email or password")
+            } else {
+                // Check if user must change password (will be in session after redirect)
+                router.push("/")
             }
-        } catch (err) {
-            setError("Login failed")
+        } catch {
+            setError("Login failed. Please try again.")
         } finally {
             setLoading(false)
         }
@@ -164,12 +170,13 @@ export default function LoginPage() {
                                 <EnvelopeClosedIcon className="w-[18px] h-[18px] ml-1" />
                             </div>
                             <input
-                                type="email"
+                                type="text"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full bg-transparent border-b border-[#364259] py-[10px] pl-9 text-[14px] text-[#e2e8f0] focus:border-[#44ceb3] focus:outline-none transition-all placeholder:text-[#64748b]"
-                                placeholder="Email ID"
+                                placeholder="Employee ID or Email"
                                 required
+                                autoComplete="username"
                             />
                         </div>
 
@@ -226,7 +233,7 @@ export default function LoginPage() {
                     </form>
                 </div>
 
-                {/* Admin/User credentials helper visible only on hover for testing */}
+                {/* Dev quick-fill helper – hover top-right corner */}
                 <div className="absolute top-0 right-0 opacity-0 hover:opacity-100 p-2 text-[10px] text-white/50 bg-black/50 rounded-bl-lg transition-opacity pointer-events-auto">
                     <div className="cursor-pointer hover:text-white" onClick={() => { setEmail("admin@emspro.com"); setPassword("admin") }}>Admin</div>
                     <div className="cursor-pointer hover:text-white" onClick={() => { setEmail("user@emspro.com"); setPassword("user") }}>User</div>

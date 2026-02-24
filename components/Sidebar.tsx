@@ -24,7 +24,7 @@ import {
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: DashboardIcon },
-  { name: 'Employees', href: '/employees', icon: PersonIcon, badge: 10 },
+  { name: 'Employees', href: '/employees', icon: PersonIcon },
   { name: 'Organization', href: '/organization', icon: MixIcon }, // New Link
   { name: 'Assets', href: '/admin/assets', hrefEmployee: '/employee/assets', icon: LaptopIcon }, // New Module
   { name: 'Documents', href: '/admin/documents', hrefEmployee: '/employee/documents', icon: FileTextIcon }, // New Module
@@ -33,10 +33,9 @@ const navItems = [
   { name: 'Payroll', href: '/payroll', icon: ReaderIcon },
   { name: 'Provident Fund', href: '/pf', icon: ArchiveIcon },
   { name: 'Performance', href: '/performance', icon: BarChartIcon },
-  { name: 'Resignation', href: '/resignation', icon: ExitIcon, badge: 2, badgeColor: 'bg-red-500 shadow-red-500/40' },
-  { name: 'Recruitment', href: '/recruitment', icon: IdCardIcon },
+  { name: 'Resignation', href: '/resignation', icon: ExitIcon },
   { name: 'Training', href: '/training', icon: BackpackIcon },
-  { name: 'Announcements', href: '/announcements', icon: SpeakerLoudIcon, badge: 3, badgeColor: 'bg-cyan-500 shadow-cyan-500/40' },
+  { name: 'Announcements', href: '/announcements', icon: SpeakerLoudIcon },
   { name: 'Settings', href: '/settings', icon: GearIcon },
 ]
 

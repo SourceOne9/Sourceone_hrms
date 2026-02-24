@@ -2,6 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { toast, Toaster } from "react-hot-toast"
 import { format } from "date-fns"
+import { CsvImportModal } from "@/components/ui/CsvImportModal"
 
 type Resignation = {
     id: string
@@ -21,6 +22,7 @@ export function AdminResignationView() {
     const [resignations, setResignations] = React.useState<Resignation[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
     const [filterStatus, setFilterStatus] = React.useState("ALL")
+    const [isImportOpen, setIsImportOpen] = React.useState(false)
 
     const fetchResignations = React.useCallback(async () => {
         try {
@@ -80,6 +82,19 @@ export function AdminResignationView() {
     return (
         <div className="space-y-6 animate-[pageIn_0.3s_cubic-bezier(0.4,0,0.2,1)]">
             <Toaster position="top-right" />
+
+            <div className="flex items-center justify-between mb-2">
+                <div>
+                    <h1 className="text-[26px] font-extrabold tracking-[-0.5px] text-[var(--text)]">Resignation Management</h1>
+                    <p className="text-[13.5px] text-[var(--text3)] mt-[4px]">Review and manage resignation requests</p>
+                </div>
+                <button
+                    onClick={() => setIsImportOpen(true)}
+                    className="flex items-center gap-2 bg-[var(--surface)] text-[var(--text2)] border border-[var(--border)] px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-[var(--bg2)] transition-colors"
+                >
+                    📥 Import CSV
+                </button>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="glass p-5 bg-[var(--surface)] border-[var(--border)] relative overflow-hidden">
@@ -206,6 +221,14 @@ export function AdminResignationView() {
                     </div>
                 </div>
             </div>
+            <CsvImportModal
+                isOpen={isImportOpen}
+                onClose={() => setIsImportOpen(false)}
+                title="Resignation Records"
+                templateHeaders={["employeeCode", "reason", "lastDay", "status"]}
+                apiEndpoint="/api/resignations/import"
+                onSuccess={fetchResignations}
+            />
         </div>
     )
 }

@@ -1,0 +1,53 @@
+import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+
+// POST /api/admin/assets/import
+export async function POST(req: Request) {
+    try {
+        const { rows } = await req.json()
+        if (!Array.isArray(rows) || rows.length === 0) {
+            return NextResponse.json({ error: "No rows provided" }, { status: 400 })
+        }
+
+        let inserted = 0
+        let skipped = 0
+
+        for (const row of rows) {
+            try {
+                const name = String(row["name"] || row["Asset Name"] || "").trim()
+                const serialNumber = String(row["serialNumber"] || row["Serial Number"] || "").trim()
+                if (!name || !serialNumber) { skipped++; continue }
+
+                const typeRaw = String(row["type"] || row["Type"] || "HARDWARE").trim().toUpperCase()
+                const validTypes = ["HARDWARE", "SOFTWARE", "ACCESSORY"]
+                const type = validTypes.includes(typeRaw) ? typeRaw as any : "HARDWARE"
+
+                const statusRaw = String(row["status"] || row["Status"] || "AVAILABLE").trim().toUpperCase()
+                const validStatuses = ["AVAILABLE", "ASSIGNED", "MAINTENANCE", "RETIRED"]
+                const status = validStatuses.includes(statusRaw) ? statusRaw as any : "AVAILABLE"
+
+                const purchaseDateRaw = String(row["purchaseDate"] || row["Purchase Date"] || "").trim()
+                const purchaseDate = purchaseDateRaw ? new Date(purchaseDateRaw) : new Date()
+                const value = parseFloat(String(row["value"] || row["Value"] || 0))
+
+                // Optional: assign to employee
+                const employeeCode = String(row["assignedToCode"] || row["Assigned To Code"] || "").trim()
+                let assignedToId: string | null = null
+                if (employeeCode) {
+                    const emp = await prisma.employee.findFirst({ where: { employeeCode }, select: { id: true } })
+                    if (emp) assignedToId = emp.id
+                }
+
+                await prisma.asset.create({
+                    data: { name, serialNumber, type, status, purchaseDate, value, assignedToId }
+                })
+                inserted++
+            } catch { skipped++ }
+        }
+
+        return NextResponse.json({ inserted, skipped })
+    } catch (error) {
+        console.error("[ASSETS_IMPORT]", error)
+        return NextResponse.json({ error: "Import failed" }, { status: 500 })
+    }
+}

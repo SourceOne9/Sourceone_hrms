@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 :root {
-  /* Apple-inspired light palette */
-  --bg: #f2f2f7;
-  --bg2: #e5e5ea;
-  --bg3: #d1d1d6;
+  /* Light lavender palette — matches reference dashboard */
+  --bg: #eef0f8;
+  --bg2: #e2e6f3;
+  --bg3: #d0d5e8;
   --surface: #ffffff;
   --surface2: rgba(255, 255, 255, 0.95);
   --surface3: rgba(242, 242, 247, 0.95);

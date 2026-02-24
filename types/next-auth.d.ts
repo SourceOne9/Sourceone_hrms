@@ -8,12 +8,14 @@ declare module "next-auth" {
             id: string
             role: "ADMIN" | "EMPLOYEE"
             avatar?: string | null
+            mustChangePassword?: boolean
         } & DefaultSession["user"]
     }
 
     interface User extends DefaultUser {
         role: "ADMIN" | "EMPLOYEE"
         avatar?: string | null
+        mustChangePassword?: boolean
     }
 }
 
@@ -21,5 +23,6 @@ declare module "next-auth/jwt" {
     interface JWT {
         role?: "ADMIN" | "EMPLOYEE"
         avatar?: string | null
+        mustChangePassword?: boolean
     }
 }

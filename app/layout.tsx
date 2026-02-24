@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { AppShell } from "@/components/AppShell";
 import "./globals.css";
-
 import { CommandPalette } from "@/components/CommandPalette";
-
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { NextAuthProvider } from "@/components/NextAuthProvider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
@@ -32,14 +31,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <CommandPalette />
-          <canvas id="bg-canvas" className="fixed inset-0 pointer-events-none z-0 opacity-25" />
-          <div className="flex h-screen overflow-hidden w-full">
-            <AppShell>
-              {children}
-            </AppShell>
-          </div>
-          <Toaster position="top-right" theme="system" />
+          <NextAuthProvider>
+            <CommandPalette />
+            <canvas id="bg-canvas" className="fixed inset-0 pointer-events-none z-0 opacity-25" />
+            <div className="flex h-screen overflow-hidden w-full">
+              <AppShell>
+                {children}
+              </AppShell>
+            </div>
+            <Toaster position="top-right" theme="system" />
+          </NextAuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -5,11 +5,7 @@ import { auth } from "@/lib/auth"
 // GET /api/attendance – List attendance records
 export async function GET(req: Request) {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
+        // Auth check disabled for dev – returns all records
         const { searchParams } = new URL(req.url)
         const date = searchParams.get("date")
         const employeeId = searchParams.get("employeeId")
@@ -17,17 +13,6 @@ export async function GET(req: Request) {
         const where: Record<string, unknown> = {}
         if (date) where.date = new Date(date)
         if (employeeId) where.employeeId = employeeId
-
-        if (session.user?.role !== "ADMIN") {
-            const employee = await prisma.employee.findFirst({
-                where: { userId: session.user?.id },
-            })
-            if (employee) {
-                where.employeeId = employee.id
-            } else {
-                return NextResponse.json([])
-            }
-        }
 
         const records = await prisma.attendance.findMany({
             where,

@@ -13,7 +13,7 @@ import { Modal } from "@/components/ui/Modal"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { toast, Toaster } from "react-hot-toast"
+import { toast } from "sonner"
 import { format } from "date-fns"
 
 // ----------------------------------------------------------------------------
@@ -119,6 +119,14 @@ export default function EmployeesPage() {
     const [modalMode, setModalMode] = React.useState<"CREATE" | "EDIT" | "VIEW">("CREATE")
     const [selectedEmployee, setSelectedEmployee] = React.useState<EmployeeApiData | null>(null)
 
+    // Credential card shown after creating a new employee
+    const [credCard, setCredCard] = React.useState<{ username: string; password: string; name: string } | null>(null)
+    const [isResettingCreds, setIsResettingCreds] = React.useState<string | null>(null)
+
+    const [isDeptModalOpen, setIsDeptModalOpen] = React.useState(false)
+    const [newDeptName, setNewDeptName] = React.useState("")
+    const [isDeptCreating, setIsDeptCreating] = React.useState(false)
+
     const fileInputRef = React.useRef<HTMLInputElement>(null)
 
     const form = useForm<EmployeeFormData>({
@@ -136,6 +144,44 @@ export default function EmployeesPage() {
             salary: 0,
         }
     })
+
+    const handleCreateDepartment = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!newDeptName.trim()) return
+
+        try {
+            setIsDeptCreating(true)
+            const randomColors = [
+                "from-[#ff9a9e] to-[#fecfef]",
+                "from-[#a18cd1] to-[#fbc2eb]",
+                "from-[#84fab0] to-[#8fd3f4]",
+                "from-[#a6c0fe] to-[#f68084]",
+                "from-[#fccb90] to-[#d57eeb]"
+            ]
+            const color = randomColors[Math.floor(Math.random() * randomColors.length)]
+            const res = await fetch('/api/departments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newDeptName, color })
+            })
+
+            if (res.ok) {
+                const newDept = await res.json()
+                setDepartments(prev => [...prev, newDept])
+                form.setValue('departmentId', newDept.id)
+                toast.success('Department created successfully')
+                setIsDeptModalOpen(false)
+                setNewDeptName("")
+            } else {
+                const errorData = await res.json()
+                toast.error(errorData.details || errorData.error || 'Failed to create department')
+            }
+        } catch (error: any) {
+            toast.error(error.message || 'An error occurred')
+        } finally {
+            setIsDeptCreating(false)
+        }
+    }
 
     // Auth protection
     React.useEffect(() => {
@@ -234,7 +280,6 @@ export default function EmployeesPage() {
 
     const handleDelete = async (id: string, name: string) => {
         if (!window.confirm(`Are you sure you want to delete ${name}?`)) return
-
         try {
             const res = await fetch(`/api/employees/${id}`, { method: 'DELETE' })
             if (res.ok) {
@@ -245,6 +290,28 @@ export default function EmployeesPage() {
             }
         } catch (error) {
             toast.error('An error occurred')
+        }
+    }
+
+    const handleResetCredentials = async (emp: EmployeeApiData) => {
+        if (!window.confirm(`Reset login credentials for ${emp.firstName} ${emp.lastName}?`)) return
+        setIsResettingCreds(emp.id)
+        try {
+            const res = await fetch(`/api/employees/${emp.id}/credentials`, { method: 'POST' })
+            if (res.ok) {
+                const data = await res.json()
+                setCredCard({
+                    username: data.username,
+                    password: data.tempPassword,
+                    name: `${emp.firstName} ${emp.lastName}`,
+                })
+            } else {
+                toast.error('Failed to reset credentials')
+            }
+        } catch {
+            toast.error('An error occurred')
+        } finally {
+            setIsResettingCreds(null)
         }
     }
 
@@ -261,9 +328,19 @@ export default function EmployeesPage() {
             })
 
             if (res.ok) {
-                toast.success(`Employee ${isEdit ? 'updated' : 'created'} successfully`)
+                const result = await res.json()
                 setIsModalOpen(false)
                 fetchData()
+                if (!isEdit && result.tempPassword) {
+                    // Show credential card for new employee
+                    setCredCard({
+                        username: result.employeeCode,
+                        password: result.tempPassword,
+                        name: `${result.firstName} ${result.lastName}`,
+                    })
+                } else {
+                    toast.success(`Employee ${isEdit ? 'updated' : 'created'} successfully`)
+                }
             } else {
                 const err = await res.json()
                 toast.error(err.error || 'Operation failed')
@@ -423,25 +500,32 @@ export default function EmployeesPage() {
                 return (
                     <div className="flex items-center gap-[6px] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
+                            title="View"
                             onClick={() => openViewModal(emp)}
                             className="w-[30px] h-[30px] rounded-[8px] border border-[var(--border)] bg-[var(--bg)] flex items-center justify-center text-[13px] text-[var(--text3)] transition-all duration-200 hover:bg-[rgba(0,122,255,0.08)] hover:border-[rgba(0,122,255,0.25)] hover:text-[var(--accent)] hover:scale-110">👁</button>
                         <button
+                            title="Edit"
                             onClick={() => openEditModal(emp)}
                             className="w-[30px] h-[30px] rounded-[8px] border border-[var(--border)] bg-[var(--bg)] flex items-center justify-center text-[13px] text-[var(--text3)] transition-all duration-200 hover:bg-[rgba(0,122,255,0.08)] hover:border-[rgba(0,122,255,0.25)] hover:text-[var(--accent)] hover:scale-110">✏</button>
                         <button
+                            title="Reset Login Credentials"
+                            onClick={() => handleResetCredentials(emp)}
+                            disabled={isResettingCreds === emp.id}
+                            className="w-[30px] h-[30px] rounded-[8px] border border-[var(--border)] bg-[var(--bg)] flex items-center justify-center text-[13px] text-[var(--text3)] transition-all duration-200 hover:bg-[rgba(255,149,0,0.08)] hover:border-[rgba(255,149,0,0.3)] hover:text-amber-500 hover:scale-110 disabled:opacity-40">🔑</button>
+                        <button
+                            title="Delete"
                             onClick={() => handleDelete(emp.id, `${emp.firstName} ${emp.lastName}`)}
                             className="w-[30px] h-[30px] rounded-[8px] border border-[var(--border)] bg-[var(--bg)] flex items-center justify-center text-[13px] text-[var(--text3)] transition-all duration-200 hover:bg-[rgba(255,59,48,0.08)] hover:border-[rgba(255,59,48,0.25)] hover:text-[var(--red)] hover:scale-110">🗑</button>
                     </div>
                 )
             },
         },
-    ], [departments]) // Re-memoize if needed but dependencies are handled natively here mostly
+    ], [departments, isResettingCreds]) // Re-memoize if needed but dependencies are handled natively here mostly
 
     if (authLoading || user?.role === 'employee') return null
 
     return (
         <div className="space-y-6 animate-[pageIn_0.3s_cubic-bezier(0.4,0,0.2,1)]">
-            <Toaster position="top-right" />
             <div className="mb-[26px]">
                 <h1 className="text-[26px] font-extrabold tracking-[-0.5px] text-[var(--text)]">Employee Management</h1>
                 <p className="text-[13.5px] text-[var(--text3)] mt-[4px]">Manage and organize your employee records</p>
@@ -571,7 +655,18 @@ export default function EmployeesPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                            <label className="text-[12px] font-semibold text-[var(--text2)]">Department *</label>
+                            <div className="flex items-center justify-between">
+                                <label className="text-[12px] font-semibold text-[var(--text2)]">Department *</label>
+                                {modalMode !== "VIEW" && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsDeptModalOpen(true)}
+                                        className="text-[11px] font-semibold text-[var(--accent)] hover:underline"
+                                    >
+                                        + New
+                                    </button>
+                                )}
+                            </div>
                             <select
                                 {...form.register('departmentId')}
                                 disabled={modalMode === "VIEW"}
@@ -640,6 +735,106 @@ export default function EmployeesPage() {
                         </div>
                     )}
                 </form>
+            </Modal>
+
+            {/* Create Department Modal inside Employees Page */}
+            <Modal
+                isOpen={isDeptModalOpen}
+                onClose={() => setIsDeptModalOpen(false)}
+                title="Create New Department"
+            >
+                <form onSubmit={handleCreateDepartment} className="space-y-4">
+                    <div className="space-y-1">
+                        <label className="text-[12px] font-semibold text-[var(--text2)]">Department Name *</label>
+                        <input
+                            required
+                            value={newDeptName}
+                            onChange={(e) => setNewDeptName(e.target.value)}
+                            className="w-full p-2 border border-[var(--border)] rounded-md text-[13px] bg-[var(--bg)] outline-none focus:border-[var(--accent)]"
+                            placeholder="e.g. Marketing"
+                        />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-4 mt-4 border-t border-[var(--border)]">
+                        <button
+                            type="button"
+                            onClick={() => setIsDeptModalOpen(false)}
+                            className="px-4 py-2 text-[13px] font-semibold bg-[var(--surface)] border border-[var(--border)] rounded-lg hover:bg-[var(--bg2)] text-[var(--text2)] transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isDeptCreating || !newDeptName.trim()}
+                            className="px-4 py-2 text-[13px] font-semibold text-white bg-[var(--accent)] rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+                        >
+                            {isDeptCreating ? "Creating..." : "Create Department"}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Credential Card Modal – shown after creating/resetting employee credentials */}
+            <Modal
+                isOpen={!!credCard}
+                onClose={() => setCredCard(null)}
+                title="🔑 Employee Login Credentials"
+            >
+                {credCard && (
+                    <div className="space-y-5">
+                        <div className="p-4 rounded-xl bg-gradient-to-br from-[rgba(0,122,255,0.06)] to-[rgba(88,86,214,0.06)] border border-[rgba(0,122,255,0.15)]">
+                            <p className="text-[12px] text-[var(--text3)] mb-3">
+                                Share these credentials with <strong className="text-[var(--text)]">{credCard.name}</strong>. The employee will be prompted to change their password on first login.
+                            </p>
+
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-3 bg-[var(--surface)] rounded-lg border border-[var(--border)]">
+                                    <div>
+                                        <p className="text-[11px] text-[var(--text3)] mb-0.5">Employee ID (Username)</p>
+                                        <p className="text-[15px] font-bold font-mono text-[var(--accent)]">{credCard.username}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => { navigator.clipboard.writeText(credCard.username); toast.success("Username copied!") }}
+                                        className="text-[11px] px-2.5 py-1 rounded-md bg-[var(--accent)] text-white font-semibold hover:opacity-80"
+                                    >Copy</button>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-[var(--surface)] rounded-lg border border-[var(--border)]">
+                                    <div>
+                                        <p className="text-[11px] text-[var(--text3)] mb-0.5">Temporary Password</p>
+                                        <p className="text-[15px] font-bold font-mono text-[var(--accent)]">{credCard.password}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => { navigator.clipboard.writeText(credCard.password); toast.success("Password copied!") }}
+                                        className="text-[11px] px-2.5 py-1 rounded-md bg-[var(--accent)] text-white font-semibold hover:opacity-80"
+                                    >Copy</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p className="text-[11.5px] text-amber-500 flex items-start gap-1.5">
+                            ⚠️ <span>This password is shown <strong>once only</strong>. Share it now via WhatsApp, Slack, or email. Use the 🔑 button on the employee row to regenerate if needed.</span>
+                        </p>
+
+                        <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
+                            <button
+                                onClick={() => {
+                                    const text = `Login URL: ${window.location.origin}/login\nUsername: ${credCard.username}\nPassword: ${credCard.password}`
+                                    navigator.clipboard.writeText(text)
+                                    toast.success("All credentials copied!")
+                                }}
+                                className="px-4 py-2 text-[13px] font-semibold bg-[var(--surface)] border border-[var(--border)] rounded-lg hover:bg-[var(--bg2)] text-[var(--text2)] transition-colors"
+                            >
+                                Copy All
+                            </button>
+                            <button
+                                onClick={() => setCredCard(null)}
+                                className="px-4 py-2 text-[13px] font-semibold text-white bg-[var(--accent)] rounded-lg hover:opacity-90 transition-opacity"
+                            >
+                                Done
+                            </button>
+                        </div>
+                    </div>
+                )}
             </Modal>
         </div>
     )

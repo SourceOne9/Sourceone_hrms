@@ -1,7 +1,8 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { PlusIcon, DownloadIcon } from "@radix-ui/react-icons"
+import { PlusIcon, DownloadIcon, UploadIcon } from "@radix-ui/react-icons"
 import { Modal } from "@/components/ui/Modal"
+import { CsvImportModal } from "@/components/ui/CsvImportModal"
 import { useForm, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -55,6 +56,7 @@ export function AdminPayrollView() {
     const [employees, setEmployees] = React.useState<Employee[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
     const [isModalOpen, setIsModalOpen] = React.useState(false)
+    const [isImportOpen, setIsImportOpen] = React.useState(false)
 
     const form = useForm<PayrollFormData>({
         resolver: zodResolver(payrollSchema),
@@ -141,12 +143,20 @@ export function AdminPayrollView() {
                     <h1 className="text-[26px] font-extrabold tracking-[-0.5px] text-[var(--text)]">Payroll Management</h1>
                     <p className="text-[13.5px] text-[var(--text3)] mt-[4px]">Manage salary disbursements and payslips</p>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 bg-[var(--accent)] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 transition-opacity"
-                >
-                    <PlusIcon className="w-4 h-4" /> Add Payroll
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setIsImportOpen(true)}
+                        className="flex items-center gap-2 bg-[var(--surface)] text-[var(--text2)] border border-[var(--border)] px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-[var(--bg2)] transition-colors"
+                    >
+                        <UploadIcon className="w-4 h-4" /> Import CSV
+                    </button>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 bg-[var(--accent)] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 transition-opacity"
+                    >
+                        <PlusIcon className="w-4 h-4" /> Add Payroll
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4 mb-5">
@@ -336,6 +346,14 @@ export function AdminPayrollView() {
                     </div>
                 </form>
             </Modal>
+            <CsvImportModal
+                isOpen={isImportOpen}
+                onClose={() => setIsImportOpen(false)}
+                title="Payroll Records"
+                templateHeaders={["employeeCode", "month", "basicSalary", "allowances", "pfDeduction", "tax", "otherDed", "netSalary", "status"]}
+                apiEndpoint="/api/payroll/import"
+                onSuccess={fetchAll}
+            />
         </div>
     )
 }

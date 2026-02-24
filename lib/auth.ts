@@ -17,30 +17,39 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         Credentials({
             name: "credentials",
             credentials: {
-                email: { label: "Email", type: "email" },
+                email: { label: "Employee ID or Email", type: "text" },
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) {
-                    return null
+                if (!credentials?.email || !credentials?.password) return null
+
+                const login = credentials.email as string
+
+                // Support login by email OR by employeeCode
+                let user = await prisma.user.findUnique({ where: { email: login } })
+
+                if (!user) {
+                    // Try looking up by employeeCode → find linked user
+                    const employee = await prisma.employee.findUnique({
+                        where: { employeeCode: login },
+                        include: { user: true },
+                    })
+                    if (employee?.user) user = employee.user
                 }
 
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials.email as string },
-                })
-
-                if (!user || !user.hashedPassword) {
-                    return null
-                }
+                if (!user || !user.hashedPassword) return null
 
                 const isPasswordValid = await bcrypt.compare(
                     credentials.password as string,
                     user.hashedPassword
                 )
+                if (!isPasswordValid) return null
 
-                if (!isPasswordValid) {
-                    return null
-                }
+                // Update lastLoginAt
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { lastLoginAt: new Date() },
+                })
 
                 return {
                     id: user.id,
@@ -48,6 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     email: user.email,
                     role: user.role,
                     avatar: user.avatar,
+                    mustChangePassword: user.mustChangePassword,
                 }
             },
         }),
@@ -56,9 +66,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         async signIn({ user, account }) {
             // Auto-create user on first Google sign-in
             if (account?.provider === "google" && user.email) {
-                const existing = await prisma.user.findUnique({
-                    where: { email: user.email },
-                })
+                const existing = await prisma.user.findUnique({ where: { email: user.email } })
                 if (!existing) {
                     await prisma.user.create({
                         data: {
@@ -77,16 +85,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (user) {
                 token.role = user.role
                 token.avatar = user.avatar
+                token.mustChangePassword = (user as any).mustChangePassword ?? false
             }
-            // Fetch role from DB for Google sign-in (since Google provider doesn't return role)
+            // Fetch role from DB for Google sign-in
             if (account?.provider === "google" && token.email) {
-                const dbUser = await prisma.user.findUnique({
-                    where: { email: token.email },
-                })
+                const dbUser = await prisma.user.findUnique({ where: { email: token.email } })
                 if (dbUser) {
                     token.sub = dbUser.id
                     token.role = dbUser.role
                     token.avatar = dbUser.avatar || token.picture
+                    token.mustChangePassword = dbUser.mustChangePassword
+                    // Update lastLoginAt for Google logins
+                    await prisma.user.update({
+                        where: { id: dbUser.id },
+                        data: { lastLoginAt: new Date() },
+                    })
                 }
             }
             return token
@@ -96,9 +109,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 session.user.id = token.sub ?? ""
                 session.user.role = token.role ?? "EMPLOYEE"
                 session.user.avatar = token.avatar
+                session.user.mustChangePassword = (token.mustChangePassword as boolean) ?? false
             }
             return session
         },
     },
 })
-

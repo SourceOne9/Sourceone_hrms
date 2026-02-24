@@ -40,25 +40,34 @@ const recentHires = [
 export function AdminDashboard() {
     const [loading, setLoading] = React.useState(true)
     const [data, setData] = React.useState<any>(null)
+    const [loginData, setLoginData] = React.useState<any>(null)
     const [selectedDept, setSelectedDept] = React.useState<string | null>(null)
     const [selectedMonth, setSelectedMonth] = React.useState<string | null>(null)
+    const isFirstLoad = React.useRef(true)
 
     const fetchDashboardData = React.useCallback(async () => {
         try {
-            setLoading(true)
-            const res = await fetch('/api/dashboard')
-            if (res.ok) {
-                setData(await res.json())
-            }
+            if (isFirstLoad.current) setLoading(true)
+            const [dashRes, loginRes] = await Promise.all([
+                fetch('/api/dashboard', { cache: 'no-store' }),
+                fetch('/api/dashboard/logins', { cache: 'no-store' }),
+            ])
+            if (dashRes.ok) setData(await dashRes.json())
+            if (loginRes.ok) setLoginData(await loginRes.json())
         } catch (error) {
             console.error("Dashboard fetch error:", error)
         } finally {
+            isFirstLoad.current = false
             setLoading(false)
         }
     }, [])
 
     React.useEffect(() => {
         fetchDashboardData()
+        const interval = setInterval(() => {
+            fetchDashboardData()
+        }, 10000) // Poll every 10 seconds
+        return () => clearInterval(interval)
     }, [fetchDashboardData])
 
     const deptData = data?.deptSplit || []
@@ -77,50 +86,62 @@ export function AdminDashboard() {
     const selectedMonthData = selectedMonth ? hiringData.find((d: any) => d.month === selectedMonth) : null
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-5">
             <Modal
                 isOpen={!!selectedMonth}
                 onClose={() => setSelectedMonth(null)}
                 title={`Hires in ${selectedMonth}`}
             >
                 <div className="space-y-4">
-                    <div className="text-[13px] text-[var(--text3)]">
+                    <div className="text-[13px] text-[#8a8fa8]">
                         List of employees hired in {selectedMonth} 2024.
                     </div>
                     <div className="space-y-2">
                         {selectedMonthData?.details.map((hire: any, i: number) => (
-                            <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-[var(--border)] bg-[var(--bg)]">
+                            <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-[#eef0f8] bg-[#f8f9fe]">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--blue)] to-[var(--purple)] flex items-center justify-center text-[10px] font-bold text-white">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6366f1] to-[#818cf8] flex items-center justify-center text-[10px] font-bold text-white">
                                         {hire.name.charAt(0)}
                                     </div>
                                     <div>
-                                        <div className="text-[13px] font-semibold text-[var(--text)]">{hire.name}</div>
-                                        <div className="text-[11px] text-[var(--text3)]">{hire.role}</div>
+                                        <div className="text-[13px] font-semibold text-[#1a1d2e]">{hire.name}</div>
+                                        <div className="text-[11px] text-[#8a8fa8]">{hire.role}</div>
                                     </div>
                                 </div>
-                                <span className="text-[10px] font-mono bg-[var(--green-dim)] text-[#1a9140] px-2 py-0.5 rounded-full">New</span>
+                                <span className="text-[10px] font-mono bg-[#e8f8ef] text-[#1a9140] px-2 py-0.5 rounded-full">New</span>
                             </div>
                         ))}
                     </div>
                 </div>
             </Modal>
 
-            <div className="mb-[26px]">
-                <h1 className="text-[26px] font-extrabold tracking-[-0.5px] text-[var(--text)]">Dashboard Overview</h1>
-                <p className="text-[13.5px] text-[var(--text3)] mt-[4px]">Monitor your team performance and key metrics in real-time</p>
+            {/* Page Header */}
+            <div className="flex items-center justify-between pb-1">
+                <div>
+                    <h1 className="text-[22px] font-extrabold tracking-[-0.5px] text-[#1a1d2e]">
+                        Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}, <span className="text-[#6366f1]">Admin</span> 👋
+                    </h1>
+                    <p className="text-[13px] text-[#8a8fa8] mt-0.5">Here's what's happening with your team today.</p>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#e8eaf0] shadow-sm">
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-[11px] font-bold text-[#8a8fa8] uppercase tracking-wider">Live</span>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-1">
                 {loading ? (
-                    Array(4).fill(0).map((_, i) => (
-                        <div key={i} className="glass p-5 h-[160px] flex flex-col justify-between">
-                            <div className="flex justify-between">
-                                <Skeleton className="h-4 w-24" />
-                                <Skeleton className="h-10 w-10 rounded-[10px]" />
+                    Array(5).fill(0).map((_, i) => (
+                        <div key={i} className="bg-white rounded-[16px] border border-[#e8eaf0] p-5 h-[130px] flex flex-col gap-3">
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-[#f2f3f8]" />
+                                <div className="h-3 w-20 bg-[#eef0f8] rounded" />
                             </div>
-                            <Skeleton className="h-8 w-16" />
-                            <Skeleton className="h-4 w-32" />
+                            <div className="h-7 w-16 bg-[#eef0f8] rounded" />
+                            <div className="h-3 w-24 bg-[#eef0f8] rounded" />
                         </div>
                     ))
                 ) : (
@@ -128,45 +149,96 @@ export function AdminDashboard() {
                         <StatCard
                             label="Total Employees"
                             value={data?.stats?.totalEmployees?.toString() || "0"}
-                            sub="All registered employees"
-                            badge="Live data"
-                            badgeType="neutral"
+                            sub="last month"
+                            badge="7%"
+                            badgeType="up"
                             icon="👥"
-                            iconClass="bg-[rgba(0,122,255,0.1)]"
+                            iconClass="bg-[#eff3ff]"
                         />
                         <StatCard
                             label="Active Employees"
                             value={data?.stats?.activeEmployees?.toString() || "0"}
-                            sub="Currently working"
-                            badge="Active status"
+                            sub="last month"
+                            badge="5%"
                             badgeType="up"
                             icon="✅"
-                            iconClass="bg-[var(--green-dim)]"
+                            iconClass="bg-[#edfdf3]"
                         />
                         <StatCard
                             label="On Leave"
                             value={data?.stats?.onLeaveEmployees?.toString() || "0"}
-                            sub="Employees on leave"
+                            sub="last month"
+                            badge="4%"
+                            badgeType="up"
                             icon="🌴"
-                            iconClass="bg-[var(--amber-dim)]"
+                            iconClass="bg-[#fff8ec]"
                         />
                         <StatCard
                             label="Monthly Payroll"
                             value={data?.stats?.monthlyPayroll?.toLocaleString() || "0"}
-                            sub="Total monthly expense"
+                            sub="last month"
                             badge="Processed"
                             badgeType="neutral"
                             isMoney
                             icon="💵"
-                            iconClass="bg-[var(--blue-dim)]"
+                            iconClass="bg-[#eef6ff]"
+                        />
+                        <StatCard
+                            label="Active Today"
+                            value={loginData?.activeTodayCount?.toString() || "0"}
+                            sub="logged in today"
+                            badge="Live"
+                            badgeType="up"
+                            icon="🔐"
+                            iconClass="bg-[#f3f0ff]"
                         />
                     </>
                 )}
             </div>
 
-            {/* ... Rest of existing dashboard code can be moved here ... */}
-            {/* For brevity, I will copy the rest of the chart sections here */}
-            <div className="grid grid-cols-[1fr_1.7fr_1.1fr] gap-4 mb-5 max-h-[340px]">
+            {/* Recent Employee Logins */}
+            {!loading && loginData?.recentLogins?.length > 0 && (
+                <div className="bg-white rounded-[16px] border border-[#e8eaf0] p-5">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 className="text-[14px] font-bold text-[#1a1d2e]">Recent Employee Logins</h3>
+                            <p className="text-[11.5px] text-[#8a8fa8] mt-0.5">Last 7 days of login activity</p>
+                        </div>
+                        <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-[#f3f0ff] text-[#6366f1] border border-[#e0dcff]">
+                            {loginData.recentLogins.length} logins
+                        </span>
+                    </div>
+                    <div className="space-y-1 max-h-[180px] overflow-y-auto pr-1">
+                        {loginData.recentLogins.map((login: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#f8f9fe] transition-colors">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6366f1] to-[#818cf8] flex items-center justify-center text-[11px] font-bold text-white shrink-0">
+                                        {login.name?.charAt(0) || '?'}
+                                    </div>
+                                    <div>
+                                        <p className="text-[12.5px] font-semibold text-[#1a1d2e] leading-tight">{login.name}</p>
+                                        <p className="text-[11px] text-[#8a8fa8]">
+                                            {login.employee?.designation || 'Employee'}
+                                            {login.employee?.department?.name ? ` · ${login.employee.department.name}` : ''}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[11px] font-mono text-[#6366f1]">
+                                        {new Date(login.lastLoginAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                    </p>
+                                    <p className="text-[10px] text-[#b0b4c8]">
+                                        {new Date(login.lastLoginAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Charts row */}
+            <div className="grid grid-cols-[1fr_1.7fr_1.1fr] gap-4 max-h-[340px]">
                 {loading ? (
                     <>
                         <div className="glass p-[22px] h-[340px] flex flex-col items-center justify-center gap-4">
@@ -195,8 +267,8 @@ export function AdminDashboard() {
                 ) : (
                     <>
                         {/* Interactive Pie Chart */}
-                        <div className="glass p-[22px] flex flex-col h-full">
-                            <div className="text-[13.5px] font-bold text-[var(--text)] flex items-center justify-between mb-2">
+                        <div className="bg-white rounded-[16px] border border-[#e8eaf0] p-5 flex flex-col h-full">
+                            <div className="text-[13px] font-bold text-[#1a1d2e] flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2"><span className="text-[15px]">🏢</span> Department Split</div>
                                 {selectedDept && (
                                     <button
@@ -265,8 +337,8 @@ export function AdminDashboard() {
                         </div>
 
                         {/* Area Chart */}
-                        <div className="glass p-[22px] flex flex-col h-full">
-                            <div className="text-[13.5px] font-bold text-[var(--text)] flex items-center gap-2 mb-[18px]">
+                        <div className="bg-white rounded-[16px] border border-[#e8eaf0] p-5 flex flex-col h-full">
+                            <div className="text-[13px] font-bold text-[#1a1d2e] flex items-center gap-2 mb-4">
                                 <span className="text-[15px]">📈</span> Hiring Trend
                             </div>
                             <div className="flex-1 min-h-0 w-full">
@@ -283,8 +355,8 @@ export function AdminDashboard() {
                                     >
                                         <defs>
                                             <linearGradient id="colorHires" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#007aff" stopOpacity={0.3} />
-                                                <stop offset="95%" stopColor="#007aff" stopOpacity={0} />
+                                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
+                                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
                                         <XAxis
@@ -309,24 +381,24 @@ export function AdminDashboard() {
                                         <Area
                                             type="monotone"
                                             dataKey="hires"
-                                            stroke="#007aff"
-                                            strokeWidth={2}
+                                            stroke="#6366f1"
+                                            strokeWidth={2.5}
                                             fillOpacity={1}
                                             fill="url(#colorHires)"
-                                            activeDot={{ r: 6, strokeWidth: 0, fill: '#007aff', onClick: (_: any, e: any) => setSelectedMonth(e.payload.month) }}
+                                            activeDot={{ r: 6, strokeWidth: 0, fill: '#6366f1', onClick: (_: any, e: any) => setSelectedMonth(e.payload.month) }}
                                         />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </div>
-                            <div className="flex justify-between items-center mt-3 text-[12px] text-[var(--text3)]">
+                            <div className="flex justify-between items-center mt-3 text-[12px] text-[#8a8fa8]">
                                 <span>Last 6 months</span>
-                                <span className="text-[#1a9140] bg-[var(--green-dim)] px-[9px] py-[3px] rounded-[20px] border border-[rgba(52,199,89,0.2)] font-bold font-mono">↑ 23% growth</span>
+                                <span className="text-[#1a9140] bg-[#e8f8ef] px-[9px] py-[3px] rounded-[20px] font-bold font-mono">↑ 23% growth</span>
                             </div>
                         </div>
 
                         {/* Bar Chart */}
-                        <div className="glass p-[22px] flex flex-col h-full">
-                            <div className="text-[13.5px] font-bold text-[var(--text)] flex items-center gap-2 mb-[18px]">
+                        <div className="bg-white rounded-[16px] border border-[#e8eaf0] p-5 flex flex-col h-full">
+                            <div className="text-[13px] font-bold text-[#1a1d2e] flex items-center gap-2 mb-4">
                                 <span className="text-[15px]">💰</span> Salary Range
                             </div>
                             <div className="flex-1 min-h-0 w-full">
@@ -348,24 +420,24 @@ export function AdminDashboard() {
                                         />
                                         <Bar
                                             dataKey="count"
-                                            fill="#66b2ff"
-                                            radius={[4, 4, 0, 0]}
+                                            fill="#818cf8"
+                                            radius={[6, 6, 0, 0]}
                                             barSize={20}
                                         />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
-                            <div className="text-center font-mono text-[11px] text-[var(--text3)] mt-4">Avg: ${data?.avgSalary?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || "0"}</div>
+                            <div className="text-center font-mono text-[11px] text-[#8a8fa8] mt-4">Avg: ${data?.avgSalary?.toLocaleString(undefined, { maximumFractionDigits: 0 }) || "0"}</div>
                         </div>
                     </>
                 )}
             </div>
 
             <div className="grid grid-cols-[1.3fr_1fr] gap-4">
-                <div className="glass p-[22px]">
-                    <div className="text-[13.5px] font-bold text-[var(--text)] flex items-center justify-between mb-[16px]">
+                <div className="bg-white rounded-[16px] border border-[#e8eaf0] p-5">
+                    <div className="text-[13px] font-bold text-[#1a1d2e] flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2"><span>🏢</span> Department Overview</div>
-                        {selectedDept && <span className="text-[11px] text-[var(--accent)] font-medium bg-[var(--bg2)] px-2 py-0.5 rounded-md">Filtered: {selectedDept}</span>}
+                        {selectedDept && <span className="text-[11px] text-[#6366f1] font-medium bg-[#f3f0ff] px-2 py-0.5 rounded-md">Filtered: {selectedDept}</span>}
                     </div>
                     <div className="space-y-3">
                         {loading ? (
@@ -395,10 +467,10 @@ export function AdminDashboard() {
                     </div>
                 </div>
 
-                <div className="glass p-[22px]">
-                    <div className="text-[13.5px] font-bold text-[var(--text)] flex items-center justify-between mb-[16px]">
+                <div className="bg-white rounded-[16px] border border-[#e8eaf0] p-5">
+                    <div className="text-[13px] font-bold text-[#1a1d2e] flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2"><span>✨</span> Recent Hires</div>
-                        {selectedDept && <span className="text-[11px] text-[var(--accent)] font-medium bg-[var(--bg2)] px-2 py-0.5 rounded-md">Filtered: {selectedDept}</span>}
+                        {selectedDept && <span className="text-[11px] text-[#6366f1] font-medium bg-[#f3f0ff] px-2 py-0.5 rounded-md">Filtered: {selectedDept}</span>}
                     </div>
                     <div className="flex flex-col gap-0 max-h-[300px] overflow-y-auto pr-1">
                         {loading ? (

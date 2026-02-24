@@ -5,11 +5,7 @@ import { auth } from "@/lib/auth"
 // GET /api/recruitment – List candidates
 export async function GET(req: Request) {
     try {
-        const session = await auth()
-        if (!session || session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
+        // Auth check disabled for dev
         const { searchParams } = new URL(req.url)
         const stage = searchParams.get("stage")
 

@@ -2,33 +2,43 @@ import { cn } from "@/lib/utils"
 
 export function StatCard({ label, value, sub, badge, badgeType, icon, iconClass, glowClass, isMoney }: any) {
     return (
-        <div className={cn("glass p-5 relative overflow-hidden group cursor-default", glowClass)}>
-            <div className="flex justify-between items-start mb-[14px] relative z-10">
-                <div className="text-[12px] font-semibold text-[var(--text3)] uppercase tracking-[0.6px]">{label}</div>
+        <div className={cn("bg-white rounded-[16px] border border-[#e8eaf0] p-5 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200", glowClass)}>
+            {/* Icon + label row */}
+            <div className="flex items-center gap-2">
+                <span className={cn("w-8 h-8 rounded-lg flex items-center justify-center text-[15px] shrink-0", iconClass || "bg-[#f0f4ff]")}>{icon}</span>
+                <span className="text-[12.5px] font-medium text-[#8a8fa8] tracking-wide">{label}</span>
             </div>
-            <div className={cn("text-[var(--text)] font-extrabold tracking-[-1px] mb-2 leading-none relative z-10 animate-[countUp_0.5s_0.1s_both]", isMoney ? "text-[24px] tracking-[-0.5px]" : "text-[32px]")}>
-                {value}
+
+            {/* Big number */}
+            <div className={cn("font-extrabold tracking-[-1px] text-[#1a1d2e] leading-none animate-[countUp_0.5s_0.1s_both]",
+                isMoney ? "text-[22px] tracking-[-0.5px]" : "text-[30px]"
+            )}>
+                {isMoney ? `₹${value}` : value}
             </div>
-            <div className="text-[12px] text-[var(--text3)] mb-2 relative z-10">{sub}</div>
-            {badge && (
-                <span className={cn("inline-flex items-center gap-[3px] text-[11.5px] font-semibold px-[9px] py-[3px] rounded-[20px] font-mono border relative z-10",
-                    badgeType === 'up' ? "bg-[var(--green-dim)] text-[#1a9140] border-[rgba(52,199,89,0.2)]" :
-                        badgeType === 'down' ? "bg-[var(--red-dim)] text-[var(--red)] border-[rgba(255,59,48,0.15)]" :
-                            "bg-[var(--bg3)] text-[var(--text3)] border-[var(--border)]"
-                )}>
-                    {badge}
-                </span>
-            )}
+
+            {/* Sub + badge row */}
+            <div className="flex items-center gap-2 flex-wrap">
+                {badge && (
+                    <span className={cn("inline-flex items-center gap-[3px] text-[11px] font-semibold px-[8px] py-[3px] rounded-[20px] font-mono",
+                        badgeType === 'up' ? "bg-[#e8f8ef] text-[#1a9140]" :
+                            badgeType === 'down' ? "bg-[#fff0f0] text-[#d93025]" :
+                                "bg-[#f2f3f8] text-[#8a8fa8]"
+                    )}>
+                        {badgeType === 'up' && "+"}{badge}
+                    </span>
+                )}
+                <span className="text-[11.5px] text-[#b0b4c8]">{sub}</span>
+            </div>
         </div>
     )
 }
 
 export function LegendItem({ color, label, pct }: any) {
     return (
-        <div className="flex items-center gap-[7px] text-[12px] text-[var(--text2)]">
-            <div className="w-[7px] h-[7px] rounded-full shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+        <div className="flex items-center gap-[7px] text-[12px] text-[#5a6072]">
+            <div className="w-[7px] h-[7px] rounded-full shrink-0" style={{ background: color }} />
             {label}
-            <span className="ml-auto font-mono text-[11px] text-[var(--text3)]">{pct}</span>
+            <span className="ml-auto font-mono text-[11px] text-[#b0b4c8]">{pct}</span>
         </div>
     )
 }
@@ -36,30 +46,32 @@ export function LegendItem({ color, label, pct }: any) {
 export function DeptRow({ name, count, pct, color, delay }: any) {
     return (
         <div className="flex items-center gap-[12px] animate-[fadeSlide_0.4s_both]" style={{ animationDelay: delay }}>
-            <div className="w-6 h-6 rounded-[7px] flex items-center justify-center text-[11px] font-bold text-white shrink-0" style={{ background: color, boxShadow: `0 0 8px ${color}40` }}>
+            <div className="w-6 h-6 rounded-[7px] flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+                style={{ background: color }}>
                 {count}
             </div>
-            <span className="text-[13px] font-medium flex-1 text-[var(--text2)]">{name}</span>
-            <div className="flex-[2] h-[5px] bg-[var(--bg2)] rounded-[3px] overflow-hidden">
-                <div className="h-full rounded-[3px] animate-[growBar_0.8s_0.3s_both] origin-left scale-x-0" style={{ width: `${pct}%`, background: color }} />
+            <span className="text-[13px] font-medium flex-1 text-[#3a3d52]">{name}</span>
+            <div className="flex-[2] h-[5px] bg-[#eef0f8] rounded-[3px] overflow-hidden">
+                <div className="h-full rounded-[3px] animate-[growBar_0.8s_0.3s_both] origin-left scale-x-0"
+                    style={{ width: `${pct}%`, background: color }} />
             </div>
-            <span className="text-[11.5px] text-[var(--text3)] font-mono w-[30px] text-right">{pct}%</span>
+            <span className="text-[11.5px] text-[#b0b4c8] font-mono w-[30px] text-right">{pct}%</span>
         </div>
     )
 }
 
 export function HireRow({ initials, name, role, date, color }: any) {
     return (
-        <div className="flex items-center gap-[12px] py-[10px] border-b border-[var(--border)] last:border-0 hover:pl-1 transition-all cursor-default relative group">
+        <div className="flex items-center gap-[12px] py-[10px] border-b border-[#f0f2f8] last:border-0 hover:bg-[#f8f9fe] px-2 rounded-lg transition-colors cursor-default">
             <div className={cn("w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold text-white shrink-0", color)}>
                 {initials}
             </div>
             <div className="flex flex-col">
-                <div className="text-[13.5px] font-semibold text-[var(--text)]">{name}</div>
-                <div className="text-[12px] text-[var(--text3)] mt-[1px]">{role}</div>
+                <div className="text-[13.5px] font-semibold text-[#1a1d2e]">{name}</div>
+                <div className="text-[12px] text-[#8a8fa8] mt-[1px]">{role}</div>
             </div>
-            <div className="ml-auto text-[11.5px] text-[var(--text3)] font-mono flex items-center gap-1 whitespace-nowrap">
-                📅 {date}
+            <div className="ml-auto text-[11.5px] text-[#b0b4c8] font-mono whitespace-nowrap">
+                {date}
             </div>
         </div>
     )

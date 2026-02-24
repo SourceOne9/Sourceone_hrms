@@ -1,31 +1,13 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
 
 // GET /api/documents – List all documents
 export async function GET() {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
-        const role = session.user?.role
-
-        // Employees only see public docs + their own
         const documents = await prisma.document.findMany({
-            where: role === "ADMIN"
-                ? {}
-                : {
-                    OR: [
-                        { isPublic: true },
-                        { employeeId: session.user?.id },
-                    ],
-                },
             include: { employee: true },
             orderBy: { uploadDate: "desc" },
         })
-
         return NextResponse.json(documents)
     } catch (error) {
         console.error("[DOCUMENTS_GET]", error)
@@ -33,22 +15,38 @@ export async function GET() {
     }
 }
 
-// POST /api/documents – Upload document metadata
+// POST /api/documents – Upload document metadata (supports bulk: employeeIds array)
 export async function POST(req: Request) {
     try {
-        const session = await auth()
-        if (!session || session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const body = await req.json()
 
+        // Bulk mode: create one document per employee
+        if (Array.isArray(body.employeeIds) && body.employeeIds.length > 0) {
+            const docs = await Promise.all(
+                body.employeeIds.map((empId: string) =>
+                    prisma.document.create({
+                        data: {
+                            title: body.title,
+                            category: body.category,
+                            url: body.url,
+                            size: body.size || null,
+                            isPublic: body.isPublic ?? false,
+                            employeeId: empId,
+                        },
+                        include: { employee: true },
+                    })
+                )
+            )
+            return NextResponse.json(docs, { status: 201 })
+        }
+
+        // Single document
         const document = await prisma.document.create({
             data: {
                 title: body.title,
                 category: body.category,
                 url: body.url,
-                size: body.size,
+                size: body.size || null,
                 isPublic: body.isPublic ?? false,
                 employeeId: body.employeeId || null,
             },
