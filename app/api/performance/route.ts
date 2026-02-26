@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { performanceReviewSchema } from "@/lib/schemas"
 
 // GET /api/performance – List performance reviews
 export async function GET(req: Request) {
@@ -18,8 +19,9 @@ export async function GET(req: Request) {
 
         const reviews = await prisma.performanceReview.findMany({
             where,
-            include: { employee: { include: { department: true } } },
+            include: { employee: { select: { id: true, firstName: true, lastName: true, department: { select: { name: true } } } } },
             orderBy: { reviewDate: "desc" },
+            take: 200,
         })
 
         return NextResponse.json(reviews)
@@ -38,15 +40,22 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json()
+        const parsed = performanceReviewSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
 
         const review = await prisma.performanceReview.create({
             data: {
-                rating: parseFloat(body.rating),
-                progress: parseInt(body.progress || "0"),
-                comments: body.comments,
-                reviewDate: body.reviewDate ? new Date(body.reviewDate) : new Date(),
-                status: body.status || "PENDING",
-                employeeId: body.employeeId,
+                rating: parsed.data.rating,
+                progress: parsed.data.progress,
+                comments: parsed.data.comments,
+                reviewDate: parsed.data.reviewDate || new Date(),
+                status: parsed.data.status,
+                employeeId: parsed.data.employeeId,
             },
             include: { employee: { include: { department: true } } },
         })

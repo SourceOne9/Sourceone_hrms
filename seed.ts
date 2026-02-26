@@ -7,24 +7,12 @@ async function main() {
     console.log("Seeding database...")
 
     // 1. Create a Department
-    const itDept = await prisma.department.upsert({
-        where: { name: "Engineering" },
-        update: {},
-        create: {
-            name: "Engineering",
-            color: "#3b82f6",
-        },
-    })
+    const existingIt = await prisma.department.findFirst({ where: { name: "Engineering" } })
+    const itDept = existingIt ?? await prisma.department.create({ data: { name: "Engineering", color: "#3b82f6" } })
 
     // 2. Create another Department
-    const hrDept = await prisma.department.upsert({
-        where: { name: "HR" },
-        update: {},
-        create: {
-            name: "HR",
-            color: "#ec4899",
-        },
-    })
+    const existingHr = await prisma.department.findFirst({ where: { name: "HR" } })
+    const hrDept = existingHr ?? await prisma.department.create({ data: { name: "HR", color: "#ec4899" } })
 
     // 3. Create Employees
     const emp1 = await prisma.employee.upsert({

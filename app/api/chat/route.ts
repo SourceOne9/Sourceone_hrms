@@ -2,17 +2,29 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { google } from "@ai-sdk/google"
-import { generateText, tool } from "ai"
+import { generateText, tool, embed } from "ai"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { getSessionEmployee } from "@/lib/session-employee"
 import crypto from "crypto"
+import { redis } from "@/lib/redis"
 
 export async function POST(req: Request) {
     try {
         const session = await auth()
         const employee = await getSessionEmployee()
         const { messages } = await req.json()
+
+        // AI Circuit Breaker - Check if open
+        const breakerKey = "gemini:circuit_open"
+        const circuitOpen = await redis.get(breakerKey)
+        if (circuitOpen) {
+            console.warn("🚨 AI Circuit Breaker is OPEN. Rejecting request.")
+            return NextResponse.json(
+                { reply: "The AI assistant is temporarily unavailable due to high load. Please try again in a minute." },
+                { status: 503 }
+            )
+        }
 
         const apiKey = process.env.GEMINI_API_KEY
         if (!apiKey) {
@@ -25,7 +37,7 @@ export async function POST(req: Request) {
         const userName = session?.user?.name || "User"
         const userRole = session?.user?.role || "EMPLOYEE"
 
-        const systemInstruction = `You are **EMS Pro Assistant**, the built-in AI helper for an Employee Management System.
+        let systemInstruction = `You are **EMS Pro Assistant**, the built-in AI helper for an Employee Management System.
 
 Your personality:
 - Friendly, professional, and concise. Use emoji sparingly 👋
@@ -38,6 +50,38 @@ Current user info:
 - Employee ID: ${employee?.id || "N/A"}
 
 If the user asks something outside HR/EMS scope, politely redirect them. Never make up specific employee data. Always use the provided tools to serve real data.`
+
+        // RAG VECTOR SEARCH
+        try {
+            const lastUserMessage = messages.filter((m: any) => m.role === 'user').pop()
+            if (lastUserMessage && lastUserMessage.content) {
+                // Vectorize the user's question
+                const { embedding } = await embed({
+                    model: google.textEmbeddingModel('text-embedding-004'),
+                    value: lastUserMessage.content,
+                })
+
+                const vectorString = `[${embedding.join(',')}]`
+
+                // Cosine similarity search using pgvector (<=> operator)
+                const relevantDocs = await prisma.$queryRawUnsafe<Array<{ content: string }>>(`
+                    SELECT content
+                    FROM "DocumentEmbedding"
+                    ORDER BY embedding <=> $1::vector
+                    LIMIT 3;
+                `, vectorString)
+
+                if (relevantDocs && relevantDocs.length > 0) {
+                    systemInstruction += `\n\n### Official Company Policies / Handbooks Context:\n`
+                    relevantDocs.forEach((doc, i) => {
+                        systemInstruction += `--- Document ${i + 1} ---\n${doc.content}\n\n`
+                    })
+                    systemInstruction += `Use the above organizational documents to answer policy questions definitively.`
+                }
+            }
+        } catch (e) {
+            console.error("Vector search failed, proceeding without RAG context:", e)
+        }
 
         // Add timeout to prevent hanging requests
         const controller = new AbortController()
@@ -131,6 +175,22 @@ If the user asks something outside HR/EMS scope, politely redirect them. Never m
         }
     } catch (error) {
         console.error("[CHAT_POST]", error)
+
+        // Increment failure counter for Circuit Breaker
+        try {
+            const failKey = "gemini:failures"
+            const fails = await redis.incr(failKey)
+            if (fails === 1) {
+                await redis.expire(failKey, 60) // 60 seconds rolling window
+            }
+            if (fails >= 5) {
+                await redis.set("gemini:circuit_open", "true", { ex: 60 }) // Open circuit for 60s
+                console.error("🚨 AI Circuit Breaker Triggered!")
+            }
+        } catch (e) {
+            console.error("Circuit breaker Redis error:", e)
+        }
+
         return NextResponse.json(
             { reply: "Something went wrong. Please try again." },
             { status: 500 }

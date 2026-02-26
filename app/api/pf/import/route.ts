@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { queue } from "@/lib/queue"
 
 // POST /api/pf/import
 export async function POST(req: Request) {
@@ -9,37 +9,16 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "No rows provided" }, { status: 400 })
         }
 
-        let inserted = 0
-        let skipped = 0
+        const jobId = await queue.enqueue("PF_IMPORT", rows)
 
-        for (const row of rows) {
-            try {
-                const employeeCode = String(row["employeeCode"] || row["Employee Code"] || "").trim()
-                const employee = await prisma.employee.findFirst({
-                    where: employeeCode
-                        ? { employeeCode }
-                        : { firstName: { contains: String(row["firstName"] || row["First Name"] || ""), mode: "insensitive" } }
-                })
-                if (!employee) { skipped++; continue }
-
-                const month = String(row["month"] || row["Month"] || "").trim()
-                const accountNumber = String(row["accountNumber"] || row["Account Number"] || "").trim()
-                const basicSalary = parseFloat(String(row["basicSalary"] || row["Basic Salary"] || 0))
-                const employeeContribution = parseFloat(String(row["employeeContribution"] || row["Employee Contribution"] || 0))
-                const employerContribution = parseFloat(String(row["employerContribution"] || row["Employer Contribution"] || 0))
-                const totalContribution = parseFloat(String(row["totalContribution"] || row["Total Contribution"] || 0)) || employeeContribution + employerContribution
-                const status = String(row["status"] || row["Status"] || "Credited").trim()
-
-                await prisma.providentFund.create({
-                    data: { employeeId: employee.id, month, accountNumber, basicSalary, employeeContribution, employerContribution, totalContribution, status }
-                })
-                inserted++
-            } catch { skipped++ }
-        }
-
-        return NextResponse.json({ inserted, skipped })
+        // Return immediately with 202 Accepted, and notify client that jobs are queued.
+        return NextResponse.json(
+            { message: `Accepted ${rows.length} rows for background processing`, jobId, status: "queued" },
+            { status: 202 }
+        )
     } catch (error) {
         console.error("[PF_IMPORT]", error)
-        return NextResponse.json({ error: "Import failed" }, { status: 500 })
+        return NextResponse.json({ error: "Job enqueue failed" }, { status: 500 })
     }
 }
+

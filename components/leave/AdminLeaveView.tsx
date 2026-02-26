@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Modal } from "@/components/ui/Modal"
 import { PlusIcon } from "@radix-ui/react-icons"
@@ -60,7 +61,17 @@ const getDays = (start: string, end: string) =>
     differenceInCalendarDays(new Date(end), new Date(start)) + 1
 
 export function AdminLeaveView() {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const pathname = usePathname()
+
+    const page = parseInt(searchParams?.get("page") || "1", 10)
+    const limit = parseInt(searchParams?.get("limit") || "15", 10)
+
     const [leaves, setLeaves] = React.useState<LeaveRequest[]>([])
+    const [totalRows, setTotalRows] = React.useState(0)
+    const [pageCount, setPageCount] = React.useState(1)
+
     const [loading, setLoading] = React.useState(true)
     const [filter, setFilter] = React.useState<"ALL" | LeaveStatus>("ALL")
     const [isModalOpen, setIsModalOpen] = React.useState(false)
@@ -75,15 +86,22 @@ export function AdminLeaveView() {
 
     const fetchLeaves = React.useCallback(async () => {
         try {
-            const res = await fetch("/api/leaves")
+            const res = await fetch(`/api/leaves?page=${page}&limit=${limit}`)
             if (!res.ok) throw new Error("Failed to fetch")
-            setLeaves(await res.json())
+            const json = await res.json()
+            const data = Array.isArray(json) ? json : (json.data || [])
+            setLeaves(data)
+
+            if (json.total !== undefined) {
+                setTotalRows(json.total)
+                setPageCount(Math.ceil(json.total / limit))
+            }
         } catch {
             toast.error("Failed to load leave requests")
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [page, limit])
 
     React.useEffect(() => {
         fetchLeaves()
@@ -270,6 +288,37 @@ export function AdminLeaveView() {
                             ))}
                         </tbody>
                     </table>
+
+                    {/* Pagination Controls */}
+                    <div className="flex items-center justify-end space-x-2 py-4 px-5 bg-[var(--surface2)] border-t border-[var(--border)]">
+                        <div className="flex-1 text-[12.5px] text-[var(--text3)]">
+                            Showing page {page} of {pageCount || 1} ({totalRows} total requests)
+                        </div>
+                        <div className="space-x-2">
+                            <button
+                                className={cn("px-3 py-1 text-[12px] border border-[var(--border)] rounded-md hover:bg-[var(--bg2)] disabled:opacity-50", page <= 1 && "pointer-events-none opacity-50")}
+                                onClick={() => {
+                                    const params = new URLSearchParams(searchParams?.toString() || "")
+                                    params.set("page", (page - 1).toString())
+                                    router.push(`${pathname}?${params.toString()}`)
+                                }}
+                                disabled={page <= 1}
+                            >
+                                Previous
+                            </button>
+                            <button
+                                className={cn("px-3 py-1 text-[12px] border border-[var(--border)] rounded-md hover:bg-[var(--bg2)] disabled:opacity-50", page >= pageCount && "pointer-events-none opacity-50")}
+                                onClick={() => {
+                                    const params = new URLSearchParams(searchParams?.toString() || "")
+                                    params.set("page", (page + 1).toString())
+                                    router.push(`${pathname}?${params.toString()}`)
+                                }}
+                                disabled={page >= pageCount}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 

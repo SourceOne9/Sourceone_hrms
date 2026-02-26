@@ -2,6 +2,18 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 
+function flattenEmployee(emp: any) {
+    if (!emp) return null
+    const { profile, addressInfo, banking, ...rest } = emp
+    return {
+        ...rest,
+        // Spread nested relations to maintain backward compatibility with UI
+        ...(profile || {}),
+        ...(addressInfo || {}),
+        ...(banking || {}),
+    }
+}
+
 export async function GET() {
     try {
         const session = await auth()
@@ -9,52 +21,39 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
-        console.log("[EMPLOYEE_PROFILE_GET] Looking up employee for userId:", session.user.id, "email:", session.user.email)
+        const includeRelations = {
+            department: true,
+            profile: true,
+            addressInfo: true,
+            banking: true,
+            educations: { orderBy: { degree: 'asc' as const } },
+            documents: {
+                select: { id: true, title: true, category: true, url: true, uploadDate: true }
+            },
+            assets: {
+                select: { id: true, name: true, type: true, serialNumber: true, status: true, assignedDate: true, image: true }
+            },
+            manager: {
+                select: { firstName: true, lastName: true, designation: true }
+            }
+        }
 
-        // Try finding by userId first, then fall back to email
         let employee = await prisma.employee.findFirst({
             where: { userId: session.user.id },
-            include: {
-                department: true,
-                educations: { orderBy: { degree: 'asc' } },
-                documents: {
-                    select: { id: true, title: true, category: true, url: true, uploadDate: true }
-                },
-                assets: {
-                    select: { id: true, name: true, type: true, serialNumber: true, status: true, assignedDate: true, image: true }
-                },
-                manager: {
-                    select: { firstName: true, lastName: true, designation: true }
-                }
-            }
+            include: includeRelations
         })
 
-        // Fallback: match by email if userId isn't linked
         if (!employee && session.user.email) {
             employee = await prisma.employee.findFirst({
                 where: { email: session.user.email },
-                include: {
-                    department: true,
-                    educations: { orderBy: { degree: 'asc' } },
-                    documents: {
-                        select: { id: true, title: true, category: true, url: true, uploadDate: true }
-                    },
-                    assets: {
-                        select: { id: true, name: true, type: true, serialNumber: true, status: true, assignedDate: true, image: true }
-                    },
-                    manager: {
-                        select: { firstName: true, lastName: true, designation: true }
-                    }
-                }
+                include: includeRelations
             })
 
-            // Auto-link if found by email
             if (employee && !employee.userId) {
                 await prisma.employee.update({
                     where: { id: employee.id },
                     data: { userId: session.user.id }
                 })
-                console.log("[EMPLOYEE_PROFILE_GET] Auto-linked employee", employee.id, "to user", session.user.id)
             }
         }
 
@@ -62,7 +61,7 @@ export async function GET() {
             return NextResponse.json({ error: "Employee profile not found" }, { status: 404 })
         }
 
-        return NextResponse.json(employee)
+        return NextResponse.json(flattenEmployee(employee))
     } catch (error: any) {
         console.error("[EMPLOYEE_PROFILE_GET] Error:", error?.message || error)
         return NextResponse.json({ error: "Internal Server Error", details: error?.message }, { status: 500 })
@@ -76,7 +75,6 @@ export async function PUT(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
-        // Find by userId or email
         let employee = await prisma.employee.findFirst({
             where: { userId: session.user.id },
         })
@@ -92,38 +90,60 @@ export async function PUT(req: Request) {
 
         const body = await req.json()
 
-        const allowedFields = [
-            'phone', 'dateOfBirth', 'gender', 'bloodGroup', 'nationality', 'maritalStatus',
+        // Root fields
+        const rootFields = ['phone', 'avatarUrl', 'address']
+        // Profile fields
+        const profileFields = [
+            'dateOfBirth', 'gender', 'bloodGroup', 'nationality', 'maritalStatus',
             'marriageDate', 'spouse', 'placeOfBirth', 'residentialStatus', 'fatherName',
             'religion', 'physicallyChallenged', 'internationalEmployee', 'hobby', 'caste',
-            'height', 'weight', 'identificationMark',
+            'height', 'weight', 'identificationMark', 'fatherDob', 'fatherBloodGroup',
+            'fatherGender', 'fatherNationality', 'emergencyContactName', 'emergencyContactPhone',
+            'emergencyContactRelation', 'passportNumber', 'passportExpiry', 'visaNumber', 'visaExpiry',
+            'category', 'costCenter', 'division', 'grade', 'location', 'previousEmployment'
+        ]
+        // Address fields
+        const addressFields = [
             'contactAddress', 'contactCity', 'contactState', 'contactPincode',
-            'permanentAddress', 'permanentCity', 'permanentState', 'permanentPincode',
+            'permanentAddress', 'permanentCity', 'permanentState', 'permanentPincode'
+        ]
+        // Banking fields
+        const bankingFields = [
             'bankName', 'bankAccountNumber', 'bankBranch', 'ifscCode',
-            'pfAccountNumber', 'aadhaarNumber', 'panNumber',
-            'fatherDob', 'fatherBloodGroup', 'fatherGender', 'fatherNationality',
-            'emergencyContactName', 'emergencyContactPhone', 'emergencyContactRelation',
-            'passportNumber', 'passportExpiry', 'visaNumber', 'visaExpiry',
-            'avatarUrl',
+            'pfAccountNumber', 'aadhaarNumber', 'panNumber'
         ]
 
-        const updateData: any = {}
-        for (const field of allowedFields) {
-            if (body[field] !== undefined) {
-                updateData[field] = body[field]
+        const getSubset = (fields: string[]) => {
+            const data: any = {}
+            for (const f of fields) {
+                if (body[f] !== undefined) data[f] = body[f]
             }
+            return Object.keys(data).length > 0 ? data : undefined
         }
+
+        const rootData = getSubset(rootFields) || {}
+        const profileData = getSubset(profileFields)
+        const addressData = getSubset(addressFields)
+        const bankingData = getSubset(bankingFields)
 
         const updated = await prisma.employee.update({
             where: { id: employee.id },
-            data: updateData,
+            data: {
+                ...rootData,
+                ...(profileData ? { profile: { upsert: { create: profileData, update: profileData } } } : {}),
+                ...(addressData ? { addressInfo: { upsert: { create: addressData, update: addressData } } } : {}),
+                ...(bankingData ? { banking: { upsert: { create: bankingData, update: bankingData } } } : {})
+            },
             include: {
                 department: true,
-                educations: true,
+                educations: { orderBy: { degree: 'asc' as const } },
+                profile: true,
+                addressInfo: true,
+                banking: true
             }
         })
 
-        return NextResponse.json(updated)
+        return NextResponse.json(flattenEmployee(updated))
     } catch (error: any) {
         console.error("[EMPLOYEE_PROFILE_PUT] Error:", error?.message || error)
         return NextResponse.json({ error: "Internal Server Error", details: error?.message }, { status: 500 })

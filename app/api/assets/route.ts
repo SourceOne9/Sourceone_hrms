@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { assetSchema } from "@/lib/schemas"
 
 // GET /api/assets – List all assets
 export async function GET() {
@@ -31,17 +32,24 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json()
+        const parsed = assetSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
 
         const asset = await prisma.asset.create({
             data: {
-                name: body.name,
-                type: body.type,
-                serialNumber: body.serialNumber,
-                status: body.status || "AVAILABLE",
-                purchaseDate: new Date(body.purchaseDate),
-                value: parseFloat(body.value),
-                image: body.image,
-                assignedToId: body.assignedToId || null,
+                name: parsed.data.name,
+                type: parsed.data.type,
+                serialNumber: parsed.data.serialNumber,
+                status: body.status || "AVAILABLE", // Status is not in create schema payload natively
+                purchaseDate: parsed.data.purchaseDate,
+                value: parsed.data.value,
+                image: parsed.data.image,
+                assignedToId: parsed.data.assignedToId || null,
                 assignedDate: body.assignedDate ? new Date(body.assignedDate) : null,
             },
             include: { assignedTo: true },

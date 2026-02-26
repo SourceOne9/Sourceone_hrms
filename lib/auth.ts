@@ -96,6 +96,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 token.mustChangePassword = (user as any).mustChangePassword ?? false
             }
 
+            if (account) {
+                token.accessToken = account.access_token
+                token.refreshToken = account.refresh_token
+                token.expiresAt = account.expires_at
+            }
+
             // Handle session updates (e.g. after password change)
             if (trigger === "update" && session) {
                 if (session.mustChangePassword !== undefined) {
@@ -128,6 +134,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 session.user.role = token.role ?? "EMPLOYEE"
                 session.user.avatar = token.avatar
                 session.user.mustChangePassword = (token.mustChangePassword as boolean) ?? false
+                session.accessToken = token.accessToken as string
             }
             return session
         },

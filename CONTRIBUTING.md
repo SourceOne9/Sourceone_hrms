@@ -7,9 +7,12 @@ We love your input! We want to make contributing to this project as easy and tra
 -   Submitting a fix
 -   Proposing new features
 
-## We Develop with Github
+## Local Development Setup
 
-We use github to host code, to track issues and feature requests, and to accept pull requests.
+1.  **Clone & Install**: `npm install`
+2.  **Environment**: Create `.env` from `.env.example`
+3.  **Database**: `npx prisma db push` and `npx prisma db seed`
+4.  **Verification**: Always run `npx next build` locally before submitting a PR to ensure 0 TypeScript/JSX errors.
 
 ## Report bugs using Github's [issue tracker](https://github.com/Work-Ashish/Employee-directory/issues)
 

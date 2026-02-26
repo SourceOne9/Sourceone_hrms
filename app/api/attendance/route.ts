@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { attendanceSchema } from "@/lib/schemas"
 
 // GET /api/attendance – List attendance records
 export async function GET(req: Request) {
@@ -20,8 +21,9 @@ export async function GET(req: Request) {
 
         const records = await prisma.attendance.findMany({
             where,
-            include: { employee: true },
+            include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true, designation: true, department: { select: { name: true } } } } },
             orderBy: { date: "desc" },
+            take: 200,
         })
 
         return NextResponse.json(records)
@@ -40,8 +42,15 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json()
+        const parsed = attendanceSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
 
-        let employeeId = body.employeeId
+        let employeeId = parsed.data.employeeId
         if (!employeeId) {
             const employee = await prisma.employee.findFirst({
                 where: { userId: session.user?.id },
@@ -56,11 +65,11 @@ export async function POST(req: Request) {
 
         const record = await prisma.attendance.create({
             data: {
-                date: new Date(body.date || new Date()),
-                checkIn: body.checkIn ? new Date(body.checkIn) : null,
-                checkOut: body.checkOut ? new Date(body.checkOut) : null,
-                workHours: body.workHours ? parseFloat(body.workHours) : null,
-                status: body.status || "PRESENT",
+                date: parsed.data.date || new Date(),
+                checkIn: parsed.data.checkIn || null,
+                checkOut: parsed.data.checkOut || null,
+                workHours: parsed.data.workHours || null,
+                status: parsed.data.status || "PRESENT",
                 employeeId,
             },
             include: { employee: true },

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { startOfMonth, endOfMonth, subMonths, format } from "date-fns"
+import { redis } from "@/lib/redis"
 
 export async function GET() {
     try {
@@ -10,19 +11,25 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
-        // 1. Employee Stats
-        const [totalEmployees, activeEmployees, onLeaveEmployees] = await Promise.all([
+        const cacheKey = "admin:dashboard:metrics"
+        try {
+            const cached = await redis.get(cacheKey)
+            if (cached) {
+                return NextResponse.json(typeof cached === "string" ? JSON.parse(cached) : cached)
+            }
+        } catch (e) {
+            console.warn("Failed to read dashboard cache from Redis", e)
+        }
+
+        // 1. Employee Stats + Payroll — single parallel batch
+        const [totalEmployees, activeEmployees, onLeaveEmployees, payroll] = await Promise.all([
             prisma.employee.count(),
             prisma.employee.count({ where: { status: "ACTIVE" } }),
-            prisma.employee.count({ where: { status: "ON_LEAVE" } })
+            prisma.employee.count({ where: { status: "ON_LEAVE" } }),
+            prisma.employee.aggregate({ _sum: { salary: true } }),
         ])
 
-        // 2. Payroll (Sum of all employee salaries)
-        const payroll = await prisma.employee.aggregate({
-            _sum: { salary: true }
-        })
-
-        // 3. Department Split
+        // 2. Department Split
         const departments = await prisma.department.findMany({
             include: {
                 _count: {
@@ -40,37 +47,47 @@ export async function GET() {
             color: colors[i % colors.length]
         }))
 
-        // 4. Hiring Trend (Last 6 months)
-        const hiringTrend: { month: string, hires: number }[] = []
+        // 3. Hiring Trend (Last 6 months) — SINGLE query instead of 6 sequential counts
+        const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5))
+        const hiringRaw = await prisma.employee.groupBy({
+            by: ["dateOfJoining"],
+            where: { dateOfJoining: { gte: sixMonthsAgo } },
+            _count: true,
+        })
+
+        // Bucket into months
+        const hiringMap = new Map<string, number>()
         for (let i = 5; i >= 0; i--) {
-            const monthDate = subMonths(new Date(), i)
-            const start = startOfMonth(monthDate)
-            const end = endOfMonth(monthDate)
-            const count = await prisma.employee.count({
-                where: {
-                    dateOfJoining: {
-                        gte: start,
-                        lte: end
-                    }
-                }
-            })
-            hiringTrend.push({
-                month: format(monthDate, "MMM"),
-                hires: count
-            })
+            hiringMap.set(format(subMonths(new Date(), i), "MMM"), 0)
         }
+        for (const row of hiringRaw) {
+            const month = format(new Date(row.dateOfJoining), "MMM")
+            if (hiringMap.has(month)) {
+                hiringMap.set(month, (hiringMap.get(month) || 0) + row._count)
+            }
+        }
+        const hiringTrend = Array.from(hiringMap, ([month, hires]) => ({ month, hires }))
 
-        // 5. Salary Range
-        const employees = await prisma.employee.findMany({ select: { salary: true } })
+        // 4. Salary Ranges — SQL aggregation instead of loading all rows
+        const salaryStats: any[] = await prisma.$queryRaw`
+            SELECT 
+                COUNT(*) FILTER (WHERE salary >= 30000 AND salary < 50000)::int as "range_30_50",
+                COUNT(*) FILTER (WHERE salary >= 50000 AND salary < 80000)::int as "range_50_80",
+                COUNT(*) FILTER (WHERE salary >= 80000 AND salary < 120000)::int as "range_80_120",
+                COUNT(*) FILTER (WHERE salary >= 120000)::int as "range_120_plus",
+                COALESCE(AVG(salary), 0) as avg_salary
+            FROM "Employee"
+        `
+        const stats = salaryStats[0] || {}
         const salaryRanges = [
-            { range: "30-50k", count: employees.filter((e: any) => e.salary >= 30000 && e.salary < 50000).length },
-            { range: "50-80k", count: employees.filter((e: any) => e.salary >= 50000 && e.salary < 80000).length },
-            { range: "80-120k", count: employees.filter((e: any) => e.salary >= 80000 && e.salary < 120000).length },
-            { range: "120k+", count: employees.filter((e: any) => e.salary >= 120000).length },
+            { range: "30-50k", count: Number(stats.range_30_50 || 0) },
+            { range: "50-80k", count: Number(stats.range_50_80 || 0) },
+            { range: "80-120k", count: Number(stats.range_80_120 || 0) },
+            { range: "120k+", count: Number(stats.range_120_plus || 0) },
         ]
-        const avgSalary = employees.length > 0 ? employees.reduce((acc: number, e: any) => acc + e.salary, 0) / employees.length : 0
+        const avgSalary = Number(stats.avg_salary || 0)
 
-        // 6. Recent Hires
+        // 5. Recent Hires (bounded — take 5)
         const recentHiresRaw = await prisma.employee.findMany({
             take: 5,
             orderBy: { dateOfJoining: "desc" },
@@ -85,7 +102,7 @@ export async function GET() {
             color: "bg-gradient-to-br from-[#3395ff] to-[#007aff]"
         }))
 
-        return NextResponse.json({
+        const payload = {
             role: "ADMIN",
             stats: {
                 totalEmployees,
@@ -98,7 +115,15 @@ export async function GET() {
             salaryRanges,
             avgSalary,
             recentHires
-        })
+        }
+
+        try {
+            await redis.set(cacheKey, payload, { ex: 300 }) // Cache for 5 minutes
+        } catch (e) {
+            console.warn("Failed to write dashboard cache to Redis", e)
+        }
+
+        return NextResponse.json(payload)
     } catch (error) {
         console.error("[DASHBOARD_GET]", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })

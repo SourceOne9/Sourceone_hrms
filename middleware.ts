@@ -1,5 +1,27 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { redis } from "@/lib/redis"
+
+// K11: Distributed fixed-window rate limiter (Redis-backed)
+const RATE_LIMIT_WINDOW = 60 // 60 seconds
+const RATE_LIMIT_MAX = 60    // max requests per window per IP
+
+async function isRateLimited(ip: string): Promise<boolean> {
+    const currentWindow = Math.floor(Date.now() / (RATE_LIMIT_WINDOW * 1000))
+    const key = `ratelimit:${ip}:${currentWindow}`
+
+    try {
+        const count = await redis.incr(key)
+        if (count === 1) {
+            await redis.expire(key, RATE_LIMIT_WINDOW + 10) // Add buffer to expiry
+        }
+        return count > RATE_LIMIT_MAX
+    } catch (e) {
+        // If Redis errors out, bypass rate limiting to prevent bringing down the app
+        console.warn("[Rate Limiting Error]", e)
+        return false
+    }
+}
 
 // Routes that don't require authentication
 const publicRoutes = [
@@ -63,11 +85,24 @@ function getSessionFromCookie(req: NextRequest): { role?: string } | null {
     return { role: undefined }
 }
 
-export default function middleware(req: NextRequest) {
+export default async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl
 
     // Always add security headers
     const response = NextResponse.next()
+
+    // K11: Rate limiting for API routes
+    if (pathname.startsWith("/api/")) {
+        const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown"
+        if (await isRateLimited(ip)) {
+            return addSecurityHeaders(
+                NextResponse.json(
+                    { error: "Too many requests. Please slow down." },
+                    { status: 429, headers: { "Retry-After": "60" } }
+                )
+            )
+        }
+    }
 
     // Allow public routes
     if (publicRoutes.some((route) => pathname.startsWith(route))) {

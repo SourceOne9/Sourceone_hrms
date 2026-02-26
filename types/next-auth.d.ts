@@ -24,5 +24,8 @@ declare module "next-auth/jwt" {
         role?: "ADMIN" | "EMPLOYEE"
         avatar?: string | null
         mustChangePassword?: boolean
+        accessToken?: string
+        refreshToken?: string
+        expiresAt?: number
     }
 }

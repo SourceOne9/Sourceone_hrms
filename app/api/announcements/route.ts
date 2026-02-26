@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { announcementSchema } from "@/lib/schemas"
 
 // GET /api/announcements – List announcements
 export async function GET() {
@@ -12,9 +13,14 @@ export async function GET() {
 
         const announcements = await prisma.announcement.findMany({
             orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
+            take: 100,
         })
 
-        return NextResponse.json(announcements)
+        return NextResponse.json(announcements, {
+            headers: {
+                "Cache-Control": "s-maxage=60, stale-while-revalidate=300"
+            }
+        })
     } catch (error) {
         console.error("[ANNOUNCEMENTS_GET]", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
@@ -30,15 +36,22 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json()
+        const parsed = announcementSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
 
         const announcement = await prisma.announcement.create({
             data: {
-                title: body.title,
-                content: body.content,
-                author: body.author || session.user?.name || "Admin",
-                category: body.category,
-                priority: body.priority || "MEDIUM",
-                isPinned: body.isPinned || false,
+                title: parsed.data.title,
+                content: parsed.data.content,
+                author: parsed.data.author || session.user?.name || "Admin",
+                category: parsed.data.category,
+                priority: parsed.data.priority,
+                isPinned: parsed.data.isPinned,
             },
         })
 
@@ -86,14 +99,23 @@ export async function PUT(req: Request) {
             return NextResponse.json({ error: "ID required" }, { status: 400 })
         }
 
+        // Ensure author field is preserved on updates if required
+        const partialParsed = announcementSchema.partial().safeParse(data)
+        if (!partialParsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: partialParsed.error.format() },
+                { status: 400 }
+            )
+        }
+
         const announcement = await prisma.announcement.update({
             where: { id },
             data: {
-                title: data.title,
-                content: data.content,
-                category: data.category,
-                priority: data.priority,
-                isPinned: data.isPinned,
+                title: partialParsed.data.title,
+                content: partialParsed.data.content,
+                category: partialParsed.data.category,
+                priority: partialParsed.data.priority,
+                isPinned: partialParsed.data.isPinned,
             },
         })
 

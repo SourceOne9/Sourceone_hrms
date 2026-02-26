@@ -20,8 +20,9 @@ export async function GET(req: Request) {
 
         const records = await prisma.payroll.findMany({
             where,
-            include: { employee: true },
+            include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true } } },
             orderBy: { createdAt: "desc" },
+            take: 200,
         })
 
         return NextResponse.json(records)

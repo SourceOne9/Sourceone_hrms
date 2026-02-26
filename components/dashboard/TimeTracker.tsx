@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 /* ─── Constants ─── */
-const HEARTBEAT_INTERVAL = 60_000  // 60 seconds
+const HEARTBEAT_INTERVAL = 300_000 // 5 minutes (K4: reduced from 60s to avoid DB overload at scale)
 const IDLE_TIMEOUT = 300_000       // 5 minutes (client-side)
 
 const BREAK_REASONS = ["Lunch", "Tea / Coffee", "Personal", "Meeting", "Other"]

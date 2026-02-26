@@ -2,32 +2,46 @@ import { cn } from "@/lib/utils"
 
 export function StatCard({ label, value, sub, badge, badgeType, icon, iconClass, glowClass, isMoney }: any) {
     return (
-        <div className={cn("bg-[var(--surface)] rounded-[16px] border border-[var(--border)] p-5 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200", glowClass)}>
+        <div className={cn(
+            "glass-premium rounded-[24px] p-6 flex flex-col gap-4 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300",
+            glowClass
+        )}>
+            {/* Visual Flare */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[var(--accent)] to-transparent opacity-[0.03] rounded-bl-full pointer-events-none group-hover:opacity-[0.08] transition-opacity" />
+
             {/* Icon + label row */}
-            <div className="flex items-center gap-2">
-                <span className={cn("w-8 h-8 rounded-lg flex items-center justify-center text-[15px] shrink-0", iconClass || "bg-[var(--bg2)]")}>{icon}</span>
-                <span className="text-[12.5px] font-medium text-[var(--text3)] tracking-wide">{label}</span>
+            <div className="flex items-center gap-3">
+                <div className={cn(
+                    "w-11 h-11 rounded-2xl flex items-center justify-center text-[20px] shrink-0 shadow-sm transition-transform group-hover:scale-110",
+                    iconClass || "bg-[var(--bg2)] text-[var(--accent)]"
+                )}>
+                    {icon}
+                </div>
+                <div>
+                    <span className="text-[13px] font-bold text-[var(--text2)] tracking-tight block">{label}</span>
+                    <span className="text-[11px] text-[var(--text3)] font-medium">{sub}</span>
+                </div>
             </div>
 
-            {/* Big number */}
-            <div className={cn("font-extrabold tracking-[-1px] text-[var(--text)] leading-none animate-[countUp_0.5s_0.1s_both]",
-                isMoney ? "text-[22px] tracking-[-0.5px]" : "text-[30px]"
-            )}>
-                {isMoney ? `₹${value}` : value}
-            </div>
+            {/* Value + badge row */}
+            <div className="flex items-end justify-between mt-auto">
+                <div className={cn(
+                    "font-extrabold tracking-[-1.5px] text-[var(--text)] leading-none animate-[countUp_0.6s_0.1s_both]",
+                    isMoney ? "text-[24px]" : "text-[34px]"
+                )}>
+                    {isMoney ? `₹${value}` : value}
+                </div>
 
-            {/* Sub + badge row */}
-            <div className="flex items-center gap-2 flex-wrap">
                 {badge && (
-                    <span className={cn("inline-flex items-center gap-[3px] text-[11px] font-semibold px-[8px] py-[3px] rounded-[20px] font-mono",
-                        badgeType === 'up' ? "bg-[#e8f8ef] text-[#1a9140]" :
-                            badgeType === 'down' ? "bg-[#fff0f0] text-[#d93025]" :
-                                "bg-[#f2f3f8] text-[#8a8fa8]"
+                    <span className={cn(
+                        "inline-flex items-center gap-[4px] text-[11px] font-bold px-[10px] py-[4px] rounded-full shadow-sm",
+                        badgeType === 'up' ? "bg-green-500/10 text-green-500 border border-green-500/20" :
+                            badgeType === 'down' ? "bg-red-500/10 text-red-500 border border-red-500/20" :
+                                "bg-[var(--bg3)] text-[var(--text2)] border border-[var(--border)]"
                     )}>
-                        {badgeType === 'up' && "+"}{badge}
+                        {badgeType === 'up' && "↑"}{badgeType === 'down' && "↓"}{badge}
                     </span>
                 )}
-                <span className="text-[11.5px] text-[var(--text3)]">{sub}</span>
             </div>
         </div>
     )

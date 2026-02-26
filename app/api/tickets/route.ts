@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { getSessionEmployee } from "@/lib/session-employee"
 import crypto from "crypto"
+import { ticketSchema, updateTicketSchema } from "@/lib/schemas"
 
 // GET /api/tickets – List help desk tickets
 export async function GET(req: Request) {
@@ -29,8 +30,9 @@ export async function GET(req: Request) {
 
         const tickets = await prisma.ticket.findMany({
             where,
-            include: { employee: true },
+            include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true } } },
             orderBy: { createdAt: "desc" },
+            take: 200,
         })
 
         return NextResponse.json(tickets)
@@ -49,6 +51,13 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json()
+        const parsed = ticketSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
 
         // Generate collision-resistant ticket code using UUID
         const shortId = crypto.randomUUID().slice(0, 8).toUpperCase()
@@ -57,12 +66,12 @@ export async function POST(req: Request) {
         const ticket = await prisma.ticket.create({
             data: {
                 ticketCode,
-                subject: body.subject,
-                description: body.description,
-                category: body.category,
-                priority: body.priority || "MEDIUM",
+                subject: parsed.data.subject,
+                description: parsed.data.description,
+                category: parsed.data.category,
+                priority: parsed.data.priority || "MEDIUM",
                 status: "OPEN",
-                employeeId: body.employeeId,
+                employeeId: parsed.data.employeeId || "",
             },
             include: { employee: true },
         })
@@ -83,12 +92,19 @@ export async function PUT(req: Request) {
         }
 
         const body = await req.json()
+        const parsed = updateTicketSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
 
         const ticket = await prisma.ticket.update({
-            where: { id: body.id },
+            where: { id: parsed.data.id },
             data: {
-                status: body.status,
-                priority: body.priority,
+                status: parsed.data.status,
+                priority: parsed.data.priority,
             },
             include: { employee: true },
         })

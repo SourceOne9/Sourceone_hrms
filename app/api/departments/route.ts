@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { departmentSchema } from "@/lib/schemas"
 
 // GET /api/departments – List all departments
 export async function GET() {
@@ -33,11 +34,18 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json()
+        const parsed = departmentSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
 
         const department = await prisma.department.create({
             data: {
-                name: body.name,
-                color: body.color,
+                name: parsed.data.name,
+                color: parsed.data.color,
             },
         })
 

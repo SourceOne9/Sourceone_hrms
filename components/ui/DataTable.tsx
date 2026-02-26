@@ -28,6 +28,10 @@ interface DataTableProps<TData, TValue> {
     searchKey: string
     filterFields?: FilterField[]
     actions?: React.ReactNode
+    pageCount?: number
+    pageIndex?: number // 0-indexed
+    onPageChange?: (pageIndex: number) => void
+    totalRows?: number
 }
 
 export function DataTable<TData, TValue>({
@@ -36,6 +40,10 @@ export function DataTable<TData, TValue>({
     searchKey,
     filterFields = [],
     actions,
+    pageCount,
+    pageIndex,
+    onPageChange,
+    totalRows,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -59,7 +67,24 @@ export function DataTable<TData, TValue>({
             columnVisibility,
             rowSelection,
         },
+        manualPagination: pageCount !== undefined,
+        pageCount: pageCount,
     })
+
+    const handlePrevious = React.useCallback(() => {
+        if (onPageChange && pageIndex !== undefined) onPageChange(pageIndex - 1)
+        else table.previousPage()
+    }, [onPageChange, pageIndex, table])
+
+    const handleNext = React.useCallback(() => {
+        if (onPageChange && pageIndex !== undefined) onPageChange(pageIndex + 1)
+        else table.nextPage()
+    }, [onPageChange, pageIndex, table])
+
+    const canPrevious = pageIndex !== undefined ? pageIndex > 0 : table.getCanPreviousPage()
+    const canNext = pageIndex !== undefined && pageCount !== undefined
+        ? pageIndex < pageCount - 1
+        : table.getCanNextPage()
 
     return (
         <div className="space-y-4">
@@ -151,20 +176,22 @@ export function DataTable<TData, TValue>({
 
             <div className="flex items-center justify-end space-x-2 py-4">
                 <div className="flex-1 text-[12.5px] text-[var(--text3)]">
-                    Showing {table.getRowModel().rows.length} rows
+                    {totalRows !== undefined
+                        ? `Showing page ${(pageIndex ?? 0) + 1} of ${pageCount || 1} (${totalRows} total rows)`
+                        : `Showing ${table.getRowModel().rows.length} rows`}
                 </div>
                 <div className="space-x-2">
                     <button
-                        className={cn("px-3 py-1 text-[12px] border border-[var(--border)] rounded-md hover:bg-[var(--bg2)] disabled:opacity-50", !table.getCanPreviousPage() && "pointer-events-none opacity-50")}
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
+                        className={cn("px-3 py-1 text-[12px] border border-[var(--border)] rounded-md hover:bg-[var(--bg2)] disabled:opacity-50", !canPrevious && "pointer-events-none opacity-50")}
+                        onClick={handlePrevious}
+                        disabled={!canPrevious}
                     >
                         Previous
                     </button>
                     <button
-                        className={cn("px-3 py-1 text-[12px] border border-[var(--border)] rounded-md hover:bg-[var(--bg2)] disabled:opacity-50", !table.getCanNextPage() && "pointer-events-none opacity-50")}
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
+                        className={cn("px-3 py-1 text-[12px] border border-[var(--border)] rounded-md hover:bg-[var(--bg2)] disabled:opacity-50", !canNext && "pointer-events-none opacity-50")}
+                        onClick={handleNext}
+                        disabled={!canNext}
                     >
                         Next
                     </button>

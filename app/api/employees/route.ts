@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import bcrypt from "bcryptjs"
+import { employeeSchema } from "@/lib/schemas"
+import { redis } from "@/lib/redis"
 
 // GET /api/employees – List all employees (paginated)
 export async function GET(req: Request) {
@@ -53,6 +55,16 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json()
+
+        // Zod Validation
+        const parsed = employeeSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
+
         const {
             employeeCode,
             firstName,
@@ -66,7 +78,8 @@ export async function POST(req: Request) {
             status,
             address,
             managerId,
-        } = body
+            avatarUrl,
+        } = parsed.data
 
         // Generate temp password: EmployeeCode@Year (e.g. EMP001@2026)
         const year = new Date().getFullYear()
@@ -83,7 +96,7 @@ export async function POST(req: Request) {
                     hashedPassword,
                     role: "EMPLOYEE",
                     mustChangePassword: true,
-                    avatar: body.avatarUrl || null,
+                    avatar: avatarUrl || null,
                 },
             })
 
@@ -97,19 +110,26 @@ export async function POST(req: Request) {
                     phone,
                     designation,
                     departmentId,
-                    dateOfJoining: new Date(dateOfJoining),
-                    salary: parseFloat(salary),
+                    dateOfJoining: parsed.data.dateOfJoining || new Date(dateOfJoining),
+                    salary: salary,
                     status: status || "ACTIVE",
                     address,
                     managerId: managerId || null,
                     userId: user.id,
-                    avatarUrl: body.avatarUrl || null,
+                    avatarUrl: avatarUrl || null,
                 },
                 include: { department: true },
             })
 
             return { ...employee, username: employeeCode }
         })
+
+        // Clear dashboard cache since new hire stats changed
+        try {
+            await redis.set("admin:dashboard:metrics", "", { ex: 1 }) // Expire quickly
+        } catch (e) {
+            console.error("Failed to invalidate dashboard cache", e)
+        }
 
         // Log creation event (no credentials in logs)
         console.log(`[NEW_EMPLOYEE] ${result.username} created. Must change password on first login.`)

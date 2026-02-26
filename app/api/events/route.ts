@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { eventSchema } from "@/lib/schemas"
 
 // GET /api/events – List calendar events
 export async function GET() {
@@ -12,9 +13,14 @@ export async function GET() {
 
         const events = await prisma.calendarEvent.findMany({
             orderBy: { start: "asc" },
+            take: 200,
         })
 
-        return NextResponse.json(events)
+        return NextResponse.json(events, {
+            headers: {
+                "Cache-Control": "s-maxage=60, stale-while-revalidate=300"
+            }
+        })
     } catch (error) {
         console.error("[EVENTS_GET]", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
@@ -30,14 +36,21 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json()
+        const parsed = eventSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
 
         const event = await prisma.calendarEvent.create({
             data: {
-                title: body.title,
-                start: new Date(body.start),
-                end: new Date(body.end),
-                allDay: body.allDay || false,
-                type: body.type || "EVENT",
+                title: parsed.data.title,
+                start: parsed.data.start,
+                end: parsed.data.end,
+                allDay: parsed.data.allDay,
+                type: parsed.data.type,
             },
         })
 

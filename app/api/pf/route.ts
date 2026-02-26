@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { providentFundSchema } from "@/lib/schemas"
 
 // GET /api/pf – List provident fund records
 export async function GET(req: Request) {
@@ -18,8 +19,9 @@ export async function GET(req: Request) {
 
         const records = await prisma.providentFund.findMany({
             where,
-            include: { employee: true },
+            include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true } } },
             orderBy: { createdAt: "desc" },
+            take: 200,
         })
 
         return NextResponse.json(records)
@@ -38,17 +40,24 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json()
+        const parsed = providentFundSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
 
         const record = await prisma.providentFund.create({
             data: {
-                month: body.month,
-                accountNumber: body.accountNumber,
-                basicSalary: parseFloat(body.basicSalary),
-                employeeContribution: parseFloat(body.employeeContribution),
-                employerContribution: parseFloat(body.employerContribution),
-                totalContribution: parseFloat(body.totalContribution),
-                status: body.status || "Credited",
-                employeeId: body.employeeId,
+                month: parsed.data.month,
+                accountNumber: parsed.data.accountNumber,
+                basicSalary: parsed.data.basicSalary,
+                employeeContribution: parsed.data.employeeContribution,
+                employerContribution: parsed.data.employerContribution,
+                totalContribution: parsed.data.totalContribution,
+                status: parsed.data.status,
+                employeeId: parsed.data.employeeId,
             },
             include: { employee: true },
         })

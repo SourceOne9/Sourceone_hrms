@@ -7,35 +7,17 @@ async function main() {
     console.log("🌱 Seeding database...")
 
     // ── Departments ─────────────────────────────────────────
-    const engineering = await prisma.department.upsert({
-        where: { name: "Engineering" },
-        update: {},
-        create: { name: "Engineering", color: "#007aff" },
-    })
+    async function upsertDept(name: string, color: string) {
+        const existing = await prisma.department.findFirst({ where: { name } })
+        if (existing) return existing
+        return prisma.department.create({ data: { name, color } })
+    }
 
-    const sales = await prisma.department.upsert({
-        where: { name: "Sales" },
-        update: {},
-        create: { name: "Sales", color: "#38bdf8" },
-    })
-
-    const marketing = await prisma.department.upsert({
-        where: { name: "Marketing" },
-        update: {},
-        create: { name: "Marketing", color: "#ec4899" },
-    })
-
-    const finance = await prisma.department.upsert({
-        where: { name: "Finance" },
-        update: {},
-        create: { name: "Finance", color: "#f59e0b" },
-    })
-
-    const hr = await prisma.department.upsert({
-        where: { name: "HR" },
-        update: {},
-        create: { name: "HR", color: "#10b981" },
-    })
+    const engineering = await upsertDept("Engineering", "#007aff")
+    const sales = await upsertDept("Sales", "#38bdf8")
+    const marketing = await upsertDept("Marketing", "#ec4899")
+    const finance = await upsertDept("Finance", "#f59e0b")
+    const hr = await upsertDept("HR", "#10b981")
 
     console.log("✅ Departments seeded")
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { resignationSchema } from "@/lib/schemas"
 
 // GET /api/resignations – List resignations
 export async function GET(req: Request) {
@@ -20,8 +21,9 @@ export async function GET(req: Request) {
 
         const resignations = await prisma.resignation.findMany({
             where,
-            include: { employee: { include: { department: true } } },
+            include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true, department: { select: { name: true } } } } },
             orderBy: { createdAt: "desc" },
+            take: 200,
         })
 
         return NextResponse.json(resignations)
@@ -40,13 +42,20 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json()
+        const parsed = resignationSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
 
         const resignation = await prisma.resignation.create({
             data: {
-                reason: body.reason,
-                lastDay: new Date(body.lastDay),
+                reason: parsed.data.reason,
+                lastDay: parsed.data.lastDay,
                 status: "UNDER_REVIEW",
-                employeeId: body.employeeId,
+                employeeId: parsed.data.employeeId || "",
             },
             include: { employee: true },
         })

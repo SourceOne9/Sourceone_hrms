@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { supabaseAdmin } from "@/lib/supabase"
 import { auth } from "@/lib/auth"
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
@@ -58,8 +58,8 @@ export async function POST(req: Request) {
         const fileName = `${crypto.randomUUID()}.${fileExt}`
         const filePath = `${fileName}`
 
-        // Upload to Supabase Storage
-        const { data, error } = await supabase.storage
+        // Upload to Supabase Storage using Admin client to bypass RLS (if service key is available)
+        const { data, error } = await supabaseAdmin.storage
             .from(bucket)
             .upload(filePath, file, {
                 contentType: file.type,
@@ -69,11 +69,15 @@ export async function POST(req: Request) {
 
         if (error) {
             console.error("[UPLOAD_ERROR]", error)
-            return NextResponse.json({ error: "Upload failed" }, { status: 500 })
+            const isRLSError = error.message.includes("row-level security") || error.message.includes("403")
+            const errorMessage = isRLSError
+                ? "Upload failed: Permission denied. Please check SUPABASE_SERVICE_ROLE_KEY."
+                : `Upload failed: ${error.message}`
+            return NextResponse.json({ error: errorMessage }, { status: 500 })
         }
 
         // Get public URL
-        const { data: { publicUrl } } = supabase.storage
+        const { data: { publicUrl } } = supabaseAdmin.storage
             .from(bucket)
             .getPublicUrl(filePath)
 

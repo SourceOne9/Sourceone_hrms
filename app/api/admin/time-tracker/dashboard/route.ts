@@ -19,8 +19,9 @@ export async function GET() {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
 
-        // Get all employees with their active sessions
+        // Get employees with their active sessions (paginated)
         const employees = await prisma.employee.findMany({
+            take: 100, // K3: Bounded — prevents OOM with 50K employees
             select: {
                 id: true,
                 firstName: true,

@@ -35,9 +35,21 @@ export async function POST(req: Request) {
                 const statusRaw = String(row["status"] || row["Status"] || "PENDING").trim().toUpperCase()
                 const status = ["PENDING", "PROCESSED", "PAID"].includes(statusRaw) ? statusRaw as "PENDING" | "PROCESSED" | "PAID" : "PENDING"
 
-                await prisma.payroll.create({
-                    data: { employeeId: employee.id, month, basicSalary, allowances, pfDeduction, tax, otherDed, netSalary, status }
+                // K10: Upsert — prevent duplicate records on re-import
+                const existing = await prisma.payroll.findFirst({
+                    where: { employeeId: employee.id, month }
                 })
+
+                if (existing) {
+                    await prisma.payroll.update({
+                        where: { id: existing.id },
+                        data: { basicSalary, allowances, pfDeduction, tax, otherDed, netSalary, status }
+                    })
+                } else {
+                    await prisma.payroll.create({
+                        data: { employeeId: employee.id, month, basicSalary, allowances, pfDeduction, tax, otherDed, netSalary, status }
+                    })
+                }
                 inserted++
             } catch { skipped++ }
         }

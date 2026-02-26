@@ -1,47 +1,76 @@
-# EMS Pro — AI Agents Documentation & Changelog
+# AI Agents — EMS Pro
 
-This document tracks the autonomous AI agents integrated into the EMS Pro platform, their capabilities, and the iteration history of their development.
-
-## 🤖 Active AI Agents
-
-### 1. HR Helpdesk & Policy Agent (Chatbot)
-- **Primary Role:** Resolves routine employee queries, checks HR data, and executes tasks autonomously.
-- **Access Point:** Floating Chatbot widget accessible across the employee and admin dashboards.
-- **Context Awareness:** Automatically knows the identity of the logged-in user to fetch personalized information without requiring an ID.
-- **Autonomous Tools:**
-  - `checkLeaveBalance`: Connects directly to the `Leave` Prisma model to count approved, pending, and rejected leave days.
-  - `submitLeaveRequest`: Submits new leaves into the database on behalf of the user.
-  - `createSupportTicket`: Generates IT or HR support tickets directly into the `Ticket` model based on conversation context.
-
-### 2. Performance & Burnout Analytics Agent
-- **Primary Role:** Proactively monitors team health, productivity patterns, and identifies severe burnout risks.
-- **Access Point:** Admin dashboard (`/admin/activity`) via the "✨ AI Team Health Report" button.
-- **Data Analyzed:** Aggregates a massive 7-day rolling window of:
-  - `TimeSession` data (Work, Break, and Idle time calculations)
-  - `ActivityLog` telemetry (Application usage, browser tabs, duration)
-  - `AttendanceRecords` (Total days worked, check-in consistency)
-- **Output:** Dynamically generates a comprehensive Markdown report highlighting overworking risks (>50 hour weeks) and team behavioral patterns.
-
-### 3. Automated Onboarding Agent
-- **Primary Role:** Welcomes new hires and acts as an interactive checklist guiding them through administrative requirements.
-- **Access Point:** Employee dashboard (`/dashboard`) via the `OnboardingCompanion` widget.
-- **Data Analyzed:** 
-  - User `Profile` data (Joined Date, Department)
-  - Uploaded `Document` models (Checks for mandatory KYC like Aadhaar and PAN cards)
-  - Assigned `TrainingEnrollment` models (Tracks outstanding mandatory courses)
-- **Output:** A personalized, empathetic welcome message and an actionable Markdown checklist detailing missing compliance items.
+## Overview
+EMS Pro integrates multiple AI agents powered by **Google Gemini 2.0 Flash** (`@ai-sdk/google`).
 
 ---
 
-## 🔄 Iteration Updates & Changelog
+## 1. AI HR Chatbot
 
-### **Iteration 1 (v1.0.0 - Current)**
-**Focus: Core Implementation & Tool Integration**
+**Endpoint:** `POST /api/chat`
 
-- [x] **Setup:** Upgraded the legacy API endpoint (`/api/chat/route.ts`) to use the official Vercel AI SDK (`@ai-sdk/google`) coupled with the `gemini-2.0-flash` model.
-- [x] **HR Chatbot Validation:** Wrote the system prompt parameters and implemented the first 3 autonomous tools (`checkLeaveBalance`, `submitLeaveRequest`, `createSupportTicket`) mapped natively to Prisma.
-- [x] **TypeScript Bypasses:** Overcame severe Vercel AI SDK typing mismatches against Next.js strict mode by deploying explicit casts and `// @ts-nocheck` directives to unblock the compilation pipeline.
-- [x] **Burnout Engine Backend:** Created a dedicated secured endpoint (`/api/admin/analytics/burnout/route.ts`) that protects against token overflow by pre-aggregating 7 days of raw `TimeSession` arrays into structured telemetry summaries before passing to the LLM. 
-- [x] **Burnout Engine UI:** Injected the `generateReport` state, fetch mechanisms, and a frosted glass `Modal` rendering the raw generative Markdown into the `AdminDashboard.tsx`.
-- [x] **Onboarding Engine:** Developed the `/api/onboarding/agent/route.ts` to intersect new hire records. Built the `OnboardingCompanion.tsx` interactive widget and injected it at the top of the Employee Dashboard schedule view.
-- [x] **Result:** Three functionally autonomous agents fully integrated into the Next.js/Prisma backend.
+An embedded chat assistant available to both admins and employees. Powered by Gemini 2.0 Flash with a system prompt configuring it as a professional HR assistant with knowledge of the employee's own data.
+
+**Features:**
+- Context-aware responses
+- Answers HR policy questions
+- Helps employees understand their leave balance, payslips, etc.
+
+---
+
+## 2. Autonomous Performance Monitoring Agent
+
+**Endpoint:** `POST /api/cron/evaluate-performance`
+**Trigger:** Weekly cron job or manual `Bearer {CRON_SECRET}` POST
+
+### How It Works
+
+```
+1. Fetch all ACTIVE employees (chunked, max 50 per run)
+2. For each employee:
+   a. Check idempotency (evaluationHash = {employeeId}_{year}_W{week})
+   b. Aggregate TimeSession data (active hours, idle hours)
+   c. Calculate Rule-Based Base Score (0–100)
+      - Perfect = 40 hours/week
+      - Penalty: -10 if idle > 20% of active time
+   d. AI Qualitative Analysis via Gemini 2.0:
+      - aiAdjustment: ±20 based on behavioral patterns
+      - Burnout risk detection (>50 hours/week)
+      - Behavioral anomaly detection
+      - Personalized feedback paragraph
+   e. Compute Final Score = clamp(base + aiAdjustment, 0, 100)
+   f. In a single transaction:
+      - Create WeeklyScore record
+      - Queue Notification (APPRECIATION if ≥90, IMPROVEMENT if ≤60)
+      - Create AdminAlert if burnout or anomaly detected
+3. Log execution in AgentExecutionLogs
+```
+
+### Database Models
+| Model | Purpose |
+|---|---|
+| `WeeklyScores` | Per-employee weekly evaluation results |
+| `AgentExecutionLogs` | Audit trail for every agent run |
+| `Notifications` | Pending messages to employees |
+| `AdminAlerts` | Escalations requiring HR intervention |
+
+### Security
+- Cron endpoint protected by `Authorization: Bearer {CRON_SECRET}`
+- Idempotency enforced via `evaluationHash` unique constraint
+
+---
+
+## 3. AI Onboarding Agent
+
+**Endpoint:** `POST /api/onboarding/agent`
+
+Assists new employees through the onboarding process, answering questions about company policy, benefits, and next steps.
+
+---
+
+## Configuration
+
+```env
+GOOGLE_GENERATIVE_AI_API_KEY=your-gemini-api-key
+CRON_SECRET=your-cron-secret
+```

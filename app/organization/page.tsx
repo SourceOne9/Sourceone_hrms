@@ -182,19 +182,30 @@ export default function Organization() {
 
     const openEditModal = (empRaw: any) => {
         setModalMode("EDIT")
+
+        // Defensive date parsing
+        let doj = new Date().toISOString().split('T')[0]
+        if (empRaw.dateOfJoining) {
+            try {
+                doj = new Date(empRaw.dateOfJoining).toISOString().split('T')[0]
+            } catch (e) {
+                console.error("Failed to parse date", e)
+            }
+        }
+
         form.reset({
             id: empRaw.id,
-            employeeCode: empRaw.employeeCode,
-            firstName: empRaw.firstName,
-            lastName: empRaw.lastName,
-            email: empRaw.email,
+            employeeCode: empRaw.employeeCode || "",
+            firstName: empRaw.firstName || "",
+            lastName: empRaw.lastName || "",
+            email: empRaw.email || "",
             phone: empRaw.phone || "",
-            designation: empRaw.designation,
-            departmentId: empRaw.departmentId,
-            dateOfJoining: new Date(empRaw.dateOfJoining).toISOString().split('T')[0],
-            salary: empRaw.salary,
-            status: empRaw.status as any,
-            managerId: empRaw.managerId
+            designation: empRaw.designation || "",
+            departmentId: empRaw.departmentId || empRaw.department?.id || "",
+            dateOfJoining: doj,
+            salary: empRaw.salary || 0,
+            status: (empRaw.status as any) || "ACTIVE",
+            managerId: empRaw.managerId || null
         })
         setIsModalOpen(true)
     }

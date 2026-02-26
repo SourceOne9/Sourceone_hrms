@@ -1,21 +1,35 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
 
 interface RouteParams {
     params: Promise<{ id: string }>
 }
 
-// GET /api/documents/:id
+// GET /api/documents/:id — scoped by role
 export async function GET(_req: Request, { params }: RouteParams) {
     try {
+        const session = await auth()
+        if (!session?.user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
         const { id } = await params
         const document = await prisma.document.findUnique({
             where: { id },
-            include: { employee: true },
+            include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true, userId: true } } },
         })
         if (!document) {
             return NextResponse.json({ error: "Document not found" }, { status: 404 })
         }
+
+        // Non-admin: can only view own documents or public documents
+        if (session.user.role !== "ADMIN") {
+            if (!document.isPublic && document.employee?.userId !== session.user.id) {
+                return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+            }
+        }
+
         return NextResponse.json(document)
     } catch (error) {
         console.error("[DOCUMENT_GET]", error)
@@ -23,9 +37,14 @@ export async function GET(_req: Request, { params }: RouteParams) {
     }
 }
 
-// PUT /api/documents/:id
+// PUT /api/documents/:id — admin only
 export async function PUT(req: Request, { params }: RouteParams) {
     try {
+        const session = await auth()
+        if (!session?.user || session.user.role !== "ADMIN") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+        }
+
         const { id } = await params
         const body = await req.json()
         const existing = await prisma.document.findUnique({ where: { id } })
@@ -42,7 +61,7 @@ export async function PUT(req: Request, { params }: RouteParams) {
                 isPublic: body.isPublic ?? false,
                 employeeId: body.employeeId ?? null,
             },
-            include: { employee: true },
+            include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true } } },
         })
         return NextResponse.json(document)
     } catch (error) {
@@ -51,9 +70,14 @@ export async function PUT(req: Request, { params }: RouteParams) {
     }
 }
 
-// DELETE /api/documents/:id
+// DELETE /api/documents/:id — admin only
 export async function DELETE(_req: Request, { params }: RouteParams) {
     try {
+        const session = await auth()
+        if (!session?.user || session.user.role !== "ADMIN") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+        }
+
         const { id } = await params
         const existing = await prisma.document.findUnique({ where: { id } })
         if (!existing) {

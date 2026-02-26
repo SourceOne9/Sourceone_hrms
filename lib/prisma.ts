@@ -19,9 +19,9 @@ function createPrismaClient() {
 
     const pool = new Pool({
         connectionString,
-        max: 3,                        // Limit per serverless instance (prevents pool exhaustion)
-        idleTimeoutMillis: 10000,      // Release idle connections after 10s
-        connectionTimeoutMillis: 5000, // Fail fast if pool is exhausted
+        max: 2,                        // K1: Reduced per-instance (serverless = many instances; 2 × 100 = 200 total)
+        idleTimeoutMillis: 5000,       // Release idle connections faster
+        connectionTimeoutMillis: 3000, // Fail fast if pool is exhausted
     })
     const adapter = new PrismaPg(pool)
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { trainingSchema } from "@/lib/schemas"
 
 // GET /api/training – List all trainings
 export async function GET(req: Request) {
@@ -21,10 +22,11 @@ export async function GET(req: Request) {
             } : {},
             include: {
                 enrollments: {
-                    include: { employee: true },
+                    include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true } } },
                 },
             },
             orderBy: { createdAt: "desc" },
+            take: 100,
         })
 
         return NextResponse.json(trainings)
@@ -47,18 +49,26 @@ export async function POST(req: Request) {
         const body = await req.json()
         console.log("POST Body:", body)
 
-        const { assignedEmployeeIds, assignToAll, ...trainingData } = body
+        const parsed = trainingSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
+
+        const { assignedEmployeeIds, assignToAll } = body
 
         const training = await (prisma.training as any).create({
             data: {
-                name: trainingData.name,
-                type: trainingData.type,
-                description: trainingData.description,
-                status: trainingData.status || "UPCOMING",
-                progress: parseInt(trainingData.progress || "0"),
-                dueDate: trainingData.dueDate ? new Date(trainingData.dueDate) : null,
+                name: parsed.data.name,
+                type: parsed.data.type,
+                description: parsed.data.description,
+                status: "UPCOMING",
+                progress: 0,
+                dueDate: parsed.data.dueDate,
                 participants: 0, // Will be updated by enrollments
-                videoUrl: trainingData.videoUrl,
+                videoUrl: parsed.data.videoUrl,
             },
         })
 

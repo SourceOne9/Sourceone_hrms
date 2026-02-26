@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { candidateSchema } from "@/lib/schemas"
 
 // GET /api/recruitment – List candidates
 export async function GET(req: Request) {
@@ -20,6 +21,7 @@ export async function GET(req: Request) {
             where,
             include: { department: true },
             orderBy: { createdAt: "desc" },
+            take: 200,
         })
 
         return NextResponse.json(candidates)
@@ -38,18 +40,25 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json()
+        const parsed = candidateSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: parsed.error.format() },
+                { status: 400 }
+            )
+        }
 
         const candidate = await prisma.candidate.create({
             data: {
-                name: body.name,
-                email: body.email,
-                phone: body.phone,
-                role: body.role,
-                stage: body.stage || "APPLICATION",
-                status: body.status || "NEW",
-                interviewDate: body.interviewDate ? new Date(body.interviewDate) : null,
-                notes: body.notes,
-                departmentId: body.departmentId || null,
+                name: parsed.data.name,
+                email: parsed.data.email,
+                phone: parsed.data.phone,
+                role: parsed.data.role,
+                stage: parsed.data.stage,
+                status: parsed.data.status,
+                interviewDate: parsed.data.interviewDate,
+                notes: parsed.data.notes,
+                departmentId: parsed.data.departmentId,
             },
             include: { department: true },
         })
@@ -70,14 +79,22 @@ export async function PUT(req: Request) {
         }
 
         const body = await req.json()
+        // We can reuse candidateSchema with .partial() for updates
+        const partialParsed = candidateSchema.partial().safeParse(body)
+        if (!partialParsed.success) {
+            return NextResponse.json(
+                { error: "Validation Error", details: partialParsed.error.format() },
+                { status: 400 }
+            )
+        }
 
         const candidate = await prisma.candidate.update({
             where: { id: body.id },
             data: {
-                stage: body.stage,
-                status: body.status,
-                interviewDate: body.interviewDate ? new Date(body.interviewDate) : undefined,
-                notes: body.notes,
+                stage: partialParsed.data.stage,
+                status: partialParsed.data.status,
+                interviewDate: partialParsed.data.interviewDate,
+                notes: partialParsed.data.notes,
             },
             include: { department: true },
         })

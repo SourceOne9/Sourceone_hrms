@@ -1,48 +1,59 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to EMS Pro are documented here.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+---
 
-## [Unreleased]
-
-## [0.2.0] - 2026-02-20
-
-### Added
--   **Full Backend API** with 17 RESTful endpoints covering all frontend modules.
--   **Prisma Schema** expanded to 18 models: `Attendance`, `Payroll`, `ProvidentFund`, `PerformanceReview`, `Training`, `TrainingEnrollment`, `Announcement`, `Ticket`, `CalendarEvent`, `Candidate`.
--   **NextAuth.js v5** integration with JWT sessions and proper type augmentation (`types/next-auth.d.ts`).
--   **API Routes** for: Employees, Assets, Documents, Departments, Attendance, Payroll, PF, Performance, Training, Leaves, Resignations, Announcements, Tickets, Events, Recruitment.
--   **Role-based access control** — Admin-only write operations; employees see only their own data.
--   **Auto-generated ticket codes** (TKT-YYYY-NNN) for help desk tickets.
--   **`.env.example`** with all required environment variables documented.
--   **`API_DOCUMENTATION.md`** with complete endpoint reference.
-
-### Changed
--   **`README.md`** rewritten to cover full-stack architecture, backend setup, and project structure.
--   **`lib/auth.ts`** refactored to use typed NextAuth callbacks (no `any` casts).
--   **Mobile optimization** for Organization Chart page (responsive container, hidden MiniMap).
+## [Unreleased] — 2026-02-26
 
 ### Fixed
--   Eliminated all ESLint errors in backend API files (0 errors, 0 warnings).
--   Fixed `session.user` type safety across all API routes with proper NextAuth type augmentation.
-
-## [0.1.0] - 2024-02-19
+- **Employee Creation 500 Error** — Root cause was a stale `.next` Prisma client cache from a long-running `npm run dev` session. Cleared `.next` build cache, regenerated Prisma client, and all employee creation now works correctly.
+- **Department Creation 409 Conflict** — Changed Department uniqueness from global `@unique` on `name` to a multi-tenant composite `@@unique([name, organizationId])`. Frontend now displays the correct server error message instead of a generic "Failed" toast.
+- **Build Errors Fixed** — Resolved 4 TypeScript/JSX compile errors:
+  - Unescaped `>` in `app/admin/performance/page.tsx` JSX text
+  - Missing `department` field in `Score` TypeScript interface
+  - Wrong `TimeSession` field names (`userId`, `startTime`, `totalWorkSec`, `totalIdleSec`) in cron worker
+  - `where: { name }` on Department upserts in both `seed.ts` files (now `findFirst + create`)
+- **Organization Chart Edit Fix** — Fixed a crash when editing employees on the org chart by adding missing fields (`dateOfJoining`, `email`, etc.) to the `/api/organization` response.
 
 ### Added
--   Initial project setup using Next.js 16 (App Router).
--   Authentication context with mock login for Admin and Employee roles.
--   **Dashboard**: Comprehensive overview with real-time statistics, hiring trends, and department distribution charts.
--   **Employee Management**: Perform CRUD operations on employee records (Search, Filter, Export to CSV/PDF).
--   **Calendar**: Initial implementation using `react-big-calendar` for tracking events and leaves.
--   **Time Tracker**: Widget for tracking check-in/out times.
-
-### Fixed
--   Resolved `date-fns` v4 import compatibility issues in Calendar page.
--   Fixed TypeScript errors in `AdminDashboard` components (Recharts tooltip formatters, `PieChart` interactions).
--   Addressed missing `actions` prop in `DataTable` component causing build failures.
--   Fixed nested git repository issue with `Employee-management-syatem` directory.
+- **Department Deletion** — New `DELETE /api/departments/[id]` API route with employee-count guard (blocks deletion if employees are still assigned)
+- **Manage Departments Modal** — The "+ New" button now opens a "Manage Departments" panel showing existing departments with individual delete buttons, plus the new department creation form
+- **Autonomous Performance Monitoring Agent (Phase 6)**
+  - `POST /api/cron/evaluate-performance` — AI cron worker using Gemini 2.0 Flash for weekly performance evaluation
+  - `GET /api/admin/performance` — Admin performance dashboard data endpoint
+  - `GET /api/employee/performance` — Employee personal performance history endpoint
+  - `/admin/performance` page — Admin AI Performance Matrix dashboard
+  - `/performance` page — Employee performance history portal
 
 ### Changed
--   Updated project documentation (`README.md`, `CONTRIBUTING.md`, `LICENSE`).
+- `prisma/schema.prisma` — Added `PerformanceMetrics`, `WeeklyScores`, `AgentExecutionLogs`, `Notifications`, `AdminAlerts` models
+- `prisma/seed.ts` — Replaced `upsert({where:{name}})` with `findFirst + create` pattern for Department seeding
+
+---
+
+## [2.0.0] — 2026-02-25
+
+### Added
+- AI Chatbot with Gemini 2.0 Flash integration
+- Google OAuth sign-in support
+- Avatar dropdown profile menu
+- Admin payroll tab with CSV/PDF export
+- Real-time time tracker with check-in/break/check-out
+
+### Fixed
+- Password change loop — mustChangePassword flag now properly reset after first login
+- Prisma connection pool exhaustion — singleton pattern enforced
+
+---
+
+## [1.0.0] — 2026-02-24
+
+### Added
+- Full Employee CRUD with role-based access
+- Department management
+- Zod validation on all API routes
+- Redis caching layer for dashboard metrics
+- Pagination on all list views
+- CSV/XLSX bulk import for employees
+
