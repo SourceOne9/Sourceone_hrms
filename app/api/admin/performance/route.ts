@@ -1,17 +1,12 @@
-import { NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 
-export async function GET() {
+export const GET = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session || session.user.role !== "ADMIN") {
-            return new NextResponse("Unauthorized", { status: 403 })
-        }
-
-        // Fetch unresolved Admin Alerts
+        // Fetch unresolved Admin Alerts scoped to org
         const alerts = await prisma.adminAlerts.findMany({
-            where: { resolved: false },
+            where: { resolved: false, organizationId: ctx.organizationId },
             include: {
                 employee: {
                     select: {
@@ -27,9 +22,9 @@ export async function GET() {
             orderBy: { createdAt: "desc" }
         })
 
-        // Fetch latest Weekly Scores
-        // Group by employee and get the latest evaluation
+        // Fetch latest Weekly Scores scoped to org
         const scores = await prisma.weeklyScores.findMany({
+            where: { organizationId: ctx.organizationId },
             include: {
                 employee: {
                     select: {
@@ -47,7 +42,7 @@ export async function GET() {
         })
 
         // Format for frontend
-        const formattedAlerts = alerts.map(a => ({
+        const formattedAlerts = alerts.map((a: any) => ({
             id: a.id,
             employeeName: `${a.employee.firstName} ${a.employee.lastName}`,
             avatarUrl: a.employee.avatarUrl,
@@ -58,7 +53,7 @@ export async function GET() {
             createdAt: a.createdAt.toISOString()
         }))
 
-        const formattedScores = scores.map(s => ({
+        const formattedScores = scores.map((s: any) => ({
             id: s.id,
             employeeName: `${s.employee.firstName} ${s.employee.lastName}`,
             avatarUrl: s.employee.avatarUrl,
@@ -71,10 +66,10 @@ export async function GET() {
             weekStartDate: s.weekStartDate.toISOString()
         }))
 
-        return NextResponse.json({ alerts: formattedAlerts, scores: formattedScores })
+        return apiSuccess({ alerts: formattedAlerts, scores: formattedScores })
 
     } catch (error) {
         console.error("[ADMIN_PERFORMANCE_GET]", error)
-        return new NextResponse("Internal Server Error", { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

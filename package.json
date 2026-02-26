@@ -10,7 +10,8 @@
     "db:seed": "npx prisma db seed",
     "db:migrate": "npx prisma migrate dev",
     "db:studio": "npx prisma studio",
-    "db:generate": "npx prisma generate"
+    "db:generate": "npx prisma generate",
+    "quality-gate": "node scripts/quality-gate.js"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
@@ -78,6 +79,7 @@
     "@types/react-dom": "^19",
     "@types/supertest": "^7.2.0",
     "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "jsdom": "^28.1.0",

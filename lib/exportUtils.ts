@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-export const exportToCSV = (data: any[], filename: string) => {
+export const exportToCSV = (data: Record<string, unknown>[], filename: string) => {
     if (!data || !data.length) return;
 
     // Get headers from first object

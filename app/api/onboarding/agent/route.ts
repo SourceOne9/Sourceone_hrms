@@ -1,19 +1,14 @@
-// @ts-nocheck
-import { NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import { google } from "@ai-sdk/google"
 import { generateText } from "ai"
 
-export async function GET(req: Request) {
+// GET /api/onboarding/agent – Personalized onboarding guide
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session?.user?.email) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
-        const employee = await prisma.employee.findUnique({
-            where: { email: session.user.email },
+        const employee = await prisma.employee.findFirst({
+            where: { userId: ctx.userId, organizationId: ctx.organizationId },
             include: {
                 documents: true,
                 trainings: {
@@ -25,12 +20,12 @@ export async function GET(req: Request) {
         })
 
         if (!employee) {
-            return NextResponse.json({ error: "Employee profile not found" }, { status: 404 })
+            return apiError("Employee profile not found", ApiErrorCode.NOT_FOUND, 404)
         }
 
         const apiKey = process.env.GEMINI_API_KEY
         if (!apiKey) {
-            return NextResponse.json({ error: "GEMINI_API_KEY is missing." }, { status: 500 })
+            return apiError("GEMINI_API_KEY is missing", ApiErrorCode.INTERNAL_ERROR, 500)
         }
 
         const systemInstruction = `You are a friendly, encouraging Automated Onboarding Agent for EMS Pro. Your job is to welcome a new employee to their dashboard and guide them through their first few weeks. 
@@ -44,7 +39,7 @@ Then, provide a checklist of what they have completed and what they still need t
 
         const employeeData = {
             name: `${employee.firstName} ${employee.lastName}`,
-            department: employee.departmentId || "Unassigned",
+            departmentId: employee.departmentId || "Unassigned",
             joinDate: employee.createdAt,
             uploadedDocs: employee.documents.map(d => d.title),
             assignedTrainings: employee.trainings.map(t => ({
@@ -58,19 +53,18 @@ Then, provide a checklist of what they have completed and what they still need t
 \n\n${JSON.stringify(employeeData, null, 2)}\n\n
 Please generate the onboarding welcome message and checklist.`
 
-        // Add timeout to prevent hanging requests
         const controller = new AbortController()
-        const timeout = setTimeout(() => controller.abort(), 15000) // 15s max
+        const timeout = setTimeout(() => controller.abort(), 15000)
 
         try {
             const { text } = await generateText({
-                model: google("gemini-2.0-flash"),
+                model: google("gemini-1.5-pro"),
                 system: systemInstruction,
                 prompt,
                 abortSignal: controller.signal,
             })
 
-            return NextResponse.json({ message: text })
+            return apiSuccess({ message: text })
         } finally {
             clearTimeout(timeout)
         }
@@ -78,8 +72,8 @@ Please generate the onboarding welcome message and checklist.`
     } catch (error: any) {
         console.error("[ONBOARDING_AGENT_GET]", error)
         if (error?.name === "AbortError") {
-            return NextResponse.json({ error: "Onboarding guide generation timed out." }, { status: 504 })
+            return apiError("Onboarding guide generation timed out", ApiErrorCode.INTERNAL_ERROR, 504)
         }
-        return NextResponse.json({ error: "Failed to fetch onboarding guide" }, { status: 500 })
+        return apiError("Failed to fetch onboarding guide", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

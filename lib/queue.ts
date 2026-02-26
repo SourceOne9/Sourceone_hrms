@@ -1,10 +1,9 @@
 import { redis } from "./redis"
 
-// Represents a background job in our queue
 export interface JobPayload {
     id: string
     type: "ATTENDANCE_IMPORT" | "PF_IMPORT" | "EMPLOYEE_IMPORT"
-    data: any
+    data: unknown
     createdAt: number
 }
 
@@ -14,7 +13,7 @@ export const queue = {
     /**
      * Enqueues a single job payload onto the Redis list securely.
      */
-    async enqueue(type: JobPayload["type"], data: any): Promise<string> {
+    async enqueue(type: JobPayload["type"], data: unknown): Promise<string> {
         const id = `job_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
         const payload: JobPayload = {
             id,
@@ -46,27 +45,27 @@ export const queue = {
      */
     async dequeue(): Promise<JobPayload | null> {
         // We increment a "tail_index" to find the oldest unread job.
-        const tailIncrStr = await redis.get(`${QUEUE_KEY}:TAIL_INCR`)
+        const tailIncrStr = (await redis.get(QUEUE_KEY + ":TAIL_INCR")) as string | null
         const tail = parseInt(tailIncrStr || "0", 10) + 1
 
-        const headIncrStr = await redis.get(`${QUEUE_KEY}:HEAD`)
+        const headIncrStr = (await redis.get(QUEUE_KEY + ":HEAD")) as string | null
         const head = parseInt(headIncrStr || "0", 10)
 
         if (tail > head) {
             return null // Queue is empty
         }
 
-        const itemStr = await redis.get(`${QUEUE_KEY}:ITEM:${tail}`)
+        const itemStr = (await redis.get(QUEUE_KEY + ":ITEM:" + tail)) as string | null
         if (!itemStr) {
             // Might have been deleted or expired, gracefully increment past it
-            await redis.incr(`${QUEUE_KEY}:TAIL_INCR`)
+            await redis.incr(QUEUE_KEY + ":TAIL_INCR")
             return null
         }
 
         // Successfully dequeued
-        await redis.incr(`${QUEUE_KEY}:TAIL_INCR`)
+        await redis.incr(QUEUE_KEY + ":TAIL_INCR")
         // Cleanup the item key
-        await redis.set(`${QUEUE_KEY}:ITEM:${tail}`, "", { ex: 1 }) // Delete essentially
+        await redis.set(QUEUE_KEY + ":ITEM:" + tail, "", { ex: 1 }) // Delete essentially
 
         try {
             return JSON.parse(itemStr) as JobPayload

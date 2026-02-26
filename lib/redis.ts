@@ -23,7 +23,7 @@ if (upstashUrl && upstashToken) {
 const inMemoryStore = new Map<string, { value: number; expiresAt: number }>()
 
 export const redis = {
-    async set(key: string, value: any, config?: { ex?: number }) {
+    async set(key: string, value: unknown, config?: { ex?: number }) {
         if (redisClient) {
             if (config?.ex !== undefined) {
                 return await redisClient.set(key, value, { ex: config.ex })
@@ -35,11 +35,11 @@ export const redis = {
         if (config?.ex) {
             expiresAt = Date.now() + config.ex * 1000
         }
-        inMemoryStore.set(key, { value, expiresAt })
+        inMemoryStore.set(key, { value: value as number, expiresAt })
         return "OK"
     },
 
-    async get(key: string): Promise<any> {
+    async get(key: string): Promise<unknown> {
         if (redisClient) {
             return await redisClient.get(key)
         }

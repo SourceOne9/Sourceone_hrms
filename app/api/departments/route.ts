@@ -1,69 +1,52 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import { departmentSchema } from "@/lib/schemas"
 
-// GET /api/departments – List all departments
-export async function GET() {
+// GET /api/departments – List all departments (scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const departments = await prisma.department.findMany({
+            where: { organizationId: ctx.organizationId },
             include: {
                 _count: { select: { employees: true } },
             },
             orderBy: { name: "asc" },
         })
 
-        return NextResponse.json(departments)
+        return apiSuccess(departments)
     } catch (error) {
         console.error("[DEPARTMENTS_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // POST /api/departments – Create a department
-export async function POST(req: Request) {
+export const POST = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session || session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const body = await req.json()
         const parsed = departmentSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
         const department = await prisma.department.create({
             data: {
                 name: parsed.data.name,
                 color: parsed.data.color,
+                organizationId: ctx.organizationId,
             },
         })
 
-        return NextResponse.json(department, { status: 201 })
+        return apiSuccess(department, null, 201)
     } catch (error: any) {
         console.error("[DEPARTMENTS_POST]", error)
 
         // Handle unique constraint violation (Prisma P2002)
         if (error.code === 'P2002') {
-            return NextResponse.json(
-                { error: "Conflict", details: "A department with this name already exists." },
-                { status: 409 }
-            )
+            return apiError("A department with this name already exists.", ApiErrorCode.CONFLICT, 409)
         }
 
-        return NextResponse.json(
-            { error: "Internal Server Error" },
-            { status: 500 }
-        )
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

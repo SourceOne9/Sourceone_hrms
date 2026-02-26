@@ -1,21 +1,16 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth, orgFilter } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import { attendanceSchema } from "@/lib/schemas"
 
-// GET /api/attendance – List attendance records
-export async function GET(req: Request) {
+// GET /api/attendance – List attendance records (scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const { searchParams } = new URL(req.url)
         const date = searchParams.get("date")
         const employeeId = searchParams.get("employeeId")
 
-        const where: Record<string, unknown> = {}
+        const where: Record<string, unknown> = { organizationId: ctx.organizationId }
         if (date) where.date = new Date(date)
         if (employeeId) where.employeeId = employeeId
 
@@ -26,41 +21,33 @@ export async function GET(req: Request) {
             take: 200,
         })
 
-        return NextResponse.json(records)
+        return apiSuccess(records)
     } catch (error) {
         console.error("[ATTENDANCE_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // POST /api/attendance – Check in / Create record
-export async function POST(req: Request) {
+export const POST = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const body = await req.json()
         const parsed = attendanceSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
         let employeeId = parsed.data.employeeId
         if (!employeeId) {
             const employee = await prisma.employee.findFirst({
-                where: { userId: session.user?.id },
+                where: { userId: ctx.userId, organizationId: ctx.organizationId },
             })
             if (!employee) {
-                return NextResponse.json({ error: "No employee profile linked to your account" }, { status: 400 })
+                return apiError("No employee profile linked to your account", ApiErrorCode.BAD_REQUEST, 400)
             }
             employeeId = employee.id
-        } else if (session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Only admins can create attendance for other employees" }, { status: 403 })
+        } else if (ctx.role !== "ADMIN") {
+            return apiError("Only admins can create attendance for other employees", ApiErrorCode.FORBIDDEN, 403)
         }
 
         const record = await prisma.attendance.create({
@@ -71,13 +58,14 @@ export async function POST(req: Request) {
                 workHours: parsed.data.workHours || null,
                 status: parsed.data.status || "PRESENT",
                 employeeId,
+                organizationId: ctx.organizationId,
             },
             include: { employee: true },
         })
 
-        return NextResponse.json(record, { status: 201 })
+        return apiSuccess(record, null, 201)
     } catch (error) {
         console.error("[ATTENDANCE_POST]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

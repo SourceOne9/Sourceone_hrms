@@ -1,39 +1,38 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/security"
 import { startOfMonth, endOfMonth, subMonths, format } from "date-fns"
 import { redis } from "@/lib/redis"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 
-export async function GET() {
+export const GET = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
-        const cacheKey = "admin:dashboard:metrics"
+        const cacheKey = `admin:dashboard:metrics:${ctx.organizationId}`
         try {
             const cached = await redis.get(cacheKey)
             if (cached) {
-                return NextResponse.json(typeof cached === "string" ? JSON.parse(cached) : cached)
+                return apiSuccess(typeof cached === "string" ? JSON.parse(cached) : cached)
             }
         } catch (e) {
             console.warn("Failed to read dashboard cache from Redis", e)
         }
 
-        // 1. Employee Stats + Payroll — single parallel batch
+        // 1. Employee Stats + Payroll (Scoped)
         const [totalEmployees, activeEmployees, onLeaveEmployees, payroll] = await Promise.all([
-            prisma.employee.count(),
-            prisma.employee.count({ where: { status: "ACTIVE" } }),
-            prisma.employee.count({ where: { status: "ON_LEAVE" } }),
-            prisma.employee.aggregate({ _sum: { salary: true } }),
+            prisma.employee.count({ where: { organizationId: ctx.organizationId } }),
+            prisma.employee.count({ where: { status: "ACTIVE", organizationId: ctx.organizationId } }),
+            prisma.employee.count({ where: { status: "ON_LEAVE", organizationId: ctx.organizationId } }),
+            prisma.employee.aggregate({
+                where: { organizationId: ctx.organizationId },
+                _sum: { salary: true }
+            }),
         ])
 
-        // 2. Department Split
+        // 2. Department Split (Scoped)
         const departments = await prisma.department.findMany({
+            where: { organizationId: ctx.organizationId },
             include: {
                 _count: {
-                    select: { employees: true }
+                    select: { employees: { where: { organizationId: ctx.organizationId } } }
                 }
             }
         })
@@ -47,15 +46,17 @@ export async function GET() {
             color: colors[i % colors.length]
         }))
 
-        // 3. Hiring Trend (Last 6 months) — SINGLE query instead of 6 sequential counts
+        // 3. Hiring Trend (Scoped)
         const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5))
         const hiringRaw = await prisma.employee.groupBy({
             by: ["dateOfJoining"],
-            where: { dateOfJoining: { gte: sixMonthsAgo } },
+            where: {
+                dateOfJoining: { gte: sixMonthsAgo },
+                organizationId: ctx.organizationId
+            },
             _count: true,
         })
 
-        // Bucket into months
         const hiringMap = new Map<string, number>()
         for (let i = 5; i >= 0; i--) {
             hiringMap.set(format(subMonths(new Date(), i), "MMM"), 0)
@@ -68,7 +69,7 @@ export async function GET() {
         }
         const hiringTrend = Array.from(hiringMap, ([month, hires]) => ({ month, hires }))
 
-        // 4. Salary Ranges — SQL aggregation instead of loading all rows
+        // 4. Salary Ranges (Scoped Raw SQL)
         const salaryStats: any[] = await prisma.$queryRaw`
             SELECT 
                 COUNT(*) FILTER (WHERE salary >= 30000 AND salary < 50000)::int as "range_30_50",
@@ -77,6 +78,7 @@ export async function GET() {
                 COUNT(*) FILTER (WHERE salary >= 120000)::int as "range_120_plus",
                 COALESCE(AVG(salary), 0) as avg_salary
             FROM "Employee"
+            WHERE "organizationId" = ${ctx.organizationId}
         `
         const stats = salaryStats[0] || {}
         const salaryRanges = [
@@ -87,8 +89,9 @@ export async function GET() {
         ]
         const avgSalary = Number(stats.avg_salary || 0)
 
-        // 5. Recent Hires (bounded — take 5)
+        // 5. Recent Hires (Scoped)
         const recentHiresRaw = await prisma.employee.findMany({
+            where: { organizationId: ctx.organizationId },
             take: 5,
             orderBy: { dateOfJoining: "desc" },
             include: { department: true }
@@ -118,14 +121,14 @@ export async function GET() {
         }
 
         try {
-            await redis.set(cacheKey, payload, { ex: 300 }) // Cache for 5 minutes
+            await redis.set(cacheKey, payload, { ex: 300 })
         } catch (e) {
             console.warn("Failed to write dashboard cache to Redis", e)
         }
 
-        return NextResponse.json(payload)
+        return apiSuccess(payload)
     } catch (error) {
         console.error("[DASHBOARD_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

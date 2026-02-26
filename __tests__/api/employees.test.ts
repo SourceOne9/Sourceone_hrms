@@ -21,7 +21,7 @@ describe('Employee API Routes', () => {
             const json = await res.json()
 
             expect(res.status).toBe(200)
-            expect(json.total).toBe(2)
+            expect(json.meta.total).toBe(2)
             expect(json.data.length).toBe(2)
             expect(prismaMock.employee.findMany).toHaveBeenCalledTimes(1)
         })
@@ -41,8 +41,8 @@ describe('Employee API Routes', () => {
             const json = await res.json()
 
             expect(res.status).toBe(400)
-            expect(json.error).toBe('Validation Error')
-            expect(json.details).toBeDefined()
+            expect(json.error.message).toBe('Validation Error')
+            expect(json.error.details).toBeDefined()
         })
 
         test('creates employee successfully with valid data', async () => {
@@ -77,7 +77,7 @@ describe('Employee API Routes', () => {
             const json = await res.json()
 
             expect(res.status).toBe(201)
-            expect(json.employeeCode).toBe('EMP-001')
+            expect(json.data.employeeCode).toBe('EMP-001')
             // Assert that the credentials generation trigger fired (if applicable)
             expect(prismaMock.employee.create).toHaveBeenCalled()
         })

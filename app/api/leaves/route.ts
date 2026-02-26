@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import { leaveSchema, updateLeaveSchema } from "@/lib/schemas"
 
 // Safe employee select — no salary, bank, Aadhaar, PAN etc.
@@ -13,14 +13,9 @@ const SAFE_EMPLOYEE_SELECT = {
     department: { select: { name: true } },
 } as const
 
-// GET /api/leaves – List leave requests
-export async function GET(req: Request) {
+// GET /api/leaves – List leave requests (scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const { searchParams } = new URL(req.url)
         const status = searchParams.get("status")
         const employeeId = searchParams.get("employeeId")
@@ -28,17 +23,17 @@ export async function GET(req: Request) {
         const limit = Math.min(Math.max(1, parseInt(searchParams.get("limit") || "50", 10)), 100)
         const skip = (page - 1) * limit
 
-        const where: Record<string, unknown> = {}
+        const where: Record<string, any> = { organizationId: ctx.organizationId }
         if (status) where.status = status
         if (employeeId) where.employeeId = employeeId
 
         // Non-admin: only own leaves
-        if (session.user?.role !== "ADMIN") {
+        if (ctx.role !== "ADMIN") {
             const emp = await prisma.employee.findFirst({
-                where: { userId: session.user?.id },
+                where: { userId: ctx.userId, organizationId: ctx.organizationId },
                 select: { id: true },
             })
-            if (!emp) return NextResponse.json({ error: "No employee profile linked" }, { status: 400 })
+            if (!emp) return apiError("No employee profile linked", ApiErrorCode.BAD_REQUEST, 400)
             where.employeeId = emp.id
         }
 
@@ -53,41 +48,33 @@ export async function GET(req: Request) {
             prisma.leave.count({ where }),
         ])
 
-        return NextResponse.json({ data: leaves, total, page, limit })
+        return apiSuccess(leaves, { total, page, limit })
     } catch (error) {
         console.error("[LEAVES_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // POST /api/leaves – Submit a leave request
-export async function POST(req: Request) {
+export const POST = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const body = await req.json()
         const parsed = leaveSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
         let employeeId = parsed.data.employeeId
         if (!employeeId) {
             const employee = await prisma.employee.findFirst({
-                where: { userId: session.user?.id },
+                where: { userId: ctx.userId, organizationId: ctx.organizationId },
             })
             if (!employee) {
-                return NextResponse.json({ error: "No employee profile linked to your account" }, { status: 400 })
+                return apiError("No employee profile linked to your account", ApiErrorCode.BAD_REQUEST, 400)
             }
             employeeId = employee.id
-        } else if (session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Only admins can create leave for other employees" }, { status: 403 })
+        } else if (ctx.role !== "ADMIN") {
+            return apiError("Only admins can create leave for other employees", ApiErrorCode.FORBIDDEN, 403)
         }
 
         // K8: Duplicate check — prevent double-submit for overlapping dates
@@ -97,16 +84,14 @@ export async function POST(req: Request) {
         const existing = await prisma.leave.findFirst({
             where: {
                 employeeId,
+                organizationId: ctx.organizationId,
                 status: "PENDING",
                 startDate: { lte: endDate },
                 endDate: { gte: startDate },
             },
         })
         if (existing) {
-            return NextResponse.json(
-                { error: "A pending leave request already exists for these dates" },
-                { status: 409 }
-            )
+            return apiError("A pending leave request already exists for these dates", ApiErrorCode.CONFLICT, 409)
         }
 
         const leave = await prisma.leave.create({
@@ -117,56 +102,45 @@ export async function POST(req: Request) {
                 reason: parsed.data.reason,
                 status: "PENDING",
                 employeeId,
+                organizationId: ctx.organizationId,
             },
             include: { employee: { select: SAFE_EMPLOYEE_SELECT } },
         })
 
-        return NextResponse.json(leave, { status: 201 })
+        return apiSuccess(leave, null, 201)
     } catch (error) {
         console.error("[LEAVES_POST]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // PUT /api/leaves – Approve/Reject a leave
-export async function PUT(req: Request) {
+export const PUT = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session || session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const body = await req.json()
         const parsed = updateLeaveSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
         // K13: Optimistic locking — only update if still PENDING
-        const leave = await prisma.leave.updateMany({
-            where: { id: parsed.data.id, status: "PENDING" },
+        const result = await prisma.leave.updateMany({
+            where: { id: parsed.data.id, status: "PENDING", organizationId: ctx.organizationId },
             data: { status: parsed.data.status },
         })
 
-        if (leave.count === 0) {
-            return NextResponse.json(
-                { error: "Leave request has already been processed" },
-                { status: 409 }
-            )
+        if (result.count === 0) {
+            return apiError("Leave request has already been processed", ApiErrorCode.CONFLICT, 409)
         }
 
-        // Fetch the updated leave to return
-        const updated = await prisma.leave.findUnique({
+        const updated = await prisma.leave.findFirst({
             where: { id: parsed.data.id },
             include: { employee: { select: SAFE_EMPLOYEE_SELECT } },
         })
 
-        return NextResponse.json(updated)
+        return apiSuccess(updated)
     } catch (error) {
         console.error("[LEAVES_PUT]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

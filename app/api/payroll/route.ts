@@ -1,22 +1,28 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
+import { payrollSchema } from "@/lib/schemas"
 
-// GET /api/payroll – List payroll records
-export async function GET(req: Request) {
+// GET /api/payroll – List payroll records (scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const { searchParams } = new URL(req.url)
         const month = searchParams.get("month")
         const employeeId = searchParams.get("employeeId")
 
-        const where: Record<string, unknown> = {}
+        const where: Record<string, any> = { organizationId: ctx.organizationId }
         if (month) where.month = month
-        if (employeeId) where.employeeId = employeeId
+
+        if (ctx.role !== "ADMIN") {
+            const employee = await prisma.employee.findFirst({
+                where: { userId: ctx.userId, organizationId: ctx.organizationId },
+                select: { id: true }
+            })
+            if (employee) where.employeeId = employee.id
+            else return apiError("No employee profile found", ApiErrorCode.BAD_REQUEST, 400)
+        } else if (employeeId) {
+            where.employeeId = employeeId
+        }
 
         const records = await prisma.payroll.findMany({
             where,
@@ -25,41 +31,41 @@ export async function GET(req: Request) {
             take: 200,
         })
 
-        return NextResponse.json(records)
+        return apiSuccess(records)
     } catch (error) {
         console.error("[PAYROLL_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // POST /api/payroll – Create payroll entry
-export async function POST(req: Request) {
+export const POST = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session || session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const body = await req.json()
+        const parsed = payrollSchema.safeParse(body)
+        if (!parsed.success) {
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
+        }
 
         const record = await prisma.payroll.create({
             data: {
-                month: body.month,
-                basicSalary: parseFloat(body.basicSalary),
-                allowances: parseFloat(body.allowances || "0"),
-                pfDeduction: parseFloat(body.pfDeduction || "0"),
-                tax: parseFloat(body.tax || "0"),
-                otherDed: parseFloat(body.otherDed || "0"),
-                netSalary: parseFloat(body.netSalary),
-                status: body.status || "PENDING",
-                employeeId: body.employeeId,
+                month: parsed.data.month,
+                basicSalary: parsed.data.basicSalary,
+                allowances: parsed.data.allowances,
+                pfDeduction: parsed.data.pfDeduction,
+                tax: parsed.data.tax,
+                otherDed: parsed.data.otherDed,
+                netSalary: parsed.data.netSalary,
+                status: parsed.data.status || "PENDING",
+                employeeId: parsed.data.employeeId,
+                organizationId: ctx.organizationId,
             },
             include: { employee: true },
         })
 
-        return NextResponse.json(record, { status: 201 })
+        return apiSuccess(record, null, 201)
     } catch (error) {
         console.error("[PAYROLL_POST]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

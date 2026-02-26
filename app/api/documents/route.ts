@@ -1,30 +1,26 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import { documentSchema } from "@/lib/schemas"
 
-// GET /api/documents – List documents (scoped by role)
-// Admin: sees all documents | Employee: sees only their own
-export async function GET() {
+// GET /api/documents – List documents (scoped by role and organization)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session?.user) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
+        const isAdmin = ctx.role === "ADMIN"
 
-        const isAdmin = session.user.role === "ADMIN"
+        let where: any = { organizationId: ctx.organizationId }
 
-        let where = {}
         if (!isAdmin) {
             // Employee: only their own documents + public documents
             const employee = await prisma.employee.findFirst({
-                where: { userId: session.user.id },
+                where: { userId: ctx.userId, organizationId: ctx.organizationId },
                 select: { id: true },
             })
             if (!employee) {
-                return NextResponse.json({ error: "No employee profile linked" }, { status: 400 })
+                return apiError("No employee profile linked", ApiErrorCode.BAD_REQUEST, 400)
             }
             where = {
+                ...where,
                 OR: [
                     { employeeId: employee.id },
                     { isPublic: true },
@@ -37,36 +33,27 @@ export async function GET() {
             include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true } } },
             orderBy: { uploadDate: "desc" },
         })
-        return NextResponse.json(documents)
+        return apiSuccess(documents)
     } catch (error) {
         console.error("[DOCUMENTS_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
-// POST /api/documents – Upload document metadata (admin only for bulk, employees for self)
-export async function POST(req: Request) {
+// POST /api/documents – Upload document metadata
+export const POST = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session?.user) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
-        const isAdmin = session.user.role === "ADMIN"
+        const isAdmin = ctx.role === "ADMIN"
         const body = await req.json()
 
         // Bulk mode: admin only
         if (Array.isArray(body.employeeIds) && body.employeeIds.length > 0) {
             if (!isAdmin) {
-                return NextResponse.json({ error: "Only admins can bulk-assign documents" }, { status: 403 })
+                return apiError("Only admins can bulk-assign documents", ApiErrorCode.FORBIDDEN, 403)
             }
-            // For bulk, we validate the base document schema (omitting employeeId since we iterate)
             const parseResult = documentSchema.omit({ employeeId: true }).safeParse(body)
             if (!parseResult.success) {
-                return NextResponse.json(
-                    { error: "Validation Error", details: parseResult.error.format() },
-                    { status: 400 }
-                )
+                return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parseResult.error.format())
             }
             const data = parseResult.data
 
@@ -80,31 +67,29 @@ export async function POST(req: Request) {
                             size: data.size || null,
                             isPublic: data.isPublic ?? false,
                             employeeId: empId,
+                            organizationId: ctx.organizationId,
                         },
                         include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true } } },
                     })
                 )
             )
-            return NextResponse.json(docs, { status: 201 })
+            return apiSuccess(docs, null, 201)
         }
 
         const singleParse = documentSchema.safeParse(body)
         if (!singleParse.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: singleParse.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, singleParse.error.format())
         }
 
-        // Single document — employees can only create for themselves
+        // Single document
         let employeeId = singleParse.data.employeeId || null
         if (!isAdmin) {
             const employee = await prisma.employee.findFirst({
-                where: { userId: session.user.id },
+                where: { userId: ctx.userId, organizationId: ctx.organizationId },
                 select: { id: true },
             })
             if (!employee) {
-                return NextResponse.json({ error: "No employee profile linked" }, { status: 400 })
+                return apiError("No employee profile linked", ApiErrorCode.BAD_REQUEST, 400)
             }
             employeeId = employee.id // Force to own ID
         }
@@ -117,13 +102,14 @@ export async function POST(req: Request) {
                 size: singleParse.data.size || null,
                 isPublic: singleParse.data.isPublic ?? false,
                 employeeId,
+                organizationId: ctx.organizationId,
             },
             include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true } } },
         })
 
-        return NextResponse.json(document, { status: 201 })
+        return apiSuccess(document, null, 201)
     } catch (error) {
         console.error("[DOCUMENTS_POST]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

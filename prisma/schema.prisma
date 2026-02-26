@@ -9,23 +9,33 @@ datasource db {
 }
 
 model Organization {
-  id            String         @id @default(cuid())
-  name          String
-  domain        String?        @unique
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  users         User[]
-  employees     Employee[]
-  departments   Department[]
-  announcements Announcement[]
-  candidates    Candidate[]
-  leaves        Leave[]
+  id                 String               @id @default(cuid())
+  name               String
+  domain             String?              @unique
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  users              User[]
+  employees          Employee[]
+  departments        Department[]
+  announcements      Announcement[]
+  candidates         Candidate[]
+  leaves             Leave[]
   attendances        Attendance[]
   tickets            Ticket[]
   performanceMetrics PerformanceMetrics[]
   weeklyScores       WeeklyScores[]
   notifications      Notifications[]
   adminAlerts        AdminAlerts[]
+  assets             Asset[]
+  documents          Document[]
+  payroll            Payroll[]
+  providentFunds     ProvidentFund[]
+  performanceReviews PerformanceReview[]
+  resignations       Resignation[]
+  trainings          Training[]
+  events             CalendarEvent[]
+  trainingEnrollments TrainingEnrollment[]
+  documentEmbeddings DocumentEmbedding[]
 }
 
 model User {
@@ -34,8 +44,8 @@ model User {
   email              String        @unique
   hashedPassword     String
   role               Role          @default(EMPLOYEE)
-  organizationId     String?
-  organization       Organization? @relation(fields: [organizationId], references: [id])
+  organizationId     String
+  organization       Organization  @relation(fields: [organizationId], references: [id])
   avatar             String?
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
@@ -50,8 +60,8 @@ model Department {
   id             String        @id @default(cuid())
   name           String
   color          String?
-  organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
   createdAt      DateTime      @default(now())
   candidates     Candidate[]
   employees      Employee[]
@@ -69,8 +79,8 @@ model Employee {
   phone          String?
   designation    String
   departmentId   String
-  organizationId String?
-  organization   Organization?  @relation(fields: [organizationId], references: [id])
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
   dateOfJoining  DateTime
   salary         Float
   status         EmployeeStatus @default(ACTIVE)
@@ -213,36 +223,42 @@ model Education {
 }
 
 model Asset {
-  id           String      @id @default(cuid())
-  name         String
-  type         AssetType
-  serialNumber String      @unique
-  status       AssetStatus @default(AVAILABLE)
-  purchaseDate DateTime
-  value        Float
-  image        String?
-  assignedToId String?
-  assignedDate DateTime?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  assignedTo   Employee?   @relation(fields: [assignedToId], references: [id])
+  id             String       @id @default(cuid())
+  name           String
+  type           AssetType
+  serialNumber   String       @unique
+  status         AssetStatus  @default(AVAILABLE)
+  purchaseDate   DateTime
+  value          Float
+  image          String?
+  assignedToId   String?
+  assignedDate   DateTime?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  assignedTo     Employee?    @relation(fields: [assignedToId], references: [id])
 
   @@index([assignedToId])
   @@index([status])
+  @@index([organizationId])
 }
 
 model Document {
-  id         String      @id @default(cuid())
-  title      String
-  category   DocCategory
-  url        String
-  size       String?
-  isPublic   Boolean     @default(false)
-  employeeId String?
-  uploadDate DateTime    @default(now())
-  employee   Employee?   @relation(fields: [employeeId], references: [id])
+  id             String       @id @default(cuid())
+  title          String
+  category       DocCategory
+  url            String
+  size           String?
+  isPublic       Boolean      @default(false)
+  employeeId     String?
+  organizationId String
+  uploadDate     DateTime     @default(now())
+  employee       Employee?    @relation(fields: [employeeId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
   @@index([employeeId])
+  @@index([organizationId])
 }
 
 model Leave {
@@ -253,11 +269,11 @@ model Leave {
   reason         String?
   status         LeaveStatus   @default(PENDING)
   employeeId     String
-  organizationId String?
+  organizationId String
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   employee       Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organization   Organization  @relation(fields: [organizationId], references: [id])
 
   @@index([employeeId])
   @@index([status])
@@ -266,16 +282,19 @@ model Leave {
 }
 
 model Resignation {
-  id         String            @id @default(cuid())
-  reason     String
-  lastDay    DateTime
-  status     ResignationStatus @default(UNDER_REVIEW)
-  employeeId String
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
-  employee   Employee          @relation(fields: [employeeId], references: [id])
+  id             String            @id @default(cuid())
+  reason         String
+  lastDay        DateTime
+  status         ResignationStatus @default(UNDER_REVIEW)
+  employeeId     String
+  organizationId String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  employee       Employee          @relation(fields: [employeeId], references: [id])
+  organization   Organization      @relation(fields: [organizationId], references: [id])
 
   @@index([employeeId])
+  @@index([organizationId])
 }
 
 model Attendance {
@@ -286,10 +305,10 @@ model Attendance {
   workHours      Float?
   status         AttendanceStatus @default(PRESENT)
   employeeId     String
-  organizationId String?
+  organizationId String
   createdAt      DateTime         @default(now())
   employee       Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  organization   Organization?    @relation(fields: [organizationId], references: [id])
+  organization   Organization     @relation(fields: [organizationId], references: [id])
 
   @@index([employeeId])
   @@index([date])
@@ -298,78 +317,95 @@ model Attendance {
 }
 
 model Payroll {
-  id          String        @id @default(cuid())
-  month       String
-  basicSalary Float
-  allowances  Float         @default(0)
-  pfDeduction Float         @default(0)
-  tax         Float         @default(0)
-  otherDed    Float         @default(0)
-  netSalary   Float
-  status      PayrollStatus @default(PENDING)
-  employeeId  String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  employee    Employee      @relation(fields: [employeeId], references: [id])
+  id             String       @id @default(cuid())
+  month          String
+  basicSalary    Float
+  allowances     Float        @default(0)
+  pfDeduction    Float        @default(0)
+  tax            Float        @default(0)
+  otherDed       Float        @default(0)
+  netSalary      Float
+  status         PayrollStatus @default(PENDING)
+  employeeId     String
+  organizationId String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  employee       Employee      @relation(fields: [employeeId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
   @@index([employeeId])
+  @@index([organizationId])
 }
 
 model ProvidentFund {
-  id                   String   @id @default(cuid())
+  id                   String       @id @default(cuid())
   month                String
   accountNumber        String
   basicSalary          Float
   employeeContribution Float
   employerContribution Float
   totalContribution    Float
-  status               String   @default("Credited")
+  status               String       @default("Credited")
   employeeId           String
-  createdAt            DateTime @default(now())
-  employee             Employee @relation(fields: [employeeId], references: [id])
+  organizationId       String
+  createdAt            DateTime     @default(now())
+  employee             Employee     @relation(fields: [employeeId], references: [id])
+  organization         Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
 }
 
 model PerformanceReview {
-  id         String            @id @default(cuid())
-  rating     Float
-  progress   Int               @default(0)
-  comments   String?
-  reviewDate DateTime          @default(now())
-  status     PerformanceStatus @default(PENDING)
-  employeeId String
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
-  employee   Employee          @relation(fields: [employeeId], references: [id])
+  id             String            @id @default(cuid())
+  rating         Float
+  progress       Int               @default(0)
+  comments       String?
+  reviewDate     DateTime          @default(now())
+  status         PerformanceStatus @default(PENDING)
+  employeeId     String
+  organizationId String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  employee       Employee          @relation(fields: [employeeId], references: [id])
+  organization   Organization      @relation(fields: [organizationId], references: [id])
 
   @@index([employeeId])
+  @@index([organizationId])
 }
 
 model Training {
-  id           String               @id @default(cuid())
-  name         String
-  type         TrainingType
-  description  String?
-  status       TrainingStatus       @default(UPCOMING)
+  id             String               @id @default(cuid())
+  name           String
+  type           TrainingType
+  description    String?
+  status         TrainingStatus       @default(UPCOMING)
   progress     Int                  @default(0)
   dueDate      DateTime?
   participants Int                  @default(0)
   videoUrl     String?
+  organizationId String
+  organization   Organization         @relation(fields: [organizationId], references: [id])
   createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
+  updatedAt      DateTime             @updatedAt
   enrollments  TrainingEnrollment[]
+
+  @@index([organizationId])
 }
 
 model TrainingEnrollment {
-  id         String   @id @default(cuid())
-  score      Int?
-  completed  Boolean  @default(false)
-  trainingId String
-  employeeId String
-  enrolledAt DateTime @default(now())
-  employee   Employee @relation(fields: [employeeId], references: [id])
-  training   Training @relation(fields: [trainingId], references: [id])
+  id             String       @id @default(cuid())
+  score          Int?
+  completed      Boolean      @default(false)
+  trainingId     String
+  employeeId     String
+  organizationId String
+  enrolledAt     DateTime     @default(now())
+  employee       Employee     @relation(fields: [employeeId], references: [id])
+  training       Training     @relation(fields: [trainingId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
   @@unique([trainingId, employeeId])
+  @@index([organizationId])
 }
 
 model Announcement {
@@ -380,8 +416,8 @@ model Announcement {
   category       AnnouncementCategory
   priority       AnnouncementPriority @default(MEDIUM)
   isPinned       Boolean              @default(false)
-  organizationId String?
-  organization   Organization?        @relation(fields: [organizationId], references: [id])
+  organizationId String
+  organization   Organization         @relation(fields: [organizationId], references: [id])
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
 
@@ -397,11 +433,11 @@ model Ticket {
   priority       TicketPriority @default(MEDIUM)
   status         TicketStatus   @default(OPEN)
   employeeId     String
-  organizationId String?
+  organizationId String
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   employee       Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  organization   Organization?  @relation(fields: [organizationId], references: [id])
+  organization   Organization   @relation(fields: [organizationId], references: [id])
 
   @@index([employeeId])
   @@index([status])
@@ -409,13 +445,17 @@ model Ticket {
 }
 
 model CalendarEvent {
-  id        String    @id @default(cuid())
-  title     String
-  start     DateTime
-  end       DateTime
-  allDay    Boolean   @default(false)
-  type      EventType @default(EVENT)
-  createdAt DateTime  @default(now())
+  id             String       @id @default(cuid())
+  title          String
+  start          DateTime
+  end            DateTime
+  allDay         Boolean      @default(false)
+  type           EventType    @default(EVENT)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
 }
 
 model Candidate {
@@ -429,14 +469,174 @@ model Candidate {
   interviewDate  DateTime?
   notes          String?
   departmentId   String?
-  organizationId String?
-  organization   Organization?   @relation(fields: [organizationId], references: [id])
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id])
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   department     Department?     @relation(fields: [departmentId], references: [id])
 
   @@index([organizationId])
 }
+
+model DocumentEmbedding {
+  id             String                          @id @default(cuid())
+  content        String
+  embedding      Unsupported("vector(1536)")
+  metadata       Json?
+  organizationId String
+  organization   Organization                    @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime                        @default(now())
+
+  @@index([organizationId])
+}
+
+// ─── Time Tracking ───
+
+model TimeSession {
+  id         String             @id @default(cuid())
+  employeeId String
+  checkIn    DateTime           @default(now())
+  checkOut   DateTime?
+  totalWork  Int                @default(0)
+  totalBreak Int                @default(0)
+  totalIdle  Int                @default(0)
+  status     SessionStatus      @default(ACTIVE)
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime           @default(now())
+  employee   Employee           @relation(fields: [employeeId], references: [id])
+  breaks     BreakEntry[]
+  activities ActivityLog[]
+  snapshots  ActivitySnapshot[]
+
+  @@index([employeeId])
+  @@index([createdAt])
+  @@index([employeeId, createdAt])
+}
+
+model BreakEntry {
+  id        String      @id @default(cuid())
+  sessionId String
+  startedAt DateTime    @default(now())
+  endedAt   DateTime?
+  reason    String?
+  session   TimeSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+}
+
+model ActivityLog {
+  id          String           @id @default(cuid())
+  sessionId   String
+  appName     String
+  windowTitle String?
+  url         String?
+  domain      String?
+  category    ActivityCategory @default(OTHER)
+  startedAt   DateTime         @default(now())
+  endedAt     DateTime?
+  durationSec Int              @default(0)
+  session     TimeSession      @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+}
+
+model ActivitySnapshot {
+  id          String         @id @default(cuid())
+  sessionId   String
+  status      ActivityStatus @default(ACTIVE)
+  timestamp   DateTime       @default(now())
+  mouseClicks Int            @default(0)
+  keystrokes  Int            @default(0)
+  session     TimeSession    @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+}
+
+// --- PHASE 6: AUTONOMOUS PERFORMANCE MONITORING AGENT ---
+
+model PerformanceMetrics {
+  id             String    @id @default(cuid())
+  employeeId     String
+  date           DateTime
+  activeSeconds  Int       @default(0)
+  idleSeconds    Int       @default(0)
+  tasksCompleted Int       @default(0)
+  qualityScore   Decimal?  @db.Decimal(5, 2)
+  organizationId String
+  
+  employee     Employee      @relation(fields: [employeeId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([employeeId, date])
+  @@index([organizationId])
+}
+
+model WeeklyScores {
+  id               String    @id @default(cuid())
+  evaluationHash   String    @unique // Format: emp123_2026_w42
+  employeeId       String
+  weekStartDate    DateTime
+  baseScore        Decimal   @db.Decimal(5, 2)
+  aiAdjustment     Decimal   @db.Decimal(5, 2)
+  finalScore       Decimal   @db.Decimal(5, 2)
+  confidenceScore  Decimal   @db.Decimal(5, 2) 
+  burnoutRisk      Boolean   @default(false)
+  behavioralAnomaly Boolean  @default(false)
+  aiFeedback       String?   @db.Text
+  organizationId   String
+
+  employee      Employee      @relation(fields: [employeeId], references: [id])
+  organization  Organization  @relation(fields: [organizationId], references: [id])
+  notifications Notifications[]
+
+  @@index([employeeId])
+  @@index([organizationId])
+}
+
+model AgentExecutionLogs {
+  id                 String    @id @default(cuid())
+  batchId            String
+  weekNumber         Int
+  employeesProcessed Int       @default(0)
+  errors             Int       @default(0)
+  status             AgentRunStatus @default(RUNNING)
+  durationMs         Int       @default(0)
+  createdAt          DateTime  @default(now())
+}
+
+model Notifications {
+  id             String    @id @default(cuid())
+  employeeId     String
+  type           NotificationType
+  evaluationHash String    @unique
+  status         NotificationStatus @default(PENDING)
+  sentAt         DateTime?
+  organizationId String
+
+  employee     Employee      @relation(fields: [employeeId], references: [id])
+  weeklyScore  WeeklyScores  @relation(fields: [evaluationHash], references: [evaluationHash])
+  organization Organization  @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+}
+
+model AdminAlerts {
+  id             String    @id @default(cuid())
+  employeeId     String
+  severity       AdminAlertSeverity
+  reason         String    @db.Text
+  resolved       Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  organizationId String
+  
+  employee     Employee      @relation(fields: [employeeId], references: [id])
+  organization Organization  @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+}
+
+// ─── Enums ───
 
 enum Role {
   ADMIN
@@ -520,6 +720,8 @@ enum TrainingType {
   SECURITY
   SOFT_SKILLS
   LEADERSHIP
+  ONBOARDING
+  OTHER
 }
 
 enum TrainingStatus {
@@ -591,69 +793,6 @@ enum CandidateStatus {
   REJECTED
 }
 
-// ─── Time Tracking ───
-
-model TimeSession {
-  id         String             @id @default(cuid())
-  employeeId String
-  checkIn    DateTime           @default(now())
-  checkOut   DateTime?
-  totalWork  Int                @default(0)
-  totalBreak Int                @default(0)
-  totalIdle  Int                @default(0)
-  status     SessionStatus      @default(ACTIVE)
-  ipAddress  String?
-  userAgent  String?
-  createdAt  DateTime           @default(now())
-  employee   Employee           @relation(fields: [employeeId], references: [id])
-  breaks     BreakEntry[]
-  activities ActivityLog[]
-  snapshots  ActivitySnapshot[]
-
-  @@index([employeeId])
-  @@index([createdAt])
-  @@index([employeeId, createdAt])
-}
-
-model BreakEntry {
-  id        String      @id @default(cuid())
-  sessionId String
-  startedAt DateTime    @default(now())
-  endedAt   DateTime?
-  reason    String?
-  session   TimeSession @relation(fields: [sessionId], references: [id])
-
-  @@index([sessionId])
-}
-
-model ActivityLog {
-  id          String           @id @default(cuid())
-  sessionId   String
-  appName     String
-  windowTitle String?
-  url         String?
-  domain      String?
-  category    ActivityCategory @default(OTHER)
-  startedAt   DateTime         @default(now())
-  endedAt     DateTime?
-  durationSec Int              @default(0)
-  session     TimeSession      @relation(fields: [sessionId], references: [id])
-
-  @@index([sessionId])
-}
-
-model ActivitySnapshot {
-  id          String         @id @default(cuid())
-  sessionId   String
-  status      ActivityStatus @default(ACTIVE)
-  timestamp   DateTime       @default(now())
-  mouseClicks Int            @default(0)
-  keystrokes  Int            @default(0)
-  session     TimeSession    @relation(fields: [sessionId], references: [id])
-
-  @@index([sessionId])
-}
-
 enum SessionStatus {
   ACTIVE
   BREAK
@@ -676,60 +815,10 @@ enum ActivityStatus {
   BREAK
 }
 
-// --- PHASE 6: AUTONOMOUS PERFORMANCE MONITORING AGENT ---
-
-model PerformanceMetrics {
-  id             String    @id @default(cuid())
-  employeeId     String
-  date           DateTime
-  activeSeconds  Int       @default(0)
-  idleSeconds    Int       @default(0)
-  tasksCompleted Int       @default(0)
-  qualityScore   Decimal?  @db.Decimal(5, 2)
-  organizationId String?
-  
-  employee     Employee      @relation(fields: [employeeId], references: [id])
-  organization Organization? @relation(fields: [organizationId], references: [id])
-
-  @@index([employeeId, date])
-}
-
-model WeeklyScores {
-  id               String    @id @default(cuid())
-  evaluationHash   String    @unique // Format: emp123_2026_w42
-  employeeId       String
-  weekStartDate    DateTime
-  baseScore        Decimal   @db.Decimal(5, 2)
-  aiAdjustment     Decimal   @db.Decimal(5, 2)
-  finalScore       Decimal   @db.Decimal(5, 2)
-  confidenceScore  Decimal   @db.Decimal(5, 2) 
-  burnoutRisk      Boolean   @default(false)
-  behavioralAnomaly Boolean  @default(false)
-  aiFeedback       String?   @db.Text
-  organizationId   String?
-
-  employee      Employee      @relation(fields: [employeeId], references: [id])
-  organization  Organization? @relation(fields: [organizationId], references: [id])
-  notifications Notifications[]
-
-  @@index([employeeId])
-}
-
 enum AgentRunStatus {
   RUNNING
   COMPLETED
   FAILED
-}
-
-model AgentExecutionLogs {
-  id                 String    @id @default(cuid())
-  batchId            String
-  weekNumber         Int
-  employeesProcessed Int       @default(0)
-  errors             Int       @default(0)
-  status             AgentRunStatus @default(RUNNING)
-  durationMs         Int       @default(0)
-  createdAt          DateTime  @default(now())
 }
 
 enum NotificationType {
@@ -744,36 +833,9 @@ enum NotificationStatus {
   FAILED
 }
 
-model Notifications {
-  id             String    @id @default(cuid())
-  employeeId     String
-  type           NotificationType
-  evaluationHash String    @unique
-  status         NotificationStatus @default(PENDING)
-  sentAt         DateTime?
-  organizationId String?
-
-  employee     Employee      @relation(fields: [employeeId], references: [id])
-  weeklyScore  WeeklyScores  @relation(fields: [evaluationHash], references: [evaluationHash])
-  organization Organization? @relation(fields: [organizationId], references: [id])
-}
-
 enum AdminAlertSeverity {
   LOW
   MEDIUM
   HIGH
   CRITICAL
-}
-
-model AdminAlerts {
-  id             String    @id @default(cuid())
-  employeeId     String
-  severity       AdminAlertSeverity
-  reason         String    @db.Text
-  resolved       Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  organizationId String?
-  
-  employee     Employee      @relation(fields: [employeeId], references: [id])
-  organization Organization? @relation(fields: [organizationId], references: [id])
 }

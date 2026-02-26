@@ -1,10 +1,12 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 
-// GET /api/organization
-export async function GET() {
+// GET /api/organization (Scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
         const employees = await prisma.employee.findMany({
+            where: { organizationId: ctx.organizationId },
             select: {
                 id: true,
                 firstName: true,
@@ -24,55 +26,47 @@ export async function GET() {
             orderBy: { createdAt: "asc" },
         })
 
-        return NextResponse.json(employees)
+        return apiSuccess(employees)
     } catch (error) {
         console.error("[ORGANIZATION_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // PUT /api/organization
 // Accept drag and drop updates to manager hierarchy
-export async function PUT(req: Request) {
+export const PUT = withAuth("ADMIN", async (req, ctx) => {
     try {
         const updates = await req.json()
 
-        // Ensure updates is an array of { id: string, managerId: string | null }
         if (!Array.isArray(updates)) {
-            return NextResponse.json({ error: "Invalid payload format." }, { status: 400 })
+            return apiError("Invalid payload format", ApiErrorCode.BAD_REQUEST, 400)
         }
 
-        // K9: Cycle detection — walk up the manager chain to ensure no circular dependencies
+        // Cycle detection
         for (const update of updates) {
             if (!update.managerId || update.managerId === update.id) {
                 if (update.managerId === update.id) {
-                    return NextResponse.json({ error: `Employee cannot be their own manager` }, { status: 400 })
+                    return apiError("Employee cannot be their own manager", ApiErrorCode.BAD_REQUEST, 400)
                 }
                 continue
             }
 
-            // Build a map of proposed changes
             const proposedManagers = new Map(updates.map((u: any) => [u.id, u.managerId]))
-
-            // Walk up the chain from the proposed manager
             let current = update.managerId
             const visited = new Set<string>([update.id])
             let depth = 0
 
             while (current && depth < 50) {
                 if (visited.has(current)) {
-                    return NextResponse.json(
-                        { error: `Circular dependency detected: assigning this manager would create a loop` },
-                        { status: 400 }
-                    )
+                    return apiError("Circular dependency detected", ApiErrorCode.BAD_REQUEST, 400)
                 }
                 visited.add(current)
-                // Check proposed changes first, then DB
                 if (proposedManagers.has(current)) {
                     current = proposedManagers.get(current) || null
                 } else {
-                    const parent = await prisma.employee.findUnique({
-                        where: { id: current },
+                    const parent = await prisma.employee.findFirst({
+                        where: { id: current, organizationId: ctx.organizationId },
                         select: { managerId: true }
                     })
                     current = parent?.managerId || null
@@ -81,19 +75,17 @@ export async function PUT(req: Request) {
             }
         }
 
-        // Use a transaction to perform all updates atomically
         const operations = updates.map((update: any) =>
             prisma.employee.update({
-                where: { id: update.id },
+                where: { id: update.id, organizationId: ctx.organizationId },
                 data: { managerId: update.managerId }
             })
         )
 
         await prisma.$transaction(operations)
-
-        return NextResponse.json({ success: true, updatedCount: operations.length })
+        return apiSuccess({ updatedCount: operations.length })
     } catch (error) {
         console.error("[ORGANIZATION_PUT]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

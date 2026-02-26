@@ -1,4 +1,4 @@
-import NextAuth from "next-auth"
+import NextAuth, { DefaultSession } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
 import { prisma } from "@/lib/prisma"
@@ -60,6 +60,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     name: user.name,
                     email: user.email,
                     role: user.role,
+                    organizationId: user.organizationId,
                     avatar: user.avatar,
                     mustChangePassword: user.mustChangePassword,
                 }
@@ -90,10 +91,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return true
         },
         async jwt({ token, user, account, trigger, session }) {
+            // Define extended user type for type safety
+            interface ExtendedUser {
+                id?: string
+                role?: string
+                organizationId?: string
+                avatar?: string | null
+                mustChangePassword?: boolean
+            }
+
             if (user) {
-                token.role = user.role
-                token.avatar = user.avatar
-                token.mustChangePassword = (user as any).mustChangePassword ?? false
+                const u = user as ExtendedUser
+                token.role = u.role
+                token.organizationId = u.organizationId
+                token.avatar = u.avatar
+                token.mustChangePassword = u.mustChangePassword ?? false
             }
 
             if (account) {
@@ -117,6 +129,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 if (dbUser) {
                     token.sub = dbUser.id
                     token.role = dbUser.role
+                    token.organizationId = dbUser.organizationId
                     token.avatar = dbUser.avatar || token.picture
                     token.mustChangePassword = dbUser.mustChangePassword
                     // Update lastLoginAt for Google logins
@@ -130,13 +143,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         },
         async session({ session, token }) {
             if (session.user) {
-                session.user.id = token.sub ?? ""
-                session.user.role = token.role ?? "EMPLOYEE"
-                session.user.avatar = token.avatar
-                session.user.mustChangePassword = (token.mustChangePassword as boolean) ?? false
-                session.accessToken = token.accessToken as string
+                const u = session.user as any
+                u.id = token.sub ?? ""
+                u.role = token.role ?? "EMPLOYEE"
+                u.organizationId = token.organizationId as string | null
+                u.avatar = token.avatar
+                u.mustChangePassword = (token.mustChangePassword as boolean) ?? false
+                u.accessToken = token.accessToken as string
             }
             return session
         },
     },
 })
+
+declare module "next-auth" {
+    interface Session {
+        user: {
+            id: string
+            role?: string
+            organizationId?: string | null
+            avatar?: string | null
+            mustChangePassword?: boolean
+        } & DefaultSession["user"]
+        accessToken?: string
+    }
+
+    interface User {
+        role?: string
+        organizationId?: string | null
+        avatar?: string | null
+        mustChangePassword?: boolean
+    }
+}

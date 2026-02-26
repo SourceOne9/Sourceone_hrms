@@ -1,25 +1,20 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth, orgFilter } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import bcrypt from "bcryptjs"
 import { employeeSchema } from "@/lib/schemas"
 import { redis } from "@/lib/redis"
 
-// GET /api/employees – List all employees (paginated)
-export async function GET(req: Request) {
+// GET /api/employees – List all employees (paginated and scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const { searchParams } = new URL(req.url)
         const page = Math.max(1, parseInt(searchParams.get("page") || "1"))
         const limit = Math.min(Math.max(1, parseInt(searchParams.get("limit") || "50")), 100)
         const search = searchParams.get("search") || ""
         const skip = (page - 1) * limit
 
-        const where = search
+        const where = orgFilter(ctx, search
             ? {
                 OR: [
                     { firstName: { contains: search, mode: "insensitive" as const } },
@@ -28,7 +23,7 @@ export async function GET(req: Request) {
                     { employeeCode: { contains: search, mode: "insensitive" as const } },
                 ],
             }
-            : {}
+            : {})
 
         const [employees, total] = await prisma.$transaction([
             prisma.employee.findMany({
@@ -44,25 +39,22 @@ export async function GET(req: Request) {
             prisma.employee.count({ where }),
         ])
 
-        return NextResponse.json({ data: employees, total, page, limit })
+        return apiSuccess(employees, { total, page, limit })
     } catch (error) {
         console.error("[EMPLOYEES_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // POST /api/employees – Create a new employee + auto-create login credentials
-export async function POST(req: Request) {
+export const POST = withAuth("ADMIN", async (req, ctx) => {
     try {
         const body = await req.json()
 
         // Zod Validation
         const parsed = employeeSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
         const {
@@ -81,7 +73,7 @@ export async function POST(req: Request) {
             avatarUrl,
         } = parsed.data
 
-        // Generate temp password: EmployeeCode@Year (e.g. EMP001@2026)
+        // Generate temp password: EmployeeCode@Year
         const year = new Date().getFullYear()
         const tempPassword = `${employeeCode}@${year}`
         const hashedPassword = await bcrypt.hash(tempPassword, 10)
@@ -95,6 +87,7 @@ export async function POST(req: Request) {
                     email,
                     hashedPassword,
                     role: "EMPLOYEE",
+                    organizationId: ctx.organizationId,
                     mustChangePassword: true,
                     avatar: avatarUrl || null,
                 },
@@ -110,6 +103,7 @@ export async function POST(req: Request) {
                     phone,
                     designation,
                     departmentId,
+                    organizationId: ctx.organizationId,
                     dateOfJoining: parsed.data.dateOfJoining || new Date(dateOfJoining),
                     salary: salary,
                     status: status || "ACTIVE",
@@ -121,52 +115,34 @@ export async function POST(req: Request) {
                 include: { department: true },
             })
 
-            return { ...employee, username: employeeCode }
+            return employee
         })
 
-        // Clear dashboard cache since new hire stats changed
+        // Clear dashboard cache
         try {
-            await redis.set("admin:dashboard:metrics", "", { ex: 1 }) // Expire quickly
+            await redis.set("admin:dashboard:metrics", "", { ex: 1 })
         } catch (e) {
             console.error("Failed to invalidate dashboard cache", e)
         }
 
-        // Log creation event (no credentials in logs)
-        console.log(`[NEW_EMPLOYEE] ${result.username} created. Must change password on first login.`)
+        console.log(`[NEW_EMPLOYEE] ${employeeCode} created in org ${ctx.organizationId}.`)
 
-        // Return employee WITHOUT the temp password
-        return NextResponse.json(result, { status: 201 })
+        return apiSuccess(result, null, 201)
     } catch (error: any) {
         console.error("[EMPLOYEES_POST] FULL ERROR:", error)
-
-        // Handle unique constraint violations (Prisma P2002)
         if (error.code === 'P2002') {
             const target = error.meta?.target || []
             let message = "A conflict occurred."
-
             if (target.includes('email')) {
                 message = "An account or employee with this email already exists."
             } else if (target.includes('employeeCode')) {
                 message = "An employee with this code already exists."
             }
-
-            return NextResponse.json(
-                { error: "Conflict", details: message },
-                { status: 409 }
-            )
+            return apiError(message, ApiErrorCode.CONFLICT, 409)
         }
-
-        // Handle foreign key constraint violations (Prisma P2003)
         if (error.code === 'P2003') {
-            return NextResponse.json(
-                { error: "Foreign Key Error", details: "Invalid department or manager selected." },
-                { status: 400 }
-            )
+            return apiError("Invalid department or manager selected.", ApiErrorCode.BAD_REQUEST, 400)
         }
-
-        return NextResponse.json(
-            { error: "Internal Server Error" },
-            { status: 500 }
-        )
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

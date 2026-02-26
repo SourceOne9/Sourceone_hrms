@@ -1,20 +1,15 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/security"
 import { candidateSchema } from "@/lib/schemas"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 
-// GET /api/recruitment – List candidates
-export async function GET(req: Request) {
+// GET /api/recruitment – List candidates (scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const { searchParams } = new URL(req.url)
         const stage = searchParams.get("stage")
 
-        const where: Record<string, unknown> = {}
+        const where: Record<string, any> = { organizationId: ctx.organizationId }
         if (stage) where.stage = stage
 
         const candidates = await prisma.candidate.findMany({
@@ -24,28 +19,20 @@ export async function GET(req: Request) {
             take: 200,
         })
 
-        return NextResponse.json(candidates)
+        return apiSuccess(candidates)
     } catch (error) {
         console.error("[RECRUITMENT_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // POST /api/recruitment – Add a candidate
-export async function POST(req: Request) {
+export const POST = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session || session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const body = await req.json()
         const parsed = candidateSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
         const candidate = await prisma.candidate.create({
@@ -59,37 +46,31 @@ export async function POST(req: Request) {
                 interviewDate: parsed.data.interviewDate,
                 notes: parsed.data.notes,
                 departmentId: parsed.data.departmentId,
+                organizationId: ctx.organizationId,
             },
             include: { department: true },
         })
 
-        return NextResponse.json(candidate, { status: 201 })
+        return apiSuccess(candidate, null, 201)
     } catch (error) {
         console.error("[RECRUITMENT_POST]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // PUT /api/recruitment – Update candidate stage/status
-export async function PUT(req: Request) {
+export const PUT = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session || session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const body = await req.json()
-        // We can reuse candidateSchema with .partial() for updates
+        if (!body.id) return apiError("Candidate ID is required", ApiErrorCode.BAD_REQUEST, 400)
+
         const partialParsed = candidateSchema.partial().safeParse(body)
         if (!partialParsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: partialParsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, partialParsed.error.format())
         }
 
         const candidate = await prisma.candidate.update({
-            where: { id: body.id },
+            where: { id: body.id, organizationId: ctx.organizationId },
             data: {
                 stage: partialParsed.data.stage,
                 status: partialParsed.data.status,
@@ -99,9 +80,9 @@ export async function PUT(req: Request) {
             include: { department: true },
         })
 
-        return NextResponse.json(candidate)
+        return apiSuccess(candidate)
     } catch (error) {
         console.error("[RECRUITMENT_PUT]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

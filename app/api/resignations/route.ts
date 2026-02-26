@@ -1,23 +1,28 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import { resignationSchema } from "@/lib/schemas"
 
-// GET /api/resignations – List resignations
-export async function GET(req: Request) {
+// GET /api/resignations – List resignations (scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const { searchParams } = new URL(req.url)
         const status = searchParams.get("status")
         const employeeId = searchParams.get("employeeId")
 
-        const where: Record<string, unknown> = {}
+        const where: Record<string, any> = { organizationId: ctx.organizationId }
         if (status) where.status = status
-        if (employeeId) where.employeeId = employeeId
+
+        if (ctx.role !== "ADMIN") {
+            const employee = await prisma.employee.findFirst({
+                where: { userId: ctx.userId, organizationId: ctx.organizationId },
+                select: { id: true }
+            })
+            if (employee) where.employeeId = employee.id
+            else return apiError("No employee profile found", ApiErrorCode.BAD_REQUEST, 400)
+        } else if (employeeId) {
+            where.employeeId = employeeId
+        }
 
         const resignations = await prisma.resignation.findMany({
             where,
@@ -26,28 +31,30 @@ export async function GET(req: Request) {
             take: 200,
         })
 
-        return NextResponse.json(resignations)
+        return apiSuccess(resignations)
     } catch (error) {
         console.error("[RESIGNATIONS_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // POST /api/resignations – Submit resignation
-export async function POST(req: Request) {
+export const POST = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const body = await req.json()
         const parsed = resignationSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
+        }
+
+        let employeeId = parsed.data.employeeId
+        if (ctx.role !== "ADMIN" || !employeeId) {
+            const employee = await prisma.employee.findFirst({
+                where: { userId: ctx.userId, organizationId: ctx.organizationId },
+                select: { id: true }
+            })
+            if (!employee) return apiError("No employee profile found", ApiErrorCode.BAD_REQUEST, 400)
+            employeeId = employee.id
         }
 
         const resignation = await prisma.resignation.create({
@@ -55,37 +62,42 @@ export async function POST(req: Request) {
                 reason: parsed.data.reason,
                 lastDay: parsed.data.lastDay,
                 status: "UNDER_REVIEW",
-                employeeId: parsed.data.employeeId || "",
+                employeeId: employeeId,
+                organizationId: ctx.organizationId,
             },
             include: { employee: true },
         })
 
-        return NextResponse.json(resignation, { status: 201 })
+        return apiSuccess(resignation, null, 201)
     } catch (error) {
         console.error("[RESIGNATIONS_POST]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // PUT /api/resignations – Update resignation status
-export async function PUT(req: Request) {
+export const PUT = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session || session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+        const body = await req.json()
+        if (!body.id) return apiError("ID required", ApiErrorCode.BAD_REQUEST, 400)
+
+        const result = await prisma.resignation.updateMany({
+            where: { id: body.id, organizationId: ctx.organizationId },
+            data: { status: body.status },
+        })
+
+        if (result.count === 0) {
+            return apiError("Resignation not found", ApiErrorCode.NOT_FOUND, 404)
         }
 
-        const body = await req.json()
-
-        const resignation = await prisma.resignation.update({
+        const updated = await prisma.resignation.findUnique({
             where: { id: body.id },
-            data: { status: body.status },
             include: { employee: true },
         })
 
-        return NextResponse.json(resignation)
+        return apiSuccess(updated)
     } catch (error) {
         console.error("[RESIGNATIONS_PUT]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

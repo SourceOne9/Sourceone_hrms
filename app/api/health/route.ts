@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 
 export async function GET() {
     try {
         // Test database connectivity
         await prisma.$queryRaw`SELECT 1`
 
-        return NextResponse.json({
+        return apiSuccess({
             status: "healthy",
             timestamp: new Date().toISOString(),
             uptime: process.uptime(),
@@ -14,13 +14,9 @@ export async function GET() {
         })
     } catch (error) {
         console.error("[HEALTH_CHECK]", error)
-        return NextResponse.json(
-            {
-                status: "unhealthy",
-                timestamp: new Date().toISOString(),
-                database: "disconnected",
-            },
-            { status: 503 }
-        )
+        return apiError("unhealthy", ApiErrorCode.INTERNAL_ERROR, 503, {
+            database: "disconnected",
+            timestamp: new Date().toISOString()
+        })
     }
 }

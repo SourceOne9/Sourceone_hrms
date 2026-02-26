@@ -1,47 +1,33 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import { eventSchema } from "@/lib/schemas"
 
-// GET /api/events – List calendar events
-export async function GET() {
+// GET /api/events – List calendar events (scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const events = await prisma.calendarEvent.findMany({
+            where: { organizationId: ctx.organizationId },
             orderBy: { start: "asc" },
             take: 200,
         })
 
-        return NextResponse.json(events, {
-            headers: {
-                "Cache-Control": "s-maxage=60, stale-while-revalidate=300"
-            }
-        })
+        const res = apiSuccess(events)
+        res.headers.set("Cache-Control", "s-maxage=60, stale-while-revalidate=300")
+        return res
     } catch (error) {
         console.error("[EVENTS_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // POST /api/events – Create a calendar event
-export async function POST(req: Request) {
+export const POST = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session || session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const body = await req.json()
         const parsed = eventSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
         const event = await prisma.calendarEvent.create({
@@ -51,35 +37,37 @@ export async function POST(req: Request) {
                 end: parsed.data.end,
                 allDay: parsed.data.allDay,
                 type: parsed.data.type,
+                organizationId: ctx.organizationId,
             },
         })
 
-        return NextResponse.json(event, { status: 201 })
+        return apiSuccess(event, null, 201)
     } catch (error) {
         console.error("[EVENTS_POST]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // DELETE /api/events – Delete an event
-export async function DELETE(req: Request) {
+export const DELETE = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session || session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const { searchParams } = new URL(req.url)
         const id = searchParams.get("id")
         if (!id) {
-            return NextResponse.json({ error: "ID required" }, { status: 400 })
+            return apiError("ID required", ApiErrorCode.BAD_REQUEST, 400)
         }
 
-        await prisma.calendarEvent.delete({ where: { id } })
+        const result = await prisma.calendarEvent.deleteMany({
+            where: { id, organizationId: ctx.organizationId }
+        })
 
-        return NextResponse.json({ message: "Deleted" })
+        if (result.count === 0) {
+            return apiError("Event not found", ApiErrorCode.NOT_FOUND, 404)
+        }
+
+        return apiSuccess({ message: "Deleted" })
     } catch (error) {
         console.error("[EVENTS_DELETE]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

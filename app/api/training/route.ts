@@ -1,25 +1,23 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import { trainingSchema } from "@/lib/schemas"
 
-// GET /api/training – List all trainings
-export async function GET(req: Request) {
+// GET /api/training – List all trainings (scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const { searchParams } = new URL(req.url)
         const employeeId = searchParams.get("employeeId")
 
         const trainings = await prisma.training.findMany({
-            where: employeeId ? {
-                enrollments: {
-                    some: { employeeId }
-                }
-            } : {},
+            where: {
+                organizationId: ctx.organizationId,
+                ...(employeeId ? {
+                    enrollments: {
+                        some: { employeeId }
+                    }
+                } : {})
+            },
             include: {
                 enrollments: {
                     include: { employee: { select: { id: true, firstName: true, lastName: true, employeeCode: true } } },
@@ -29,37 +27,25 @@ export async function GET(req: Request) {
             take: 100,
         })
 
-        return NextResponse.json(trainings)
+        return apiSuccess(trainings)
     } catch (error) {
         console.error("[TRAINING_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // POST /api/training – Create a training
-export async function POST(req: Request) {
+export const POST = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        console.log("Session User Role:", (session?.user as any)?.role)
-
-        if (!session?.user || (session.user as any).role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const body = await req.json()
-        console.log("POST Body:", body)
-
         const parsed = trainingSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
         const { assignedEmployeeIds, assignToAll } = body
 
-        const training = await (prisma.training as any).create({
+        const training = await prisma.training.create({
             data: {
                 name: parsed.data.name,
                 type: parsed.data.type,
@@ -67,8 +53,9 @@ export async function POST(req: Request) {
                 status: "UPCOMING",
                 progress: 0,
                 dueDate: parsed.data.dueDate,
-                participants: 0, // Will be updated by enrollments
+                participants: 0,
                 videoUrl: parsed.data.videoUrl,
+                organizationId: ctx.organizationId,
             },
         })
 
@@ -76,10 +63,10 @@ export async function POST(req: Request) {
         let targetEmployeeIds: string[] = []
         if (assignToAll) {
             const allEmployees = await prisma.employee.findMany({
-                where: { status: "ACTIVE" },
+                where: { status: "ACTIVE", organizationId: ctx.organizationId },
                 select: { id: true }
             })
-            targetEmployeeIds = allEmployees.map((e: { id: string }) => e.id)
+            targetEmployeeIds = allEmployees.map(e => e.id)
         } else if (assignedEmployeeIds && Array.isArray(assignedEmployeeIds)) {
             targetEmployeeIds = assignedEmployeeIds
         }
@@ -101,30 +88,25 @@ export async function POST(req: Request) {
             })
         }
 
-        return NextResponse.json(training, { status: 201 })
+        return apiSuccess(training, null, 201)
     } catch (error: any) {
         console.error("[TRAINING_POST] Error:", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // PUT /api/training – Update a training
-export async function PUT(req: Request) {
+export const PUT = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session?.user || (session.user as any).role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const body = await req.json()
         const { id, assignedEmployeeIds, assignToAll, ...data } = body
 
         if (!id) {
-            return NextResponse.json({ error: "ID required" }, { status: 400 })
+            return apiError("ID required", ApiErrorCode.BAD_REQUEST, 400)
         }
 
-        const training = await (prisma.training as any).update({
-            where: { id },
+        const training = await prisma.training.update({
+            where: { id, organizationId: ctx.organizationId },
             data: {
                 ...data,
                 dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
@@ -137,10 +119,10 @@ export async function PUT(req: Request) {
         let targetEmployeeIds: string[] = []
         if (assignToAll) {
             const allEmployees = await prisma.employee.findMany({
-                where: { status: "ACTIVE" },
+                where: { status: "ACTIVE", organizationId: ctx.organizationId },
                 select: { id: true }
             })
-            targetEmployeeIds = allEmployees.map((e: { id: string }) => e.id)
+            targetEmployeeIds = allEmployees.map(e => e.id)
         } else if (assignedEmployeeIds && Array.isArray(assignedEmployeeIds)) {
             targetEmployeeIds = assignedEmployeeIds
         }
@@ -165,29 +147,30 @@ export async function PUT(req: Request) {
             })
         }
 
-        return NextResponse.json(training)
+        return apiSuccess(training)
     } catch (error) {
         console.error("[TRAINING_PUT]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // DELETE /api/training – Delete a training
-export async function DELETE(req: Request) {
+export const DELETE = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session?.user || (session.user as any).role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const { searchParams } = new URL(req.url)
         const id = searchParams.get("id")
 
         if (!id) {
-            return NextResponse.json({ error: "ID required" }, { status: 400 })
+            return apiError("ID required", ApiErrorCode.BAD_REQUEST, 400)
         }
 
-        // Delete enrollments first
+        // Verify ownership/scoping
+        const existing = await prisma.training.findFirst({
+            where: { id, organizationId: ctx.organizationId }
+        })
+        if (!existing) return apiError("Training not found", ApiErrorCode.NOT_FOUND, 404)
+
+        // Delete enrollments first (Cascade-like manually)
         await prisma.trainingEnrollment.deleteMany({
             where: { trainingId: id }
         })
@@ -196,9 +179,9 @@ export async function DELETE(req: Request) {
             where: { id },
         })
 
-        return NextResponse.json({ message: "Training deleted" })
+        return apiSuccess({ message: "Training deleted" })
     } catch (error) {
         console.error("[TRAINING_DELETE]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

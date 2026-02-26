@@ -1,12 +1,13 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 
-// POST /api/admin/assets/import
-export async function POST(req: Request) {
+// POST /api/admin/assets/import (Admin only, scoped)
+export const POST = withAuth("ADMIN", async (req, ctx) => {
     try {
         const { rows } = await req.json()
         if (!Array.isArray(rows) || rows.length === 0) {
-            return NextResponse.json({ error: "No rows provided" }, { status: 400 })
+            return apiError("No rows provided", ApiErrorCode.BAD_REQUEST, 400)
         }
 
         let inserted = 0
@@ -30,24 +31,36 @@ export async function POST(req: Request) {
                 const purchaseDate = purchaseDateRaw ? new Date(purchaseDateRaw) : new Date()
                 const value = parseFloat(String(row["value"] || row["Value"] || 0))
 
-                // Optional: assign to employee
+                // Optional: assign to employee (MUST be in the same organization)
                 const employeeCode = String(row["assignedToCode"] || row["Assigned To Code"] || "").trim()
                 let assignedToId: string | null = null
                 if (employeeCode) {
-                    const emp = await prisma.employee.findFirst({ where: { employeeCode }, select: { id: true } })
+                    const emp = await prisma.employee.findFirst({
+                        where: { employeeCode, organizationId: ctx.organizationId },
+                        select: { id: true }
+                    })
                     if (emp) assignedToId = emp.id
                 }
 
                 await prisma.asset.create({
-                    data: { name, serialNumber, type, status, purchaseDate, value, assignedToId }
+                    data: {
+                        name,
+                        serialNumber,
+                        type,
+                        status,
+                        purchaseDate,
+                        value,
+                        assignedToId,
+                        organizationId: ctx.organizationId,
+                    }
                 })
                 inserted++
             } catch { skipped++ }
         }
 
-        return NextResponse.json({ inserted, skipped })
+        return apiSuccess({ inserted, skipped })
     } catch (error) {
         console.error("[ASSETS_IMPORT]", error)
-        return NextResponse.json({ error: "Import failed" }, { status: 500 })
+        return apiError("Import failed", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

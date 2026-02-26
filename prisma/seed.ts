@@ -6,11 +6,29 @@ const prisma = new PrismaClient()
 async function main() {
     console.log("🌱 Seeding database...")
 
+    // ── Organization ─────────────────────────────────────────
+    const org = await prisma.organization.upsert({
+        where: { slug: "ems-pro-default" },
+        update: {},
+        create: {
+            name: "EMS Pro Default",
+            slug: "ems-pro-default",
+            domain: "emspro.com",
+            subscription: "BASIC",
+        }
+    })
+    const organizationId = org.id
+    console.log(`✅ Organization created: ${org.name}`)
+
     // ── Departments ─────────────────────────────────────────
     async function upsertDept(name: string, color: string) {
-        const existing = await prisma.department.findFirst({ where: { name } })
+        const existing = await prisma.department.findFirst({
+            where: { name, organizationId }
+        })
         if (existing) return existing
-        return prisma.department.create({ data: { name, color } })
+        return prisma.department.create({
+            data: { name, color, organizationId }
+        })
     }
 
     const engineering = await upsertDept("Engineering", "#007aff")
@@ -26,13 +44,14 @@ async function main() {
 
     const adminUser = await prisma.user.upsert({
         where: { email: "admin@emspro.com" },
-        update: {},
+        update: { organizationId },
         create: {
             name: "Admin User",
             email: "admin@emspro.com",
             hashedPassword,
             role: "ADMIN",
             avatar: "AU",
+            organizationId
         },
     })
 
@@ -40,22 +59,22 @@ async function main() {
 
     // ── Employees ───────────────────────────────────────────
     const employees = [
-        { code: "EMP001", first: "John", last: "Doe", email: "john@emspro.com", designation: "Sr. Software Engineer", dept: engineering.id, salary: 9500, initials: "JD" },
-        { code: "EMP002", first: "Jane", last: "Smith", email: "jane@emspro.com", designation: "QA Engineer", dept: engineering.id, salary: 7000, initials: "JS" },
-        { code: "EMP003", first: "Emily", last: "Brown", email: "emily@emspro.com", designation: "HR Director", dept: hr.id, salary: 8500, initials: "EB" },
-        { code: "EMP004", first: "Michael", last: "Johnson", email: "michael@emspro.com", designation: "Sales Representative", dept: sales.id, salary: 6000, initials: "MJ" },
-        { code: "EMP005", first: "Lisa", last: "Anderson", email: "lisa@emspro.com", designation: "Content Strategist", dept: marketing.id, salary: 6500, initials: "LA" },
-        { code: "EMP006", first: "David", last: "Wilson", email: "david@emspro.com", designation: "Financial Analyst", dept: finance.id, salary: 7500, initials: "DW" },
-        { code: "EMP007", first: "Sarah", last: "Davis", email: "sarah@emspro.com", designation: "CTO", dept: engineering.id, salary: 12000, initials: "SD" },
-        { code: "EMP008", first: "James", last: "Taylor", email: "james@emspro.com", designation: "DevOps Engineer", dept: engineering.id, salary: 8000, initials: "JT" },
-        { code: "EMP009", first: "Amanda", last: "Thomas", email: "amanda@emspro.com", designation: "Sales Director", dept: sales.id, salary: 9000, initials: "AT" },
-        { code: "EMP010", first: "Robert", last: "Garcia", email: "robert@emspro.com", designation: "Marketing Manager", dept: marketing.id, salary: 7000, initials: "RG" },
+        { code: "EMP001", first: "John", last: "Doe", email: "john@emspro.com", designation: "Sr. Software Engineer", dept: engineering.id, salary: 9500 },
+        { code: "EMP002", first: "Jane", last: "Smith", email: "jane@emspro.com", designation: "QA Engineer", dept: engineering.id, salary: 7000 },
+        { code: "EMP003", first: "Emily", last: "Brown", email: "emily@emspro.com", designation: "HR Director", dept: hr.id, salary: 8500 },
+        { code: "EMP004", first: "Michael", last: "Johnson", email: "michael@emspro.com", designation: "Sales Representative", dept: sales.id, salary: 6000 },
+        { code: "EMP005", first: "Lisa", last: "Anderson", email: "lisa@emspro.com", designation: "Content Strategist", dept: marketing.id, salary: 6500 },
+        { code: "EMP006", first: "David", last: "Wilson", email: "david@emspro.com", designation: "Financial Analyst", dept: finance.id, salary: 7500 },
+        { code: "EMP007", first: "Sarah", last: "Davis", email: "sarah@emspro.com", designation: "CTO", dept: engineering.id, salary: 12000 },
+        { code: "EMP008", first: "James", last: "Taylor", email: "james@emspro.com", designation: "DevOps Engineer", dept: engineering.id, salary: 8000 },
+        { code: "EMP009", first: "Amanda", last: "Thomas", email: "amanda@emspro.com", designation: "Sales Director", dept: sales.id, salary: 9000 },
+        { code: "EMP10", first: "Robert", last: "Garcia", email: "robert@emspro.com", designation: "Marketing Manager", dept: marketing.id, salary: 7000 },
     ]
 
     for (const emp of employees) {
         await prisma.employee.upsert({
             where: { employeeCode: emp.code },
-            update: {},
+            update: { organizationId },
             create: {
                 employeeCode: emp.code,
                 firstName: emp.first,
@@ -66,6 +85,7 @@ async function main() {
                 dateOfJoining: new Date("2024-01-15"),
                 salary: emp.salary,
                 status: "ACTIVE",
+                organizationId
             },
         })
     }

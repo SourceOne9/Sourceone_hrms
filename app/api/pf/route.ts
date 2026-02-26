@@ -1,21 +1,26 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import { providentFundSchema } from "@/lib/schemas"
 
-// GET /api/pf – List provident fund records
-export async function GET(req: Request) {
+// GET /api/pf – List provident fund records (scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const { searchParams } = new URL(req.url)
         const employeeId = searchParams.get("employeeId")
 
-        const where: Record<string, unknown> = {}
-        if (employeeId) where.employeeId = employeeId
+        const where: Record<string, any> = { organizationId: ctx.organizationId }
+
+        if (ctx.role !== "ADMIN") {
+            const employee = await prisma.employee.findFirst({
+                where: { userId: ctx.userId, organizationId: ctx.organizationId },
+                select: { id: true }
+            })
+            if (employee) where.employeeId = employee.id
+            else return apiError("No employee profile found", ApiErrorCode.BAD_REQUEST, 400)
+        } else if (employeeId) {
+            where.employeeId = employeeId
+        }
 
         const records = await prisma.providentFund.findMany({
             where,
@@ -24,28 +29,20 @@ export async function GET(req: Request) {
             take: 200,
         })
 
-        return NextResponse.json(records)
+        return apiSuccess(records)
     } catch (error) {
         console.error("[PF_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // POST /api/pf – Create PF record
-export async function POST(req: Request) {
+export const POST = withAuth("ADMIN", async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session || session.user?.role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-        }
-
         const body = await req.json()
         const parsed = providentFundSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
         const record = await prisma.providentFund.create({
@@ -58,13 +55,14 @@ export async function POST(req: Request) {
                 totalContribution: parsed.data.totalContribution,
                 status: parsed.data.status,
                 employeeId: parsed.data.employeeId,
+                organizationId: ctx.organizationId,
             },
             include: { employee: true },
         })
 
-        return NextResponse.json(record, { status: 201 })
+        return apiSuccess(record, null, 201)
     } catch (error) {
         console.error("[PF_POST]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

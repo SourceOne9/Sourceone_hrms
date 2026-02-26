@@ -1,29 +1,27 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
-import { getSessionEmployee } from "@/lib/session-employee"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import crypto from "crypto"
 import { ticketSchema, updateTicketSchema } from "@/lib/schemas"
 
-// GET /api/tickets – List help desk tickets
-export async function GET(req: Request) {
+// GET /api/tickets – List help desk tickets (scoped)
+export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const { searchParams } = new URL(req.url)
         const status = searchParams.get("status")
         const employeeId = searchParams.get("employeeId")
 
-        const where: Record<string, unknown> = {}
+        const where: Record<string, any> = { organizationId: ctx.organizationId }
         if (status) where.status = status
 
         // Non-admins can only see their own tickets
-        if (session.user?.role !== "ADMIN") {
-            const employee = await getSessionEmployee()
+        if (ctx.role !== "ADMIN") {
+            const employee = await prisma.employee.findFirst({
+                where: { userId: ctx.userId, organizationId: ctx.organizationId },
+                select: { id: true }
+            })
             if (employee) where.employeeId = employee.id
+            else return apiError("No employee profile found", ApiErrorCode.BAD_REQUEST, 400)
         } else if (employeeId) {
             where.employeeId = employeeId
         }
@@ -35,31 +33,33 @@ export async function GET(req: Request) {
             take: 200,
         })
 
-        return NextResponse.json(tickets)
+        return apiSuccess(tickets)
     } catch (error) {
         console.error("[TICKETS_GET]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // POST /api/tickets – Create a ticket
-export async function POST(req: Request) {
+export const POST = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const body = await req.json()
         const parsed = ticketSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
-        // Generate collision-resistant ticket code using UUID
+        let employeeId = parsed.data.employeeId
+        if (ctx.role !== "ADMIN" || !employeeId) {
+            const employee = await prisma.employee.findFirst({
+                where: { userId: ctx.userId, organizationId: ctx.organizationId },
+                select: { id: true }
+            })
+            if (!employee) return apiError("No employee profile found", ApiErrorCode.BAD_REQUEST, 400)
+            employeeId = employee.id
+        }
+
+        // Generate collision-resistant ticket code
         const shortId = crypto.randomUUID().slice(0, 8).toUpperCase()
         const ticketCode = `TKT-${new Date().getFullYear()}-${shortId}`
 
@@ -71,47 +71,60 @@ export async function POST(req: Request) {
                 category: parsed.data.category,
                 priority: parsed.data.priority || "MEDIUM",
                 status: "OPEN",
-                employeeId: parsed.data.employeeId || "",
+                employeeId: employeeId,
+                organizationId: ctx.organizationId,
             },
             include: { employee: true },
         })
 
-        return NextResponse.json(ticket, { status: 201 })
+        return apiSuccess(ticket, null, 201)
     } catch (error) {
         console.error("[TICKETS_POST]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
 
 // PUT /api/tickets – Update ticket status
-export async function PUT(req: Request) {
+export const PUT = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const body = await req.json()
         const parsed = updateTicketSchema.safeParse(body)
         if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation Error", details: parsed.error.format() },
-                { status: 400 }
-            )
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
-        const ticket = await prisma.ticket.update({
-            where: { id: parsed.data.id },
+        // Verify ownership/permission
+        const where: any = { id: parsed.data.id, organizationId: ctx.organizationId }
+
+        // Non-admin can only update their own tickets (e.g. closing them)
+        if (ctx.role !== "ADMIN") {
+            const employee = await prisma.employee.findFirst({
+                where: { userId: ctx.userId, organizationId: ctx.organizationId }
+            })
+            if (!employee) return apiError("Forbidden", ApiErrorCode.FORBIDDEN, 403)
+            where.employeeId = employee.id
+        }
+
+        const result = await prisma.ticket.updateMany({
+            where,
             data: {
                 status: parsed.data.status,
                 priority: parsed.data.priority,
-            },
+            }
+        })
+
+        if (result.count === 0) {
+            return apiError("Ticket not found or unauthorized", ApiErrorCode.NOT_FOUND, 404)
+        }
+
+        const updated = await prisma.ticket.findUnique({
+            where: { id: parsed.data.id },
             include: { employee: true },
         })
 
-        return NextResponse.json(ticket)
+        return apiSuccess(updated)
     } catch (error) {
         console.error("[TICKETS_PUT]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
