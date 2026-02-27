@@ -18,7 +18,7 @@ export default function WorkflowsAdmin() {
             const res = await fetch('/api/workflows/templates')
             if (res.ok) {
                 const json = await res.json()
-                setTemplates(json.data)
+                setTemplates(json.data || (Array.isArray(json) ? json : []))
             } else {
                 toast.error('Failed to load workflow templates')
             }

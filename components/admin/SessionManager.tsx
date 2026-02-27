@@ -27,7 +27,7 @@ export function SessionManager() {
             const res = await fetch("/api/admin/sessions")
             if (res.ok) {
                 const data = await res.json()
-                setSessions(data.data)
+                setSessions(data.data || (Array.isArray(data) ? data : []))
             }
         } catch (error) {
             toast.error("Failed to fetch sessions")

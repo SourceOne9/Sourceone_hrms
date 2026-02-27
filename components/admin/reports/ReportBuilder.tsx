@@ -82,7 +82,8 @@ export function ReportBuilder() {
             })
             if (res.ok) {
                 const result = await res.json()
-                setPreviewData(result.data.data)
+                const data = result.data || result
+                setPreviewData(data.data || (Array.isArray(data) ? data : []))
             }
         } catch (error) {
             toast.error("Failed to fetch preview")
@@ -160,8 +161,8 @@ export function ReportBuilder() {
                                         key={type}
                                         onClick={() => setEntityType(type)}
                                         className={`p-2 rounded-lg border text-[11px] font-bold transition-all ${entityType === type
-                                                ? "bg-[var(--accent)] text-white border-[var(--accent)]"
-                                                : "bg-[var(--surface)] text-[var(--text2)] border-[var(--border)] hover:border-[var(--accent)]/30"
+                                            ? "bg-[var(--accent)] text-white border-[var(--accent)]"
+                                            : "bg-[var(--surface)] text-[var(--text2)] border-[var(--border)] hover:border-[var(--accent)]/30"
                                             }`}
                                     >
                                         {type}

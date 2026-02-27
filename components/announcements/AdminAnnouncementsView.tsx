@@ -56,7 +56,8 @@ export function AdminAnnouncementsView() {
             setIsLoading(true)
             const res = await fetch('/api/announcements')
             if (res.ok) {
-                setAnnouncements(await res.json())
+                const data = await res.json()
+                setAnnouncements(data.data || data)
             }
         } catch {
             toast.error("Failed to load announcements")

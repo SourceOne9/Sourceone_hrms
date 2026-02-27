@@ -23,9 +23,14 @@ export default function Error({
                     This page encountered an error. You can try reloading it, or
                     go back to the dashboard.
                 </p>
-                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs text-left p-3 rounded-lg overflow-auto max-h-[150px] mb-6 font-mono">
-                    {error.message || "Unknown error occurred"}
-                </div>
+                <details className="text-left mb-6 group">
+                    <summary className="text-[11px] text-[var(--text3)] cursor-pointer hover:text-[var(--text)] transition-colors inline-flex items-center gap-1 list-none group-open:mb-2">
+                        <span className="group-open:rotate-90 transition-transform">▶</span> Technical Details
+                    </summary>
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs p-3 rounded-lg overflow-auto max-h-[150px] font-mono">
+                        {error.message || "Unknown error occurred"}
+                    </div>
+                </details>
                 <div className="flex gap-3 justify-center">
                     <button
                         onClick={() => reset()}

@@ -32,7 +32,8 @@ export function EmployeeResignationView({ employeeId }: { employeeId: string }) 
         try {
             const res = await fetch(`/api/resignations?employeeId=${employeeId}`)
             if (res.ok) {
-                const data = await res.json()
+                const resJson = await res.json()
+                const data = resJson.data || resJson
                 setMyResignation(data[0] || null)
             }
         } catch {

@@ -49,11 +49,12 @@ export function EmployeeAttendanceView() {
         try {
             const res = await fetch("/api/attendance")
             if (!res.ok) throw new Error("Failed to fetch")
-            const data: AttendanceRecord[] = await res.json()
+            const resJson = await res.json()
+            const data = resJson.data || resJson
             setRecords(data)
 
             const todayStr = format(new Date(), "yyyy-MM-dd")
-            const today = data.find(r => format(new Date(r.date), "yyyy-MM-dd") === todayStr)
+            const today = data.find((r: AttendanceRecord) => format(new Date(r.date), "yyyy-MM-dd") === todayStr)
             setTodayRecord(today || null)
         } catch {
             toast.error("Failed to load attendance")

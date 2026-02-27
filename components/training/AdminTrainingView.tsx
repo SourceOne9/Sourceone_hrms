@@ -91,7 +91,8 @@ export function AdminTrainingView() {
             setIsLoading(true)
             const res = await fetch('/api/training')
             if (res.ok) {
-                setTrainings(await res.json())
+                const data = await res.json()
+                setTrainings(data.data || data)
             }
         } catch {
             toast.error("Failed to load trainings")

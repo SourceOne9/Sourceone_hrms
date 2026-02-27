@@ -42,8 +42,10 @@ export function EmployeePayrollView() {
                 fetch('/api/pf')
             ])
             if (payRes.ok && pfRes.ok) {
-                setPayslips(await payRes.json())
-                setPfRecords(await pfRes.json())
+                const payJson = await payRes.json()
+                setPayslips(payJson.data || payJson)
+                const pfJson = await pfRes.json()
+                setPfRecords(pfJson.data || pfJson)
             }
         } catch (error) {
             toast.error("Failed to load your financial data")

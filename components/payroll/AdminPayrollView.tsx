@@ -138,8 +138,10 @@ export function AdminPayrollView() {
                 fetch('/api/employees?limit=100')
             ])
             if (payRes.ok && pfRes.ok && empRes.ok) {
-                setRecords(await payRes.json())
-                setPfRecords(await pfRes.json())
+                const payJson = await payRes.json()
+                setRecords(payJson.data || payJson)
+                const pfJson = await pfRes.json()
+                setPfRecords(pfJson.data || pfJson)
                 const empJson = await empRes.json()
                 setEmployees(Array.isArray(empJson) ? empJson : empJson.data || [])
             }

@@ -187,7 +187,10 @@ export default function DocumentManagement() {
                     body: uploadFormData
                 })
 
-                if (!uploadRes.ok) throw new Error("File upload failed")
+                if (!uploadRes.ok) {
+                    const uploadErr = await uploadRes.json()
+                    throw new Error(uploadErr.error || "File upload failed")
+                }
                 const uploadData = await uploadRes.json()
                 fileUrl = uploadData.url
             }
@@ -208,7 +211,10 @@ export default function DocumentManagement() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 })
-                if (!res.ok) throw new Error("Failed to save document metadata")
+                if (!res.ok) {
+                    const err = await res.json()
+                    throw new Error(err.error?.message || "Failed to save document metadata")
+                }
                 toast.success("Policy uploaded for all employees", { id: "doc-upload" })
             } else {
                 const ids = Array.from(selectedEmpIds)
@@ -230,7 +236,10 @@ export default function DocumentManagement() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 })
-                if (!res.ok) throw new Error("Failed to save document metadata")
+                if (!res.ok) {
+                    const err = await res.json()
+                    throw new Error(err.error?.message || "Failed to save document metadata")
+                }
                 toast.success(`Document sent to ${ids.length} employee${ids.length > 1 ? "s" : ""}`, { id: "doc-upload" })
             }
 
@@ -266,11 +275,14 @@ export default function DocumentManagement() {
         if (!confirm("Delete this document?")) return
         try {
             const res = await fetch(`/api/documents/${docId}`, { method: "DELETE" })
-            if (!res.ok) throw new Error()
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error?.message || "Failed to delete")
+            }
             toast.success("Deleted")
             fetchAll()
-        } catch {
-            toast.error("Failed to delete")
+        } catch (error: any) {
+            toast.error(error.message || "Failed to delete")
         }
     }
 

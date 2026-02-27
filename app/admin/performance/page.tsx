@@ -43,9 +43,10 @@ export default function PerformanceAdminDashboard() {
     useEffect(() => {
         fetch("/api/admin/performance")
             .then(res => res.json())
-            .then(data => {
-                setAlerts(data.alerts)
-                setScores(data.scores)
+            .then(resJson => {
+                const data = resJson.data || resJson
+                setAlerts(data.alerts || [])
+                setScores(data.scores || [])
             })
             .catch(console.error)
             .finally(() => setLoading(false))

@@ -62,8 +62,8 @@ export default function ActivityDashboardPage() {
         )
     }
 
-    if (!data) {
-        return <p className="text-center text-[var(--text3)] py-12">Failed to load dashboard.</p>
+    if (!data || !data.employees) {
+        return <p className="text-center text-[var(--text3)] py-12">No activity data available.</p>
     }
 
     const filtered = filter === "all" ? data.employees : data.employees.filter(e => e.currentStatus === filter)

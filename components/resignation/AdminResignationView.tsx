@@ -29,7 +29,8 @@ export function AdminResignationView() {
             setIsLoading(true)
             const res = await fetch('/api/resignations')
             if (res.ok) {
-                setResignations(await res.json())
+                const data = await res.json()
+                setResignations(data.data || data)
             }
         } catch {
             toast.error("Failed to load resignations")

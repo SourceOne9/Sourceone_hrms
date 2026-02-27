@@ -90,7 +90,8 @@ export default function AssetManagement() {
                 setFormData(prev => ({ ...prev, image: url }))
                 toast.success("Image uploaded", { id: "asset-upload" })
             } else {
-                toast.error("Upload failed", { id: "asset-upload" })
+                const err = await res.json()
+                toast.error(err.error || "Upload failed", { id: "asset-upload" })
             }
         } catch (error) {
             toast.error("An error occurred")
@@ -165,7 +166,7 @@ export default function AssetManagement() {
                 value: formData.value,
                 assignedToId: formData.assignedToId || null,
                 assignedDate: formData.assignedToId ? new Date().toISOString() : null,
-                image: formData.image,
+                image: formData.image || null,
             }
 
             const url = editingAsset ? `/api/assets/${editingAsset.id}` : "/api/assets"
@@ -179,7 +180,17 @@ export default function AssetManagement() {
 
             if (!res.ok) {
                 const err = await res.json()
-                throw new Error(err.error || "Failed to save asset")
+                // If it's a validation error, try to extract specific field errors
+                if (err.code === "VALIDATION_ERROR" && err.details) {
+                    const fields = Object.keys(err.details).filter(k => k !== "_errors")
+                    if (fields.length > 0) {
+                        const field = fields[0]
+                        const fieldError = err.details[field]?._errors?.[0]
+                        throw new Error(`${field}: ${fieldError}`)
+                    }
+                }
+                const msg = err.error?.message || err.error || "Failed to save asset"
+                throw new Error(msg)
             }
 
             toast.success(editingAsset ? "Asset updated" : "Asset created")
@@ -198,11 +209,14 @@ export default function AssetManagement() {
 
         try {
             const res = await fetch(`/api/assets/${id}`, { method: "DELETE" })
-            if (!res.ok) throw new Error("Failed to delete asset")
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error?.message || "Failed to delete asset")
+            }
             toast.success("Asset deleted")
             fetchAssets()
-        } catch {
-            toast.error("Failed to delete asset")
+        } catch (error: any) {
+            toast.error(error.message || "Failed to delete asset")
         }
     }
 

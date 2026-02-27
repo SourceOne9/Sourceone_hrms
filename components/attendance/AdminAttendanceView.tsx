@@ -69,7 +69,8 @@ export function AdminAttendanceView() {
         try {
             const res = await fetch("/api/attendance")
             if (!res.ok) throw new Error("Failed to fetch")
-            setRecords(await res.json())
+            const data = await res.json()
+            setRecords(data.data || data)
         } catch {
             toast.error("Failed to load attendance records")
         } finally {

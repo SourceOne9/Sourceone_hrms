@@ -28,7 +28,8 @@ export function EmployeeAnnouncementsView() {
             setIsLoading(true)
             const res = await fetch('/api/announcements')
             if (res.ok) {
-                setAnnouncements(await res.json())
+                const data = await res.json()
+                setAnnouncements(data.data || data)
             }
         } catch {
             console.error("Failed to load announcements")
