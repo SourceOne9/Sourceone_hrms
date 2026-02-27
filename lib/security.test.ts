@@ -20,13 +20,14 @@ describe('Security Utilities', () => {
 
     describe('orgFilter', () => {
         it('should inject organizationId into an empty where clause', () => {
-            const context: AuthContext = {
+            const mockAdminCtx: AuthContext = {
                 requestId: 'req-1',
                 userId: 'user-1',
                 organizationId: 'org-1',
-                role: 'ADMIN'
+                role: 'ADMIN',
+                params: {},
             }
-            const result = orgFilter(context)
+            const result = orgFilter(mockAdminCtx)
             expect(result.organizationId).toBe('org-1')
         })
 
@@ -35,7 +36,8 @@ describe('Security Utilities', () => {
                 requestId: 'req-2',
                 userId: 'user-2',
                 organizationId: 'org-2',
-                role: 'EMPLOYEE'
+                role: 'EMPLOYEE',
+                params: {},
             }
             const existing: Record<string, unknown> = { status: 'ACTIVE' }
             const result = orgFilter(context, existing)

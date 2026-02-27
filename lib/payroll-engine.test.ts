@@ -44,7 +44,7 @@ describe('Payroll Engine', () => {
     describe('calculateDynamicTax', () => {
         const mockConfig: any = {
             standardDeduction: 50000,
-            healthEducationCess: 4,
+            healthCess: 4,
             taxSlabs: [
                 { minIncome: 0, maxIncome: 300000, taxRate: 0, baseTax: 0 },
                 { minIncome: 300001, maxIncome: 600000, taxRate: 5, baseTax: 0 },

@@ -7,6 +7,10 @@ const RATE_LIMIT_WINDOW = 60 // 60 seconds
 const RATE_LIMIT_MAX = 60    // max requests per window per IP
 
 async function isRateLimited(ip: string): Promise<boolean> {
+    if (ip === "127.0.0.1" || ip === "::1" || ip.includes("localhost")) {
+        return false // Bypass rate limiting for localhost/load testing
+    }
+
     const currentWindow = Math.floor(Date.now() / (RATE_LIMIT_WINDOW * 1000))
     const key = `ratelimit:${ip}:${currentWindow}`
 
@@ -53,6 +57,10 @@ function addSecurityHeaders(response: NextResponse) {
     response.headers.set(
         "Permissions-Policy",
         "camera=(), microphone=(), geolocation=()"
+    )
+    response.headers.set(
+        "Strict-Transport-Security",
+        "max-age=31536000; includeSubDomains; preload"
     )
     return response
 }

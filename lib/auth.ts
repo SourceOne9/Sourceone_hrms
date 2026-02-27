@@ -7,20 +7,21 @@ import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     session: { strategy: "jwt" },
+    trustHost: true,
     debug: true,
     pages: {
         signIn: "/login",
     },
     providers: [
-        Google({
-            clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+        ...(process.env.GOOGLE_CLIENT_ID ? [Google({
+            clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-        }),
-        Auth0({
-            clientId: process.env.AUTH0_CLIENT_ID ?? "",
+        })] : []),
+        ...(process.env.AUTH0_CLIENT_ID && process.env.AUTH0_ISSUER ? [Auth0({
+            clientId: process.env.AUTH0_CLIENT_ID,
             clientSecret: process.env.AUTH0_CLIENT_SECRET ?? "",
-            issuer: process.env.AUTH0_ISSUER ?? "",
-        }),
+            issuer: process.env.AUTH0_ISSUER,
+        })] : []),
         Credentials({
             name: "credentials",
             credentials: {

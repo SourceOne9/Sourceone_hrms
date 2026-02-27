@@ -22,9 +22,10 @@ describe('Enterprise Identity Security Tests', () => {
         })
 
         test('allows creating user with valid SCIM token', async () => {
-            prismaMock.organization.findFirst.mockResolvedValue({ id: 'org-1', scimSecret: 'valid-token' })
+            prismaMock.organization.findFirst.mockResolvedValue({ id: 'org-1', scimSecret: 'valid-token' } as any)
             prismaMock.user.findUnique.mockResolvedValue(null)
-            prismaMock.user.create.mockResolvedValue({ id: 'new-user-1', email: 'scim@test.com' })
+            prismaMock.department.findFirst.mockResolvedValue({ id: 'dept-1' } as any)
+            prismaMock.user.create.mockResolvedValue({ id: 'new-user-1', email: 'scim@test.com' } as any)
 
             const req = new Request('http://localhost:3000/api/scim/v2/Users', {
                 method: 'POST',

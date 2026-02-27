@@ -99,9 +99,10 @@ async function benchmarkEndpoint(name, path, method, cookie, iterations = 20, co
     let completed = 0;
 
     const postData = method === 'POST' ? JSON.stringify({
+        entityType: "EMPLOYEE",
+        columns: ["firstName", "lastName", "departmentId"],
         filters: {},
-        metrics: ["headcount"],
-        dimensions: ["department"]
+        limit: 50
     }) : null;
 
     const options = {
