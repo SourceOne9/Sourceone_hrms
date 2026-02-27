@@ -206,9 +206,9 @@ export function AdminDashboard() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-1">
+            <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-1">
                 {loading ? (
-                    Array(5).fill(0).map((_, i) => (
+                    Array(6).fill(0).map((_, i) => (
                         <div key={i} className="bg-[var(--surface)] rounded-[16px] border border-[var(--border)] p-5 h-[130px] flex flex-col gap-3">
                             <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-lg bg-[var(--bg2)]" />
@@ -265,6 +265,15 @@ export function AdminDashboard() {
                             badgeType="up"
                             icon="🔐"
                             iconClass="bg-[var(--purple-dim)]"
+                        />
+                        <StatCard
+                            label="Attrition Rate"
+                            value={(data?.stats?.attritionRate || 0).toFixed(1) + "%"}
+                            sub="last 30 days"
+                            badge={data?.stats?.attritionRate > 5 ? "Alert" : "Stable"}
+                            badgeType={data?.stats?.attritionRate > 5 ? "down" : "up"}
+                            icon="📉"
+                            iconClass="bg-[var(--red-dim)]"
                         />
                     </>
                 )}

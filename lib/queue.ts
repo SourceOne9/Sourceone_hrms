@@ -2,7 +2,7 @@ import { redis } from "./redis"
 
 export interface JobPayload {
     id: string
-    type: "ATTENDANCE_IMPORT" | "PF_IMPORT" | "EMPLOYEE_IMPORT"
+    type: "ATTENDANCE_IMPORT" | "PF_IMPORT" | "EMPLOYEE_IMPORT" | "WEBHOOK_DELIVERY"
     data: unknown
     createdAt: number
 }

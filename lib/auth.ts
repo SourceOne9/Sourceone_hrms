@@ -1,11 +1,13 @@
 import NextAuth, { DefaultSession } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
+import Auth0 from "next-auth/providers/auth0"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     session: { strategy: "jwt" },
+    debug: true,
     pages: {
         signIn: "/login",
     },
@@ -14,6 +16,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             clientId: process.env.GOOGLE_CLIENT_ID ?? "",
             clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
         }),
+        Auth0({
+            clientId: process.env.AUTH0_CLIENT_ID ?? "",
+            clientSecret: process.env.AUTH0_CLIENT_SECRET ?? "",
+            issuer: process.env.AUTH0_ISSUER ?? "",
+        }),
         Credentials({
             name: "credentials",
             credentials: {
@@ -21,59 +28,63 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) return null
-
-                const login = (credentials.email as string).trim()
-
-                // Support login by email OR by employeeCode
-                let user = await prisma.user.findUnique({ where: { email: login } })
-
-                if (!user) {
-                    // Try looking up by employeeCode → find linked user
-                    const employee = await prisma.employee.findUnique({
-                        where: { employeeCode: login },
-                        include: { user: true },
-                    })
-                    if (employee?.user) user = employee.user
-                }
-
-                if (!user || !user.hashedPassword) return null
-
-                const isPasswordValid = await bcrypt.compare(
-                    credentials.password as string,
-                    user.hashedPassword
-                )
-                if (!isPasswordValid) return null
-
-                // Update lastLoginAt
                 try {
-                    await prisma.user.update({
-                        where: { id: user.id },
-                        data: { lastLoginAt: new Date() },
-                    })
-                } catch (error) {
-                    console.error("Failed to update lastLoginAt:", error)
-                }
+                    if (!credentials?.email || !credentials?.password) return null
 
-                return {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    role: user.role,
-                    organizationId: user.organizationId,
-                    avatar: user.avatar,
-                    mustChangePassword: user.mustChangePassword,
+                    const login = (credentials.email as string).trim()
+
+                    // Support login by email OR by employeeCode
+                    let user = await prisma.user.findUnique({ where: { email: login } })
+
+                    if (!user) {
+                        // Try looking up by employeeCode → find linked user
+                        const employee = await prisma.employee.findUnique({
+                            where: { employeeCode: login },
+                            include: { user: true },
+                        })
+                        if (employee?.user) user = employee.user
+                    }
+
+                    if (!user || !user.hashedPassword) return null
+
+                    const isPasswordValid = await bcrypt.compare(
+                        credentials.password as string,
+                        user.hashedPassword
+                    )
+                    if (!isPasswordValid) return null
+
+                    // Update lastLoginAt
+                    try {
+                        await prisma.user.update({
+                            where: { id: user.id },
+                            data: { lastLoginAt: new Date() },
+                        })
+                    } catch (error) {
+                        console.error("Failed to update lastLoginAt:", error)
+                    }
+
+                    return {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        organizationId: user.organizationId,
+                        avatar: user.avatar,
+                        mustChangePassword: user.mustChangePassword,
+                    }
+                } catch (e) {
+                    console.error("AUTHORIZE_ERROR_CAUGHT:", e);
+                    throw e;
                 }
             },
         }),
     ],
     callbacks: {
         async signIn({ user, account }) {
-            // Auto-create user on first Google sign-in
-            if (account?.provider === "google" && user.email) {
+            // Auto-create user on first SSO sign-in (Google/Auth0)
+            if ((account?.provider === "google" || account?.provider === "auth0") && user.email) {
                 const existing = await prisma.user.findUnique({ where: { email: user.email } })
                 if (!existing) {
-                    // Generate a random password so the field is never empty
                     const randomPassword = globalThis.crypto.randomUUID() + globalThis.crypto.randomUUID()
                     const hashedRandom = await bcrypt.hash(randomPassword, 10)
 
@@ -84,7 +95,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                     await prisma.user.create({
                         data: {
-                            name: user.name || "Google User",
+                            name: user.name || "SSO User",
                             email: user.email,
                             hashedPassword: hashedRandom,
                             role: "EMPLOYEE",
@@ -97,55 +108,54 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return true
         },
         async jwt({ token, user, account, trigger, session }) {
-            // Define extended user type for type safety
-            interface ExtendedUser {
-                id?: string
-                role?: string
-                organizationId?: string
-                avatar?: string | null
-                mustChangePassword?: boolean
-            }
-
-            if (user) {
-                const u = user as ExtendedUser
-                token.role = u.role as "ADMIN" | "EMPLOYEE" | undefined
-                token.organizationId = u.organizationId
-                token.avatar = u.avatar
-                token.mustChangePassword = u.mustChangePassword ?? false
-            }
-
-            if (account) {
-                token.accessToken = account.access_token
-                token.refreshToken = account.refresh_token
-                token.expiresAt = account.expires_at
-            }
-
-            // Handle session updates (e.g. after password change)
-            if (trigger === "update" && session) {
-                if (session.mustChangePassword !== undefined) {
-                    token.mustChangePassword = session.mustChangePassword
+            try {
+                if (user) {
+                    const u = user as any
+                    token.role = u.role
+                    token.organizationId = u.organizationId
+                    token.avatar = u.avatar
+                    token.mustChangePassword = u.mustChangePassword ?? false
+                    token.sub = u.id
                 }
-                if (session.name) token.name = session.name
-                if (session.avatar) token.avatar = session.avatar
-            }
 
-            // Fetch role from DB for Google sign-in
-            if (account?.provider === "google" && token.email) {
-                const dbUser = await prisma.user.findUnique({ where: { email: token.email } })
-                if (dbUser) {
-                    token.sub = dbUser.id
-                    token.role = dbUser.role
-                    token.organizationId = dbUser.organizationId
-                    token.avatar = dbUser.avatar || token.picture
-                    token.mustChangePassword = dbUser.mustChangePassword
-                    // Update lastLoginAt for Google logins
-                    await prisma.user.update({
-                        where: { id: dbUser.id },
-                        data: { lastLoginAt: new Date() },
-                    })
+                if (account) {
+                    token.accessToken = account.access_token
+                    token.sessionToken = crypto.randomUUID() // Generate a custom session token for tracking
                 }
+
+                if (trigger === "update" && session) {
+                    if (session.mustChangePassword !== undefined) token.mustChangePassword = session.mustChangePassword
+                    if (session.name) token.name = session.name
+                    if (session.avatar) token.avatar = session.avatar
+                }
+
+                // Session persistence (Week 9)
+                if (token.sub && token.organizationId && token.sessionToken && (user || trigger === "signIn")) {
+                    if ((prisma as any).userSession) {
+                        try {
+                            await (prisma as any).userSession.upsert({
+                                where: { sessionToken: token.sessionToken as string },
+                                update: { lastActive: new Date() },
+                                create: {
+                                    sessionToken: token.sessionToken as string,
+                                    userId: token.sub as string,
+                                    organizationId: token.organizationId as string,
+                                    expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+                                    userAgent: null,
+                                    ipAddress: null,
+                                }
+                            })
+                        } catch (e) {
+                            console.error("Failed to upsert userSession:", e)
+                        }
+                    }
+                }
+
+                return token
+            } catch (e) {
+                console.error("JWT_ERROR_CAUGHT:", e);
+                throw e;
             }
-            return token
         },
         async session({ session, token }) {
             if (session.user) {
@@ -156,6 +166,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 u.avatar = token.avatar
                 u.mustChangePassword = (token.mustChangePassword as boolean) ?? false
                 u.accessToken = token.accessToken as string
+                u.sessionToken = token.sessionToken as string
             }
             return session
         },

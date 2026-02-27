@@ -1,8 +1,9 @@
+import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
 import { apiError, ApiErrorCode } from "@/lib/api-response"
 
-export type Role = "ADMIN" | "EMPLOYEE"
+export type Role = "ADMIN" | "EMPLOYEE" | "HR_MANAGER" | "PAYROLL_ADMIN" | "RECRUITER" | "IT_ADMIN"
 
 export interface AuthContext {
     requestId: string
@@ -10,6 +11,8 @@ export interface AuthContext {
     organizationId: string
     role: Role
     name?: string | null
+    sessionToken?: string
+    params: any
 }
 
 type AuthHandler = (req: Request, context: AuthContext) => Promise<NextResponse>
@@ -22,7 +25,7 @@ import { MetricsCollector } from "@/lib/metrics"
  * RBAC checks, and organization context.
  */
 export function withAuth(requiredRole: Role | Role[], handler: AuthHandler) {
-    return async (req: Request) => {
+    return async (req: Request, { params }: { params: any } = { params: {} }) => {
         const requestId = crypto.randomUUID()
         const startTime = Date.now()
         const url = new URL(req.url)
@@ -35,9 +38,25 @@ export function withAuth(requiredRole: Role | Role[], handler: AuthHandler) {
                 return apiError("Unauthorized", ApiErrorCode.UNAUTHORIZED, 401)
             }
 
-            const { id: userId, organizationId, role, name } = session.user
+            const { id: userId, organizationId, role, name, sessionToken } = session.user as any
             if (!organizationId) {
                 return apiError("Organization account required", ApiErrorCode.FORBIDDEN, 403)
+            }
+
+            // Session Revocation Check (Week 9)
+            if (sessionToken) {
+                const dbSession = await prisma.userSession.findUnique({
+                    where: { sessionToken }
+                })
+                if (!dbSession || dbSession.isRevoked) {
+                    logger.warn("Revoked session attempt", { userId, path, requestId })
+                    return apiError("Session has been revoked", ApiErrorCode.UNAUTHORIZED, 401)
+                }
+                // Update last active in background
+                prisma.userSession.update({
+                    where: { id: dbSession.id },
+                    data: { lastActive: new Date() }
+                }).catch(() => { })
             }
 
             // RBAC Check
@@ -51,7 +70,7 @@ export function withAuth(requiredRole: Role | Role[], handler: AuthHandler) {
             return await logContext.run({ requestId, organizationId, userId }, async () => {
                 logger.info("API Request Started", { path, method: req.method, userId, organizationId })
 
-                const response = await handler(req, { requestId, userId, organizationId, role: role as Role, name })
+                const response = await handler(req, { requestId, userId, organizationId, role: role as Role, name, sessionToken, params })
 
                 const duration = Date.now() - startTime
 

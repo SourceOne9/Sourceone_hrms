@@ -35,11 +35,12 @@ export function Topbar() {
 
     return (
         <div className="h-[60px] bg-[var(--glass-bg)] backdrop-blur-xl border-b border-[var(--border)] flex items-center px-[28px] gap-4 shrink-0 z-40 sticky top-0 transition-colors duration-300">
-            <div className="flex-1 max-w-[380px] relative">
-                <MagnifyingGlassIcon className="absolute left-[13px] top-1/2 -translate-y-1/2 text-[var(--text4)] w-[14px] h-[14px]" />
+            <div className="flex-1 max-w-[380px] relative" role="search">
+                <MagnifyingGlassIcon className="absolute left-[13px] top-1/2 -translate-y-1/2 text-[var(--text4)] w-[14px] h-[14px]" aria-hidden="true" />
                 <input
                     type="text"
                     placeholder="Quick search employees, departments..."
+                    aria-label="Search employees and departments"
                     className="w-full pl-[40px] pr-[16px] py-[9px] bg-[var(--bg)] border border-[var(--border)] rounded-[10px] text-[13px] text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--accent)] focus:bg-[var(--surface)] focus:shadow-[0_0_0_3px_var(--glow)] placeholder-[var(--text4)]"
                 />
             </div>
@@ -52,10 +53,13 @@ export function Topbar() {
                 <div className="relative" ref={menuRef}>
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className="w-[38px] h-[38px] rounded-full bg-gradient-to-br from-[var(--accent)] to-[#5856d6] flex items-center justify-center text-white text-[12px] font-bold cursor-pointer border-2 border-transparent transition-all duration-200 shadow-[0_2px_8px_var(--glow)] hover:border-[var(--accent)] hover:scale-105 overflow-hidden"
+                        aria-label="User menu"
+                        aria-expanded={isOpen}
+                        aria-haspopup="true"
+                        className="w-[38px] h-[38px] rounded-full bg-gradient-to-br from-[var(--accent)] to-[#5856d6] flex items-center justify-center text-white text-[12px] font-bold cursor-pointer border-2 border-transparent transition-all duration-200 shadow-[0_2px_8px_var(--glow)] hover:border-[var(--accent)] hover:scale-105 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                     >
                         {user?.avatar ? (
-                            <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
+                            <img src={user.avatar} alt={user.name || "User Avatar"} className="w-full h-full object-cover" />
                         ) : (
                             initials
                         )}

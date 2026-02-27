@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { queue } from "@/lib/queue"
+import { createHmacSignature } from "@/lib/webhooks"
 
 // POST /api/worker/process-queue
 // Use a secure secret in production to invoke this
@@ -96,6 +97,62 @@ export async function POST(req: Request) {
                     }
                     inserted++
                 } catch { skipped++ }
+            }
+        } else if (type === "WEBHOOK_DELIVERY") {
+            const { deliveryId, webhookUrl, secret, payload } = rawRows as any
+            const payloadString = JSON.stringify(payload)
+            const headers: Record<string, string> = {
+                "Content-Type": "application/json",
+                "X-EMS-Event": (payload as any).event,
+                "X-EMS-Delivery": (payload as any).id,
+            }
+
+            if (secret) {
+                headers["X-EMS-Signature"] = createHmacSignature(payloadString, secret)
+            }
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: "POST",
+                    headers,
+                    body: payloadString,
+                })
+
+                const responseBody = await response.text()
+
+                await prisma.webhookDelivery.update({
+                    where: { id: deliveryId },
+                    data: {
+                        responseCode: response.status,
+                        responseBody: responseBody.slice(0, 1000),
+                        status: response.ok ? "SUCCESS" : "FAILED",
+                    }
+                })
+
+                if (!response.ok) {
+                    const delivery = await prisma.webhookDelivery.findUnique({ where: { id: deliveryId } })
+                    if (delivery && delivery.retryCount < 5) {
+                        await prisma.webhookDelivery.update({
+                            where: { id: deliveryId },
+                            data: {
+                                retryCount: { increment: 1 },
+                                nextRetryAt: new Date(Date.now() + Math.pow(2, delivery.retryCount + 1) * 60 * 1000)
+                            }
+                        })
+                    }
+                }
+                inserted++
+            } catch (error: any) {
+                console.error("[WEBHOOK_DELIVERY_ERROR]", error)
+                await prisma.webhookDelivery.update({
+                    where: { id: deliveryId },
+                    data: {
+                        status: "FAILED",
+                        responseBody: error.message,
+                        nextRetryAt: new Date(Date.now() + 60 * 1000)
+                    }
+                })
+                skipped++
             }
         }
 

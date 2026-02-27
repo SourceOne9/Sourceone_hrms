@@ -9,6 +9,14 @@ import { Toaster } from "sonner";
 export const metadata: Metadata = {
   title: "EMS Pro – Enterprise Dashboard",
   description: "Enterprise Management System",
+  manifest: "/manifest.json",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
+  themeColor: "#007aff",
 };
 
 export default function RootLayout({

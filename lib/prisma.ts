@@ -11,23 +11,29 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrismaClient() {
-    // Make sure we throw an error if DATABASE_URL is somehow missing
     const connectionString = process.env.DATABASE_URL
     if (!connectionString) {
         throw new Error("DATABASE_URL is not set!")
     }
 
+    const isDev = process.env.NODE_ENV === "development"
+    const logOptions: any = isDev ? ["error", "warn"] : ["error"]
+
+    console.log("[Prisma] Initializing PrismaClient with driver-adapter.")
+
+    // We intentionally don't keep a global connection pool in serverless except via cache,
+    // but Next.js hot-reloads execute this module multiple times.
     const pool = new Pool({
         connectionString,
-        max: 2,                        // K1: Reduced per-instance (serverless = many instances; 2 × 100 = 200 total)
-        idleTimeoutMillis: 5000,       // Release idle connections faster
-        connectionTimeoutMillis: 3000, // Fail fast if pool is exhausted
+        max: 5,
+        idleTimeoutMillis: 5000,
+        connectionTimeoutMillis: 3000,
     })
     const adapter = new PrismaPg(pool)
 
     return new PrismaClient({
         adapter,
-        log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+        log: logOptions,
     })
 }
 

@@ -96,18 +96,22 @@ export function EmployeePayrollView() {
             {activeTab === "payroll" ? (
                 <>
                     {latest ? (
-                        <div className="glass p-8 bg-gradient-to-br from-[#007aff] to-[#5856d6] text-white relative overflow-hidden mb-8 shadow-lg rounded-2xl">
-                            <div className="relative z-10 flex justify-between items-end">
+                        <div className="glass p-6 md:p-8 bg-gradient-to-br from-[#007aff] to-[#5856d6] text-white relative overflow-hidden mb-8 shadow-lg rounded-2xl">
+                            <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-end gap-6">
                                 <div>
                                     <div className="text-[13px] font-medium text-white/80 uppercase tracking-wider mb-2">Last Disbursed Salary ({latest.month})</div>
-                                    <div className="text-[48px] font-extrabold leading-none mb-1">₹{latest.netSalary.toLocaleString()}</div>
+                                    <div className="text-[36px] md:text-[48px] font-extrabold leading-none mb-1">₹{latest.netSalary.toLocaleString()}</div>
                                     <div className="text-[14px] text-white/90 font-medium">Credited on {format(new Date(latest.createdAt), "MMM dd, yyyy")}</div>
                                 </div>
-                                <div className="text-right">
-                                    <div className="text-[13px] text-white/80 mb-1">Gross Earnings</div>
-                                    <div className="text-[18px] font-bold mb-3">₹{(latest.basicSalary + latest.allowances).toLocaleString()}</div>
-                                    <div className="text-[13px] text-white/80 mb-1">Total Deductions</div>
-                                    <div className="text-[18px] font-bold">-₹{(latest.pfDeduction + latest.tax + latest.otherDed).toLocaleString()}</div>
+                                <div className="text-left md:text-right flex flex-row md:flex-col gap-6 md:gap-0">
+                                    <div>
+                                        <div className="text-[12px] md:text-[13px] text-white/80 mb-1">Gross Earnings</div>
+                                        <div className="text-[16px] md:text-[18px] font-bold md:mb-3">₹{(latest.basicSalary + latest.allowances).toLocaleString()}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-[12px] md:text-[13px] text-white/80 mb-1">Total Deductions</div>
+                                        <div className="text-[16px] md:text-[18px] font-bold">-₹{(latest.pfDeduction + latest.tax + latest.otherDed).toLocaleString()}</div>
+                                    </div>
                                 </div>
                             </div>
                             <div className="absolute right-[-40px] top-[-40px] w-[300px] h-[300px] bg-white/10 rounded-full blur-[60px]" />
@@ -122,7 +126,9 @@ export function EmployeePayrollView() {
                         <div className="p-[16px_20px] flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface2)] backdrop-blur-md">
                             <div className="text-[14px] font-bold text-[var(--text)]">📄 Payslip History</div>
                         </div>
-                        <div className="overflow-x-auto">
+
+                        {/* Desktop Table */}
+                        <div className="hidden md:block overflow-x-auto">
                             <table className="w-full border-collapse">
                                 <thead>
                                     <tr className="border-b border-[var(--border)] bg-[var(--surface2)] backdrop-blur-md">
@@ -160,22 +166,62 @@ export function EmployeePayrollView() {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Mobile Card Stack */}
+                        <div className="md:hidden divide-y divide-[var(--border)]">
+                            {!isLoading ? payslips.map((slip) => (
+                                <div key={slip.id} className="p-4 flex flex-col gap-3">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="text-[14px] font-bold text-[var(--text)]">{slip.month}</div>
+                                            <div className="text-[12px] text-[var(--text3)]">Net Salary: <span className="text-[var(--accent)] font-bold">₹{slip.netSalary.toLocaleString()}</span></div>
+                                        </div>
+                                        <span className={cn("inline-flex items-center gap-[4px] px-[10px] py-[2px] rounded-full text-[10px] font-bold border",
+                                            slip.status === 'PAID' ? "bg-[var(--green-dim)] text-[#1a9140] border-[rgba(52,199,89,0.25)]" :
+                                                slip.status === 'PROCESSED' ? "bg-[var(--blue-dim)] text-[#007aff] border-[rgba(0,122,255,0.25)]" :
+                                                    "bg-[var(--bg2)] text-[var(--text3)] border-[var(--border)]")
+                                        }>
+                                            {slip.status}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-[12px]">
+                                        <div className="flex gap-4">
+                                            <div className="flex flex-col">
+                                                <span className="text-[var(--text4)] text-[10px] uppercase">G. Earnings</span>
+                                                <span className="font-mono text-[var(--text2)]">₹{(slip.basicSalary + slip.allowances).toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-[var(--text4)] text-[10px] uppercase">Deductions</span>
+                                                <span className="font-mono text-[var(--red)]">₹{(slip.pfDeduction + slip.tax + slip.otherDed).toLocaleString()}</span>
+                                            </div>
+                                        </div>
+                                        <button className="p-2 bg-[var(--bg2)] rounded-lg text-[var(--text2)]">
+                                            <DownloadIcon className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )) : null}
+                        </div>
                     </div>
                 </>
             ) : (
                 <>
-                    <div className="glass p-8 bg-gradient-to-br from-[#1a9140] to-[#34c759] text-white relative overflow-hidden mb-8 shadow-lg rounded-2xl">
-                        <div className="relative z-10 flex justify-between items-end">
+                    <div className="glass p-6 md:p-8 bg-gradient-to-br from-[#1a9140] to-[#34c759] text-white relative overflow-hidden mb-8 shadow-lg rounded-2xl">
+                        <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-end gap-6">
                             <div>
                                 <div className="text-[13px] font-medium text-white/80 uppercase tracking-wider mb-2">Total Accumulated Corpus</div>
-                                <div className="text-[48px] font-extrabold leading-none mb-1">₹{totalPF.toLocaleString()}</div>
+                                <div className="text-[36px] md:text-[48px] font-extrabold leading-none mb-1">₹{totalPF.toLocaleString()}</div>
                                 <div className="text-[14px] text-white/90 font-medium">As of {format(new Date(), "MMMM yyyy")}</div>
                             </div>
-                            <div className="text-right">
-                                <div className="text-[13px] text-white/80 mb-1">Total Contributions</div>
-                                <div className="text-[24px] font-bold">{pfRecords.length} Months</div>
-                                <div className="text-[13px] text-white/80 mt-2 mb-1">A/C Number</div>
-                                <div className="text-[16px] font-mono font-bold tracking-wider">{pfRecords[0]?.accountNumber || "N/A"}</div>
+                            <div className="text-left md:text-right flex flex-row md:flex-col gap-6 md:gap-0">
+                                <div>
+                                    <div className="text-[12px] md:text-[13px] text-white/80 mb-1">Total Contributions</div>
+                                    <div className="text-[20px] md:text-[24px] font-bold">{pfRecords.length} Months</div>
+                                </div>
+                                <div className="md:mt-4">
+                                    <div className="text-[12px] md:text-[13px] text-white/80 mb-1">A/C Number</div>
+                                    <div className="text-[14px] md:text-[16px] font-mono font-bold tracking-wider">{pfRecords[0]?.accountNumber || "N/A"}</div>
+                                </div>
                             </div>
                         </div>
                         <div className="absolute right-[-40px] top-[-40px] w-[300px] h-[300px] bg-white/10 rounded-full blur-[60px]" />
@@ -185,7 +231,9 @@ export function EmployeePayrollView() {
                         <div className="p-[16px_20px] flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface2)] backdrop-blur-md">
                             <div className="text-[14px] font-bold text-[var(--text)]">📁 PF Contribution Ledger</div>
                         </div>
-                        <div className="overflow-x-auto">
+
+                        {/* Desktop Table */}
+                        <div className="hidden md:block overflow-x-auto">
                             <table className="w-full border-collapse">
                                 <thead>
                                     <tr className="border-b border-[var(--border)] bg-[var(--surface2)] backdrop-blur-md">
@@ -218,6 +266,29 @@ export function EmployeePayrollView() {
                                     )) : null}
                                 </tbody>
                             </table>
+                        </div>
+
+                        {/* Mobile Card Stack */}
+                        <div className="md:hidden divide-y divide-[var(--border)]">
+                            {!isLoading ? pfRecords.map((rec) => (
+                                <div key={rec.id} className="p-4 flex flex-col gap-1">
+                                    <div className="flex justify-between items-center">
+                                        <div className="text-[14px] font-bold text-[var(--text)]">{rec.month}</div>
+                                        <span className={cn(
+                                            "px-2 px-1 rounded-full text-[9px] font-bold uppercase tracking-[0.3px]",
+                                            rec.status === "Credited" ? "bg-[#1a914015] text-[#1a9140]" :
+                                                rec.status === "Pending" ? "bg-[#f59e0b15] text-[#f59e0b]" :
+                                                    "bg-[#ef444415] text-[#ef4444]"
+                                        )}>
+                                            {rec.status}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between text-[12px] mt-1">
+                                        <div className="text-[var(--text3)]">Contribution: <span className="text-[#007aff] font-bold">₹{rec.totalContribution.toLocaleString()}</span></div>
+                                        <div className="text-[var(--text4)] font-mono text-[11px]">Basic: ₹{rec.basicSalary.toLocaleString()}</div>
+                                    </div>
+                                </div>
+                            )) : null}
                         </div>
                     </div>
                 </>

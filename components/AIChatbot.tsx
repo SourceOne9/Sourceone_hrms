@@ -182,10 +182,25 @@ export function AIChatbot() {
                         >
                             🤖
                         </div>
-                        <div>
+                        <div style={{ flex: 1 }}>
                             <div style={{ fontWeight: 700, fontSize: 15, fontFamily: "var(--font)" }}>EMS Pro Assistant</div>
                             <div style={{ fontSize: 12, opacity: 0.85 }}>Powered by Gemini AI</div>
                         </div>
+                        <button
+                            onClick={() => setMessages([{ id: "welcome", role: "assistant", content: "Chat cleared. How can I help you now? 👋" }])}
+                            style={{
+                                background: "rgba(255,255,255,0.15)",
+                                border: "none",
+                                color: "white",
+                                fontSize: "11px",
+                                padding: "4px 8px",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                                transition: "all 0.2s"
+                            }}
+                        >
+                            Clear
+                        </button>
                     </div>
 
                     {/* Messages */}

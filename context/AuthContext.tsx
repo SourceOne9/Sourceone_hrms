@@ -4,7 +4,7 @@ import * as React from "react"
 import { useSession, signOut } from "next-auth/react"
 import { useRouter, usePathname } from "next/navigation"
 
-type UserRole = "ADMIN" | "EMPLOYEE"
+type UserRole = "ADMIN" | "EMPLOYEE" | "HR_MANAGER" | "PAYROLL_ADMIN" | "RECRUITER" | "IT_ADMIN"
 
 interface User {
     id: string

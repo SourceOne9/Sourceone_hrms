@@ -10,6 +10,24 @@ export async function POST() {
 
         const headersList = await headers()
         const now = new Date()
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+        // Fetch Policy, Shift Assignment, and Holidays
+        const [policy, shiftAssignment, holiday] = await Promise.all([
+            prisma.attendancePolicy.findUnique({ where: { organizationId: employee.organizationId } }),
+            prisma.shiftAssignment.findFirst({
+                where: {
+                    employeeId: employee.id,
+                    startDate: { lte: now },
+                    OR: [{ endDate: null }, { endDate: { gte: now } }]
+                },
+                include: { shift: true }
+            }),
+            prisma.holiday.findFirst({ where: { organizationId: employee.organizationId, date: startOfDay } })
+        ])
+
+        // Fallback policy if none exists
+        const effectivePolicy = policy || { lateGracePeriod: 15, earlyExitGrace: 15, otThreshold: 60 } as any
 
         // Use a transaction to atomically check + create (prevents TOCTOU race)
         const result = await prisma.$transaction(async (tx) => {
@@ -31,16 +49,32 @@ export async function POST() {
             })
 
             // Synchronize with Attendance record for the day
-            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
             const attendance = await tx.attendance.findFirst({
                 where: {
                     employeeId: employee.id,
-                    date: {
-                        gte: startOfDay,
-                        lt: new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000)
-                    }
+                    date: startOfDay
                 }
             })
+
+            // Policy Evaluation
+            let isLate = false
+            let status: any = "PRESENT"
+
+            if (holiday) {
+                status = "HOLIDAY"
+            } else if (shiftAssignment) {
+                const dayOfWeek = now.getDay()
+                if (!shiftAssignment.shift.workDays.includes(dayOfWeek)) {
+                    status = "WEEKEND"
+                } else {
+                    const shiftStart = new Date(now)
+                    const [h, m] = shiftAssignment.shift.startTime.split(":").map(Number)
+                    shiftStart.setHours(h, m, 0, 0)
+
+                    const lateMinutes = (now.getTime() - shiftStart.getTime()) / (1000 * 60)
+                    isLate = lateMinutes > effectivePolicy.lateGracePeriod
+                }
+            }
 
             if (!attendance) {
                 await tx.attendance.create({
@@ -49,8 +83,15 @@ export async function POST() {
                         organizationId: employee.organizationId,
                         date: startOfDay,
                         checkIn: now,
-                        status: "PRESENT"
+                        status,
+                        isLate
                     }
+                })
+            } else {
+                // If attendance already exists (e.g. checked out and back in), update it
+                await tx.attendance.update({
+                    where: { id: attendance.id },
+                    data: { checkIn: attendance.checkIn || now }
                 })
             }
 

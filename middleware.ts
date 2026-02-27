@@ -28,6 +28,8 @@ const publicRoutes = [
     "/login",
     "/api/auth",
     "/api/health",
+    "/api/seed-load-test",
+    "/api/raw-health",
 ]
 
 // Routes that require ADMIN role

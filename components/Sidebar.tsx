@@ -40,6 +40,7 @@ const navItems: NavItem[] = [
   { name: 'Leave', href: '/leave', icon: CalendarIcon },
   { name: 'Attendance', href: '/attendance', icon: ClockIcon },
   { name: 'Payroll', href: '/payroll', icon: ReaderIcon },
+  { name: 'Reports', href: '/admin/reports', icon: BarChartIcon },
   { name: 'Performance', href: '/performance', icon: BarChartIcon },
   { name: 'Resignation', href: '/resignation', icon: ExitIcon },
   { name: 'Training', href: '/training', icon: BackpackIcon },
@@ -84,22 +85,27 @@ export function NavContent({ pathname, user, logout, onItemClick }: { pathname: 
               key={item.name}
               href={href}
               onClick={onItemClick}
+              aria-label={`Navigate to ${item.name}`}
               className={cn(
-                "flex items-center gap-[10px] p-[10px_12px] rounded-[10px] cursor-pointer text-[13.5px] font-medium transition-all duration-200 relative overflow-hidden group select-none",
+                "flex items-center gap-[10px] p-[10px_12px] rounded-[10px] cursor-pointer text-[13.5px] font-medium transition-all duration-200 relative overflow-hidden group select-none outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]",
                 isActive
                   ? "text-[var(--accent)] bg-[rgba(0,122,255,0.1)] border border-[rgba(0,122,255,0.18)] shadow-[0_1px_4px_rgba(0,122,255,0.08)] dark:bg-[rgba(10,132,255,0.15)] dark:border-[rgba(10,132,255,0.2)]"
                   : "text-[var(--text2)] hover:text-[var(--text)] hover:bg-[rgba(0,0,0,0.04)] hover:translate-x-[2px] dark:hover:bg-[rgba(255,255,255,0.05)]"
               )}
             >
-              <div className={cn(
-                "absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[60%] bg-[var(--accent)] rounded-r-[3px] transition-opacity duration-200",
-                isActive ? "opacity-100" : "opacity-0"
-              )} />
+              <div
+                aria-hidden="true"
+                className={cn(
+                  "absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[60%] bg-[var(--accent)] rounded-r-[3px] transition-opacity duration-200",
+                  isActive ? "opacity-100" : "opacity-0"
+                )} />
 
-              <item.icon className={cn(
-                "w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110",
-                isActive ? "text-[var(--accent)]" : "text-current"
-              )} />
+              <item.icon
+                aria-hidden="true"
+                className={cn(
+                  "w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110",
+                  isActive ? "text-[var(--accent)]" : "text-current"
+                )} />
 
               <span>{item.name}</span>
 
@@ -129,8 +135,9 @@ export function NavContent({ pathname, user, logout, onItemClick }: { pathname: 
           </Link>
           <button
             onClick={logout}
-            className="ml-auto text-[var(--text4)] text-[14px] transition-colors duration-200 hover:text-[var(--red)] p-2 hover:bg-[var(--red-dim)] rounded-md"
+            className="ml-auto text-[var(--text4)] text-[14px] transition-colors duration-200 hover:text-[var(--red)] p-2 hover:bg-[var(--red-dim)] rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[var(--red)]"
             title="Logout"
+            aria-label="Logout"
           >
             <ExitIcon />
           </button>

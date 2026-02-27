@@ -1,11 +1,26 @@
-import { AsyncLocalStorage } from 'async_hooks'
+// Safe import for Edge runtime compatibility
+let ALS: any = null
+try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    ALS = require('async_hooks').AsyncLocalStorage
+} catch (e) {
+    // async_hooks not available in Edge runtime (Next.js Middleware)
+}
 
-// Context for global request tracking
-export const logContext = new AsyncLocalStorage<{
+interface LogContextType {
     requestId: string
     organizationId?: string
     userId?: string
-}>()
+}
+
+class MockAsyncLocalStorage<T> {
+    getStore(): T | undefined { return undefined }
+    run<R>(store: T, callback: () => R): R { return callback() }
+}
+
+export const logContext = ALS
+    ? new (ALS as any)()
+    : new MockAsyncLocalStorage<LogContextType>()
 
 export enum LogLevel {
     DEBUG = 0,

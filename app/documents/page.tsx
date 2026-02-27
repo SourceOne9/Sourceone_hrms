@@ -21,7 +21,7 @@ export default function Documents() {
                 <p className="text-[13.5px] text-[var(--text3)] mt-[4px]">Securely access your personal and company documents</p>
             </div>
 
-            <div className="grid grid-cols-[250px_1fr] gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
                 {/* Sidebar / Folders */}
                 <div className="glass p-4 self-start">
                     <div className="text-[12px] font-bold text-[var(--text3)] uppercase tracking-[0.5px] mb-3 px-2">Folders</div>
@@ -45,7 +45,7 @@ export default function Documents() {
                     </ul>
                 </div>
 
-                {/* File Grid */}
+                {/* File List */}
                 <div className="space-y-4">
                     <div className="text-[14px] font-bold text-[var(--text)] border-b border-[var(--border)] pb-2 flex justify-between items-center">
                         <span>Recent Files</span>
@@ -56,7 +56,8 @@ export default function Documents() {
                         </div>
                     </div>
 
-                    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--r)] overflow-hidden shadow-sm">
+                    {/* Desktop Table */}
+                    <div className="hidden md:block bg-[var(--surface)] border border-[var(--border)] rounded-[var(--r)] overflow-hidden shadow-sm">
                         <table className="w-full border-collapse">
                             <thead>
                                 <tr className="border-b border-[var(--border)] bg-[var(--surface2)] backdrop-blur-md">
@@ -94,6 +95,30 @@ export default function Documents() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Mobile Card Stack */}
+                    <div className="md:hidden space-y-3">
+                        {documents.map((doc, i) => (
+                            <div key={i} className="glass p-4 flex items-center justify-between animate-[pageIn_0.3s_both]" style={{ animationDelay: `${i * 0.05}s` }}>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[rgba(255,59,48,0.1)] flex items-center justify-center text-[var(--red)]">
+                                        <FileTextIcon className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <div className="text-[14px] font-bold text-[var(--text)] truncate max-w-[180px]">{doc.name}</div>
+                                        <div className="text-[12px] text-[var(--text3)] flex gap-2">
+                                            <span>{doc.date}</span>
+                                            <span>•</span>
+                                            <span>{doc.size}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button className="w-9 h-9 flex items-center justify-center bg-[var(--bg2)] rounded-full text-[var(--text2)]">
+                                    <DownloadIcon className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

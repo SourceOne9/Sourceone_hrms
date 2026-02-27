@@ -41,9 +41,29 @@ model Organization {
   workflowTemplates  WorkflowTemplate[]
   workflowInstances  WorkflowInstance[]
 
+  // Attendance Policy (Week 7)
+  shifts             Shift[]
+  shiftAssignments   ShiftAssignment[]
+  attendancePolicies AttendancePolicy[]
+  holidays           Holiday[]
+  regularizations    AttendanceRegularization[]
+
   // Payroll Configs
   payrollConfigs     PayrollComplianceConfig[]
   payrollAudits      PayrollAudit[]
+
+  // Integrations (Week 8)
+  webhooks           Webhook[]
+  kudos              Kudos[]
+
+  // Enterprise Identity (Week 9)
+  scimSecret         String?      @unique
+  userSessions       UserSession[]
+
+  // Reporting & Analytics (Week 10)
+  savedReports       SavedReport[]
+  reportSchedules    ReportSchedule[]
+  inAppNotifications InAppNotification[]
 }
 
 model User {
@@ -62,6 +82,7 @@ model User {
   lastLoginAt        DateTime?
   mustChangePassword Boolean       @default(false)
   employee           Employee?
+  sessions           UserSession[]
 }
 
 model Department {
@@ -125,10 +146,14 @@ model Employee {
   weeklyScores       WeeklyScores[]
   notifications      Notifications[]
   adminAlerts        AdminAlerts[]
+  shiftAssignments   ShiftAssignment[]
+  regularizations    AttendanceRegularization[]
 
   // Workflows
   requestedWorkflows WorkflowInstance[] @relation("WorkflowRequester")
   workflowActions    WorkflowAction[]   @relation("WorkflowActor")
+  kudosSent          Kudos[]            @relation("KudosSent")
+  kudosReceived      Kudos[]            @relation("KudosReceived")
 
   @@index([departmentId])
   @@index([userId])
@@ -315,18 +340,119 @@ model Attendance {
   checkIn        DateTime?
   checkOut       DateTime?
   workHours      Float?
+  
+  // Policy Engine Results (Week 7)
+  overtime       Float?           @default(0) // In minutes
+  isLate         Boolean          @default(false)
+  isEarlyExit    Boolean          @default(false)
+  
   status         AttendanceStatus @default(PRESENT)
   employeeId     String
   organizationId String
   createdAt      DateTime         @default(now())
+  
   employee       Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   organization   Organization     @relation(fields: [organizationId], references: [id])
+  regularization AttendanceRegularization?
 
   @@index([employeeId])
   @@index([date])
   @@index([employeeId, date])
   @@index([organizationId])
 }
+
+// ─── Phase 2: Core HRMS Phase 2 - Attendance Policy Engine (Week 7) ───
+
+model Shift {
+  id             String       @id @default(cuid())
+  name           String
+  startTime      String       // HH:mm
+  endTime        String       // HH:mm
+  workDays       Int[]        // 0-6 (Sun-Sat)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  assignments    ShiftAssignment[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+}
+
+model ShiftAssignment {
+  id             String       @id @default(cuid())
+  employeeId     String
+  shiftId        String
+  startDate      DateTime
+  endDate        DateTime?
+  organizationId String
+  
+  employee       Employee     @relation(fields: [employeeId], references: [id])
+  shift          Shift        @relation(fields: [shiftId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([employeeId])
+  @@index([shiftId])
+  @@index([organizationId])
+}
+
+model AttendancePolicy {
+  id                String       @id @default(cuid())
+  name              String       @default("DEFAULT")
+  lateGracePeriod   Int          @default(15) // Minutes
+  earlyExitGrace    Int          @default(15) // Minutes
+  otThreshold       Int          @default(60) // Extra minutes before OT starts
+  organizationId    String       @unique
+  organization      Organization @relation(fields: [organizationId], references: [id])
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+}
+
+model AttendanceRegularization {
+  id             String           @id @default(cuid())
+  attendanceId   String           @unique
+  reason         String
+  requestedTime  DateTime?        // Corrected CheckIn or CheckOut time
+  type           RegularizationType
+  status         RegularizationStatus @default(PENDING)
+  notes          String?
+  employeeId     String
+  organizationId String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  attendance     Attendance       @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  employee       Employee         @relation(fields: [employeeId], references: [id])
+  
+  @@index([organizationId])
+  @@index([employeeId])
+}
+
+model Holiday {
+  id             String       @id @default(cuid())
+  name           String
+  date           DateTime
+  isOptional     Boolean      @default(false)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([date])
+}
+
+enum RegularizationType {
+  MISSING_PUNCH
+  LATE_CORRECTION
+  EARLY_EXIT_CORRECTION
+}
+
+enum RegularizationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ─── Phase 2: Core HRMS Phase 2 - Payroll Compliance ───
 
 model Payroll {
   id             String       @id @default(cuid())
@@ -659,11 +785,51 @@ model AdminAlerts {
   @@index([organizationId])
 }
 
+model Kudos {
+  id             String       @id @default(cuid())
+  message        String
+  fromId         String
+  toId           String
+  organizationId String
+  createdAt      DateTime     @default(now())
+
+  from         Employee     @relation("KudosSent", fields: [fromId], references: [id])
+  to           Employee     @relation("KudosReceived", fields: [toId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([fromId])
+  @@index([toId])
+  @@index([organizationId])
+}
+
+model UserSession {
+  id             String       @id @default(cuid())
+  sessionToken   String       @unique
+  userId         String
+  organizationId String
+  expires        DateTime
+  userAgent      String?
+  ipAddress      String?
+  isRevoked      Boolean      @default(false)
+  lastActive     DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
 // ─── Enums ───
 
 enum Role {
   ADMIN
   EMPLOYEE
+  HR_MANAGER
+  PAYROLL_ADMIN
+  RECRUITER
+  IT_ADMIN
 }
 
 enum EmployeeStatus {
@@ -1016,4 +1182,120 @@ enum PayrollAuditAction {
   MANUAL_OVERRIDE
   FINALIZED
   LOCKED
+}
+
+// ─── Phase 2: Core HRMS Phase 2 - Integrations & Webhooks (Week 8) ───
+
+model Webhook {
+  id             String            @id @default(cuid())
+  url            String
+  secret         String?           // For HMAC signing
+  events         String[]          // Array of event types (e.g., ["PAYROLL.FINALIZED", "EMPLOYEE.CREATED"])
+  isActive       Boolean           @default(true)
+  organizationId String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+  deliveries     WebhookDelivery[]
+
+  @@index([organizationId])
+}
+
+model WebhookDelivery {
+  id             String                @id @default(cuid())
+  webhookId      String
+  event          String
+  payload        Json
+  responseCode   Int?
+  responseBody   String?
+  status         WebhookDeliveryStatus @default(PENDING)
+  retryCount     Int                   @default(0)
+  nextRetryAt    DateTime?
+  createdAt      DateTime              @default(now())
+
+  webhook        Webhook               @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId])
+  @@index([status])
+}
+
+enum WebhookDeliveryStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+// ─── Phase 3: Reporting & Analytics (Week 10) ───
+
+model SavedReport {
+  id             String           @id @default(cuid())
+  name           String
+  description    String?
+  config         Json             // Stores columns, filters, sorting, grouping
+  entityType     ReportEntityType
+  organizationId String
+  creatorId      String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  schedules      ReportSchedule[]
+
+  @@index([organizationId])
+}
+
+model ReportSchedule {
+  id             String           @id @default(cuid())
+  reportId       String
+  frequency      ReportFrequency
+  format         ReportFormat     @default(CSV)
+  recipients     String[]         // Email addresses
+  lastRunAt      DateTime?
+  nextRunAt      DateTime
+  isActive       Boolean          @default(true)
+  organizationId String
+  createdAt      DateTime         @default(now())
+
+  report         SavedReport      @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([reportId])
+}
+
+enum ReportEntityType {
+  EMPLOYEE
+  PAYROLL
+  ATTENDANCE
+  PERFORMANCE
+  LEAVE
+}
+
+enum ReportFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum ReportFormat {
+  CSV
+  PDF
+}
+
+model InAppNotification {
+  id             String       @id @default(cuid())
+  userId         String
+  title          String
+  description    String
+  type           String       @default("INFO") // INFO, SUCCESS, WARNING, ERROR
+  isRead         Boolean      @default(false)
+  organizationId String
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([createdAt])
 }

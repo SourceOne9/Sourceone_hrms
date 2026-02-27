@@ -56,23 +56,54 @@ export async function POST() {
 
             // Synchronize with Attendance record
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-            const attendance = await tx.attendance.findFirst({
-                where: {
-                    employeeId: employee.id,
-                    date: {
-                        gte: startOfDay,
-                        lt: new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000)
+            const [attendance, policy, shiftAssignment] = await Promise.all([
+                tx.attendance.findFirst({
+                    where: {
+                        employeeId: employee.id,
+                        date: startOfDay
                     }
-                }
-            })
+                }),
+                tx.attendancePolicy.findUnique({ where: { organizationId: employee.organizationId } }),
+                tx.shiftAssignment.findFirst({
+                    where: {
+                        employeeId: employee.id,
+                        startDate: { lte: now },
+                        OR: [{ endDate: null }, { endDate: { gte: now } }]
+                    },
+                    include: { shift: true }
+                })
+            ])
 
             if (attendance) {
                 const addedHours = totalWorkSec / 3600
+                const effectivePolicy = policy || { lateGracePeriod: 15, earlyExitGrace: 15, otThreshold: 60 } as any
+
+                let isEarlyExit = false
+                let overtime = 0
+
+                if (shiftAssignment) {
+                    const shiftEnd = new Date(now)
+                    const [h, m] = shiftAssignment.shift.endTime.split(":").map(Number)
+                    shiftEnd.setHours(h, m, 0, 0)
+
+                    // Early Exit
+                    const earlyMinutes = (shiftEnd.getTime() - now.getTime()) / (1000 * 60)
+                    isEarlyExit = earlyMinutes > effectivePolicy.earlyExitGrace
+
+                    // Overtime
+                    const extraMinutes = (now.getTime() - shiftEnd.getTime()) / (1000 * 60)
+                    if (extraMinutes > effectivePolicy.otThreshold) {
+                        overtime = extraMinutes
+                    }
+                }
+
                 await tx.attendance.update({
                     where: { id: attendance.id },
                     data: {
                         checkOut: now,
-                        workHours: (attendance.workHours || 0) + addedHours
+                        workHours: (attendance.workHours || 0) + addedHours,
+                        isEarlyExit: attendance.isEarlyExit || isEarlyExit,
+                        overtime: (attendance.overtime || 0) + overtime
                     }
                 })
             }

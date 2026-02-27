@@ -17,6 +17,16 @@ export const prismaMock = {
     user: {
         findUnique: vi.fn(),
         create: vi.fn(),
+        update: vi.fn(),
+    },
+    userSession: {
+        findMany: vi.fn(),
+        findUnique: vi.fn(),
+        findFirst: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        upsert: vi.fn(),
+        delete: vi.fn(),
     },
     $transaction: vi.fn((queries) => {
         if (Array.isArray(queries)) return Promise.all(queries)

@@ -4,19 +4,36 @@ import * as React from "react"
 import { BellIcon, CheckIcon } from "@radix-ui/react-icons"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-
-const initialNotifications = [
-    { id: 1, title: "Leave Approved", desc: "Your sick leave for Oct 24 is approved", time: "2h ago", read: false },
-    { id: 2, title: "Payslip Available", desc: "Salary slip for September 2026 is ready", time: "1d ago", read: false },
-    { id: 3, title: "Kudos Received", desc: "Sarah thanked you for helping with deployment", time: "2d ago", read: true },
-    { id: 4, title: "Meeting Reminder", desc: "Quarterly Review starts in 15 mins", time: "3d ago", read: true },
-]
+import { ReloadIcon } from "@radix-ui/react-icons"
 
 export function NotificationCenter() {
     const [isOpen, setIsOpen] = React.useState(false)
-    const [notifications, setNotifications] = React.useState(initialNotifications)
-    const unreadCount = notifications.filter(n => !n.read).length
+    const [notifications, setNotifications] = React.useState<any[]>([])
+    const [loading, setLoading] = React.useState(false)
+    const unreadCount = notifications.filter(n => !n.isRead).length
     const dropdownRef = React.useRef<HTMLDivElement>(null)
+
+    const fetchNotifications = React.useCallback(async () => {
+        setLoading(true)
+        try {
+            const res = await fetch("/api/notifications")
+            if (res.ok) {
+                const result = await res.json()
+                setNotifications(result.data)
+            }
+        } catch (error) {
+            console.error("Failed to fetch notifications")
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
+    React.useEffect(() => {
+        fetchNotifications()
+        // Poll every minute
+        const interval = setInterval(fetchNotifications, 60000)
+        return () => clearInterval(interval)
+    }, [fetchNotifications])
 
     React.useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -28,13 +45,43 @@ export function NotificationCenter() {
         return () => document.removeEventListener("mousedown", handleClickOutside)
     }, [])
 
-    const markAllRead = () => {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-        toast.success("All notifications marked as read")
+    const markAllRead = async () => {
+        try {
+            const res = await fetch("/api/notifications", {
+                method: "PATCH",
+                body: JSON.stringify({ markAll: true })
+            })
+            if (res.ok) {
+                setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+                toast.success("All notifications marked as read")
+            }
+        } catch (error) {
+            toast.error("Failed to mark read")
+        }
     }
 
-    const markRead = (id: number) => {
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    const markRead = async (id: string, isAlreadyRead: boolean) => {
+        if (isAlreadyRead) return
+        try {
+            const res = await fetch("/api/notifications", {
+                method: "PATCH",
+                body: JSON.stringify({ id })
+            })
+            if (res.ok) {
+                setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n))
+            }
+        } catch (error) {
+            console.error("Failed to mark read")
+        }
+    }
+
+    const formatTime = (date: string) => {
+        const diff = Date.now() - new Date(date).getTime()
+        const mins = Math.floor(diff / 60000)
+        if (mins < 60) return `${mins}m ago`
+        const hours = Math.floor(mins / 60)
+        if (hours < 24) return `${hours}h ago`
+        return `${Math.floor(hours / 24)}d ago`
     }
 
     return (
@@ -62,8 +109,10 @@ export function NotificationCenter() {
                             </button>
                         )}
                     </div>
-                    <div className="max-h-[300px] overflow-y-auto">
-                        {notifications.length === 0 ? (
+                    <div className="max-h-[300px] overflow-y-auto min-h-[100px]">
+                        {loading && notifications.length === 0 ? (
+                            <div className="p-8 text-center"><ReloadIcon className="animate-spin text-[var(--accent)] mx-auto w-5 h-5" /></div>
+                        ) : notifications.length === 0 ? (
                             <div className="p-8 text-center text-[13px] text-[var(--text3)]">
                                 No notifications
                             </div>
@@ -71,19 +120,19 @@ export function NotificationCenter() {
                             notifications.map(n => (
                                 <div
                                     key={n.id}
-                                    onClick={() => markRead(n.id)}
+                                    onClick={() => markRead(n.id, n.isRead)}
                                     className={cn(
                                         "p-3 border-b border-[var(--border)] last:border-0 hover:bg-[var(--bg2)] transition-colors cursor-pointer flex gap-3",
-                                        !n.read ? "bg-[rgba(0,122,255,0.03)]" : ""
+                                        !n.isRead ? "bg-[rgba(0,122,255,0.03)]" : ""
                                     )}
                                 >
-                                    <div className={cn("w-2 h-2 rounded-full shrink-0 mt-1.5", !n.read ? "bg-[var(--accent)]" : "bg-transparent")} />
+                                    <div className={cn("w-2 h-2 rounded-full shrink-0 mt-1.5", !n.isRead ? "bg-[var(--accent)]" : "bg-transparent")} />
                                     <div className="flex-1">
                                         <div className="flex justify-between items-start">
                                             <div className="text-[13px] font-semibold text-[var(--text)]">{n.title}</div>
-                                            <div className="text-[10px] text-[var(--text3)] whitespace-nowrap ml-2">{n.time}</div>
+                                            <div className="text-[10px] text-[var(--text3)] whitespace-nowrap ml-2">{formatTime(n.createdAt)}</div>
                                         </div>
-                                        <div className="text-[12px] text-[var(--text3)] mt-0.5 leading-snug">{n.desc}</div>
+                                        <div className="text-[12px] text-[var(--text3)] mt-0.5 leading-snug">{n.description}</div>
                                     </div>
                                 </div>
                             ))
