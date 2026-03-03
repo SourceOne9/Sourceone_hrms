@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { extractArray, cn } from "@/lib/utils"
 import { toast, Toaster } from "react-hot-toast"
 import { format } from "date-fns"
 import { PlusIcon, TrashIcon, Pencil2Icon } from "@radix-ui/react-icons"
@@ -92,7 +92,7 @@ export function AdminTrainingView() {
             const res = await fetch('/api/training')
             if (res.ok) {
                 const data = await res.json()
-                setTrainings(data.data || data)
+                setTrainings(extractArray<Training>(data))
             }
         } catch {
             toast.error("Failed to load trainings")

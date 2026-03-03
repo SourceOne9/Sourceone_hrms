@@ -4,6 +4,7 @@ import { PlusIcon, InputIcon } from '@radix-ui/react-icons'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { WorkflowTemplate } from '@prisma/client'
+import { extractArray } from '@/lib/utils'
 
 // Extended interface matches our Prisma return structure
 interface Template extends WorkflowTemplate {
@@ -18,7 +19,7 @@ export default function WorkflowsAdmin() {
             const res = await fetch('/api/workflows/templates')
             if (res.ok) {
                 const json = await res.json()
-                setTemplates(json.data || (Array.isArray(json) ? json : []))
+                setTemplates(extractArray<Template>(json))
             } else {
                 toast.error('Failed to load workflow templates')
             }

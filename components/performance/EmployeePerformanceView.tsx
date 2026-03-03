@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { cn, extractArray } from "@/lib/utils"
 import { toast } from "react-hot-toast"
 import { format } from "date-fns"
 
@@ -27,7 +27,7 @@ export function EmployeePerformanceView() {
             try {
                 const res = await fetch('/api/performance')
                 if (res.ok) {
-                    setReviews(await res.json())
+                    setReviews(extractArray<PerformanceReview>(await res.json()))
                 }
             } catch (_error) {
                 toast.error("Failed to load performance reviews")

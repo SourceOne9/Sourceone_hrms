@@ -40,7 +40,8 @@ export function withAuth(requiredRole: Role | Role[], handler: AuthHandler) {
 
             const { id: userId, organizationId, role, name, sessionToken } = session.user as any
             if (!organizationId) {
-                return apiError("Organization account required", ApiErrorCode.FORBIDDEN, 403)
+                logger.error("Organization account missing in session", { userId, path, requestId })
+                return apiError("Organization account required. Please log in again.", ApiErrorCode.FORBIDDEN, 403)
             }
 
             // Session Revocation Check (Week 9)
@@ -63,7 +64,7 @@ export function withAuth(requiredRole: Role | Role[], handler: AuthHandler) {
             const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole]
             if (!roles.includes(role as Role)) {
                 logger.warn("Forbidden role access", { userId, role, requiredRole, path, requestId })
-                return apiError(`Forbidden. ${roles.join("/")} access required.`, ApiErrorCode.FORBIDDEN, 403)
+                return apiError(`Forbidden. Your role (${role}) does not have access to this resource. Required: ${roles.join("/")}`, ApiErrorCode.FORBIDDEN, 403)
             }
 
             // Run within log context for downstream tracing

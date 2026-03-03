@@ -1,5 +1,4 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import { extractArray, cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Modal } from "@/components/ui/Modal"
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar } from "recharts"
@@ -56,11 +55,17 @@ export function AdminDashboard() {
             ])
             if (dashRes.ok) {
                 const dashJson = await dashRes.json()
-                setData(dashJson.data || dashJson)
+                setData(dashJson.data || (typeof dashJson === 'object' && !Array.isArray(dashJson) ? dashJson : null))
+            } else {
+                const errorJson = await dashRes.json().catch(() => ({}));
+                console.error("Dashboard API error:", dashRes.status, errorJson.error?.message || dashRes.statusText)
             }
             if (loginRes.ok) {
                 const loginJson = await loginRes.json()
-                setLoginData(loginJson.data || loginJson)
+                setLoginData(loginJson.data || (typeof loginJson === 'object' && !Array.isArray(loginJson) ? loginJson : null))
+            } else {
+                const errorJson = await loginRes.json().catch(() => ({}));
+                console.error("Login API error:", loginRes.status, errorJson.error?.message || loginRes.statusText)
             }
         } catch (error) {
             console.error("Dashboard fetch error:", error)
@@ -119,10 +124,10 @@ export function AdminDashboard() {
         }
     }
 
-    const deptData = data?.deptSplit || []
-    const hiringData = data?.hiringTrend || []
-    const salaryData = data?.salaryRanges || []
-    const recentHires = data?.recentHires || []
+    const deptData = extractArray(data?.deptSplit)
+    const hiringData = extractArray(data?.hiringTrend)
+    const salaryData = extractArray(data?.salaryRanges)
+    const recentHires = extractArray(data?.recentHires)
 
     const filteredDepts = selectedDept
         ? deptData.filter((d: any) => d.name === selectedDept)

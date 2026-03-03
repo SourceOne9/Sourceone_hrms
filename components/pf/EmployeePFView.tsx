@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { cn, extractArray } from "@/lib/utils"
 import { toast } from "react-hot-toast"
 
 type PFRecord = {
@@ -22,7 +22,7 @@ export function EmployeePFView() {
             try {
                 const res = await fetch('/api/pf')
                 if (res.ok) {
-                    setRecords(await res.json())
+                    setRecords(extractArray<PFRecord>(await res.json()))
                 }
             } catch (error) {
                 toast.error("Failed to load PF records")

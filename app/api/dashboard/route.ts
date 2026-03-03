@@ -7,12 +7,12 @@ import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
-export const GET = withAuth(["ADMIN", "EMPLOYEE"], async (req, ctx) => {
+export const GET = withAuth(["ADMIN", "EMPLOYEE", "HR_MANAGER", "PAYROLL_ADMIN", "RECRUITER", "IT_ADMIN"], async (req, ctx) => {
     try {
         let payload: any = { role: ctx.role }
 
-        if (ctx.role === "ADMIN") {
-            // --- ADMIN VIEW (Original Logic) ---
+        if (ctx.role !== "EMPLOYEE") {
+            // --- ADMINISTRATIVE VIEW (Universal for Admin/Management) ---
             const [totalEmployees, activeEmployees, onLeaveEmployees, resignedEmployees, payroll] = await Promise.all([
                 prisma.employee.count({ where: { organizationId: ctx.organizationId } }),
                 prisma.employee.count({ where: { status: "ACTIVE", organizationId: ctx.organizationId } }),

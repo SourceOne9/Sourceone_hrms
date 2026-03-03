@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Document, DocCategory } from "@/types"
 import { FileTextIcon, DownloadIcon } from "@radix-ui/react-icons"
-import { cn } from "@/lib/utils"
+import { extractArray, cn } from "@/lib/utils"
 import toast from "react-hot-toast"
 
 const CATEGORY_LABELS: Record<DocCategory, string> = {
@@ -23,8 +23,8 @@ export default function MyDocuments() {
             try {
                 const res = await fetch("/api/documents")
                 if (!res.ok) throw new Error("Failed to fetch")
-                const data: Document[] = await res.json()
-                setDocuments(data)
+                const json = await res.json()
+                setDocuments(extractArray<Document>(json))
             } catch {
                 toast.error("Failed to load documents")
             } finally {

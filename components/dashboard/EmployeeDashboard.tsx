@@ -23,7 +23,8 @@ export function EmployeeDashboard() {
                 const updatedData = await res.json()
                 setData(updatedData)
             } else {
-                console.error("Dashboard API returned:", res.status)
+                const errorJson = await res.json().catch(() => ({}));
+                console.error("Dashboard API error:", res.status, errorJson.error?.message || res.statusText)
             }
         } catch (error) {
             console.error("Dashboard fetch error:", error)

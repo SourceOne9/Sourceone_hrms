@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { extractArray, cn } from "@/lib/utils"
 import { toast, Toaster } from "react-hot-toast"
 import { format } from "date-fns"
 import { PlusIcon, TrashIcon, Pencil2Icon, DrawingPinFilledIcon, DrawingPinIcon } from "@radix-ui/react-icons"
@@ -57,7 +57,7 @@ export function AdminAnnouncementsView() {
             const res = await fetch('/api/announcements')
             if (res.ok) {
                 const data = await res.json()
-                setAnnouncements(data.data || data)
+                setAnnouncements(extractArray<Announcement>(data))
             }
         } catch {
             toast.error("Failed to load announcements")

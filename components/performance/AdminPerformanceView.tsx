@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { cn, extractArray } from "@/lib/utils"
 import { PlusIcon, StarFilledIcon } from "@radix-ui/react-icons"
 import { Modal } from "@/components/ui/Modal"
 import { useForm, SubmitHandler } from "react-hook-form"
@@ -70,9 +70,8 @@ export function AdminPerformanceView() {
                 fetch('/api/employees?limit=100')
             ])
             if (revRes.ok && empRes.ok) {
-                setReviews(await revRes.json())
-                const empJson = await empRes.json()
-                setEmployees(Array.isArray(empJson) ? empJson : empJson.data || [])
+                setReviews(extractArray<PerformanceReview>(await revRes.json()))
+                setEmployees(extractArray<Employee>(await empRes.json()))
             }
         } catch (_error) {
             toast.error("Failed to load data")

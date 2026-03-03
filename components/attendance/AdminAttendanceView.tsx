@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { extractArray, cn } from "@/lib/utils"
 import toast from "react-hot-toast"
 import { format } from "date-fns"
 import { CsvImportModal } from "@/components/ui/CsvImportModal"
@@ -70,7 +70,7 @@ export function AdminAttendanceView() {
             const res = await fetch("/api/attendance")
             if (!res.ok) throw new Error("Failed to fetch")
             const data = await res.json()
-            setRecords(data.data || data)
+            setRecords(extractArray<AttendanceRecord>(data))
         } catch {
             toast.error("Failed to load attendance records")
         } finally {

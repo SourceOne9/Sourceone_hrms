@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { extractArray, cn } from "@/lib/utils"
 import { toast, Toaster } from "react-hot-toast"
 import { format } from "date-fns"
 import { CsvImportModal } from "@/components/ui/CsvImportModal"
@@ -30,7 +30,7 @@ export function AdminResignationView() {
             const res = await fetch('/api/resignations')
             if (res.ok) {
                 const data = await res.json()
-                setResignations(data.data || data)
+                setResignations(extractArray<Resignation>(data))
             }
         } catch {
             toast.error("Failed to load resignations")

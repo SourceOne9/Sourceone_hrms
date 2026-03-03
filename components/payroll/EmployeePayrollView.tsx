@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { cn, extractArray } from "@/lib/utils"
 import { DownloadIcon, ReaderIcon, ArchiveIcon } from "@radix-ui/react-icons"
 import { toast, Toaster } from "react-hot-toast"
 import { format } from "date-fns"
@@ -42,10 +42,8 @@ export function EmployeePayrollView() {
                 fetch('/api/pf')
             ])
             if (payRes.ok && pfRes.ok) {
-                const payJson = await payRes.json()
-                setPayslips(payJson.data || payJson)
-                const pfJson = await pfRes.json()
-                setPfRecords(pfJson.data || pfJson)
+                setPayslips(extractArray<Payslip>(await payRes.json()))
+                setPfRecords(extractArray<PFRecord>(await pfRes.json()))
             }
         } catch (error) {
             toast.error("Failed to load your financial data")

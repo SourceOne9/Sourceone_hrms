@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { extractArray, cn } from "@/lib/utils"
 import { ClockIcon, CalendarIcon } from "@radix-ui/react-icons"
 import toast from "react-hot-toast"
 import { format, differenceInHours, differenceInMinutes, startOfMonth, endOfMonth } from "date-fns"
@@ -50,7 +50,7 @@ export function EmployeeAttendanceView() {
             const res = await fetch("/api/attendance")
             if (!res.ok) throw new Error("Failed to fetch")
             const resJson = await res.json()
-            const data = resJson.data || resJson
+            const data = extractArray<AttendanceRecord>(resJson)
             setRecords(data)
 
             const todayStr = format(new Date(), "yyyy-MM-dd")

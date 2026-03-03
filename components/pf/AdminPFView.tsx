@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { cn, extractArray } from "@/lib/utils"
 import { PlusIcon, UploadIcon } from "@radix-ui/react-icons"
 import { Modal } from "@/components/ui/Modal"
 import { CsvImportModal } from "@/components/ui/CsvImportModal"
@@ -77,9 +77,8 @@ export function AdminPFView() {
                 fetch('/api/employees?limit=100')
             ])
             if (pfRes.ok && empRes.ok) {
-                setRecords(await pfRes.json())
-                const empJson = await empRes.json()
-                setEmployees(Array.isArray(empJson) ? empJson : empJson.data || [])
+                setRecords(extractArray<PFRecord>(await pfRes.json()))
+                setEmployees(extractArray<Employee>(await empRes.json()))
             }
         } catch (error) {
             toast.error("Failed to load data")

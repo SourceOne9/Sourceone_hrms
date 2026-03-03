@@ -1,20 +1,21 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { withAuth } from "@/lib/security"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 
 export const dynamic = "force-dynamic"
 
 // GET /api/dashboard/logins
 // Returns employees who have logged in today + recent login history
-export async function GET() {
+export const GET = withAuth(["ADMIN", "HR_MANAGER", "PAYROLL_ADMIN", "IT_ADMIN", "RECRUITER", "EMPLOYEE"], async (req, ctx) => {
     try {
         const startOfDay = new Date()
         startOfDay.setHours(0, 0, 0, 0)
 
-        // Users who logged in today
+        // Users who logged in today within the same organization
         const activeTodayUsers = await prisma.user.findMany({
             where: {
                 lastLoginAt: { gte: startOfDay },
                 role: "EMPLOYEE",
+                organizationId: ctx.organizationId
             },
             select: {
                 id: true,
@@ -41,6 +42,7 @@ export async function GET() {
             where: {
                 lastLoginAt: { gte: since7Days },
                 role: "EMPLOYEE",
+                organizationId: ctx.organizationId
             },
             select: {
                 name: true,
@@ -58,13 +60,13 @@ export async function GET() {
             take: 20,
         })
 
-        return NextResponse.json({
+        return apiSuccess({
             activeTodayCount: activeTodayUsers.length,
             activeTodayUsers,
             recentLogins,
         })
     } catch (error) {
         console.error("[DASHBOARD_LOGINS]", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})
