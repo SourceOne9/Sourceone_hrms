@@ -7,7 +7,9 @@
       "Bash(xargs wc -l)",
       "Bash(npx vitest run __tests__/lib/permissions.test.ts)",
       "Bash(npx vitest run)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(node -e \"require\\(''dotenv''\\).config\\(\\); const u = process.env.DATABASE_URL || ''''; console.log\\(''Has URL:'', !!u\\); console.log\\(''Host:'', u.split\\(''@''\\)[1]?.split\\(''/''\\)[0] || ''N/A''\\); console.log\\(''DB:'', u.split\\(''/''\\).pop\\(\\)?.split\\(''?''\\)[0] || ''N/A''\\)\")",
+      "Bash(node -e \"require\\(''dotenv''\\).config\\(\\); const u = process.env.DATABASE_URL || ''''; console.log\\(''Has URL:'', u.length > 0\\); console.log\\(''Host:'', \\(u.split\\(''@''\\)[1] || ''''\\).split\\(''/''\\)[0] || ''N/A''\\)\")"
     ]
   }
 }
