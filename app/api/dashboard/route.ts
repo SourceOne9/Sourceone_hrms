@@ -8,12 +8,83 @@ import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
+// Shared helper: get personal employee stats (used by EMPLOYEE, PAYROLL, TEAM_LEAD)
+async function getPersonalStats(userId: string, organizationId: string) {
+    const employee = await prisma.employee.findUnique({
+        where: { userId },
+        include: {
+            department: true,
+            attendanceRecords: {
+                where: {
+                    date: {
+                        gte: startOfMonth(new Date()),
+                        lte: endOfMonth(new Date())
+                    }
+                }
+            },
+            trainings: {
+                where: { completed: false }
+            },
+            leaves: {
+                where: { status: "APPROVED" }
+            },
+            manager: true
+        }
+    })
+
+    if (!employee) return null
+
+    // Department colleagues for team status
+    const teamMembers = await prisma.employee.findMany({
+        where: {
+            departmentId: employee.departmentId,
+            organizationId,
+            NOT: { id: employee.id }
+        },
+        take: 5
+    })
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const teamAttendance = await prisma.attendance.findMany({
+        where: {
+            employeeId: { in: teamMembers.map(tm => tm.id) },
+            date: { gte: today },
+        },
+        select: { employeeId: true },
+    })
+    const presentIds = new Set(teamAttendance.map(a => a.employeeId))
+
+    const latestReview = await prisma.performanceReview.findFirst({
+        where: { employeeId: employee.id },
+        orderBy: { createdAt: "desc" },
+        select: { status: true, reviewPeriod: true },
+    })
+
+    return {
+        employeeId: employee.id,
+        stats: {
+            attendanceCount: employee.attendanceRecords.length,
+            leavesUsed: employee.leaves.length,
+            pendingTrainingCount: employee.trainings.length,
+            reviewStatus: latestReview
+                ? `${latestReview.status}${latestReview.reviewPeriod ? ` (${latestReview.reviewPeriod})` : ""}`
+                : "No reviews yet",
+        },
+        teamStatus: teamMembers.map(tm => ({
+            name: `${tm.firstName} ${tm.lastName}`,
+            status: presentIds.has(tm.id) ? "Active" : "Away",
+            initials: `${tm.firstName[0]}${tm.lastName[0]}`.toUpperCase()
+        }))
+    }
+}
+
 export const GET = withAuth({ module: Module.DASHBOARD, action: Action.VIEW }, async (req, ctx) => {
     try {
         let payload: any = { role: ctx.role }
 
-        if (ctx.role !== Roles.EMPLOYEE) {
-            // --- ADMINISTRATIVE VIEW (Universal for Admin/Management) ---
+        if (ctx.role === Roles.CEO || ctx.role === Roles.HR) {
+            // --- ADMINISTRATIVE VIEW (CEO / HR) ---
             const [totalEmployees, activeEmployees, onLeaveEmployees, resignedEmployees, payroll] = await Promise.all([
                 prisma.employee.count({ where: { organizationId: ctx.organizationId } }),
                 prisma.employee.count({ where: { status: "ACTIVE", organizationId: ctx.organizationId } }),
@@ -72,7 +143,7 @@ export const GET = withAuth({ module: Module.DASHBOARD, action: Action.VIEW }, a
             const hiringTrend = Array.from(hiringMap, ([month, hires]) => ({ month, hires }))
 
             const salaryStats: any[] = await prisma.$queryRaw`
-                SELECT 
+                SELECT
                     COUNT(*) FILTER (WHERE salary >= 30000 AND salary < 50000)::int as "range_30_50",
                     COUNT(*) FILTER (WHERE salary >= 50000 AND salary < 80000)::int as "range_50_80",
                     COUNT(*) FILTER (WHERE salary >= 80000 AND salary < 120000)::int as "range_80_120",
@@ -119,78 +190,123 @@ export const GET = withAuth({ module: Module.DASHBOARD, action: Action.VIEW }, a
                 avgSalary: Number(stats.avg_salary || 0),
                 recentHires
             }
-        } else {
-            // --- EMPLOYEE VIEW (Polymorphic Logic) ---
-            const employee = await prisma.employee.findUnique({
-                where: { userId: ctx.userId },
-                include: {
-                    department: true,
-                    attendanceRecords: {
-                        where: {
-                            date: {
-                                gte: startOfMonth(new Date()),
-                                lte: endOfMonth(new Date())
-                            }
-                        }
-                    },
-                    trainings: {
-                        where: { completed: false }
-                    },
-                    leaves: {
-                        where: { status: "APPROVED" }
-                    },
-                    manager: true
-                }
-            })
+        } else if (ctx.role === Roles.PAYROLL) {
+            // --- PAYROLL VIEW (Personal stats + Payroll operations overview) ---
+            const personal = await getPersonalStats(ctx.userId, ctx.organizationId)
+            const currentMonth = format(new Date(), "MMMM yyyy")
 
-            if (!employee) {
-                return apiError("Employee profile not found", ApiErrorCode.NOT_FOUND, 404)
-            }
-
-            // Mock team status for now (can be improved with real check-in status later)
-            const teamMembers = await prisma.employee.findMany({
-                where: {
-                    departmentId: employee.departmentId,
-                    organizationId: ctx.organizationId,
-                    NOT: { id: employee.id }
-                },
-                take: 5
-            })
-
-            // Derive team status from today's attendance records
-            const today = new Date()
-            today.setHours(0, 0, 0, 0)
-            const teamAttendance = await prisma.attendance.findMany({
-                where: {
-                    employeeId: { in: teamMembers.map(tm => tm.id) },
-                    date: { gte: today },
-                },
-                select: { employeeId: true },
-            })
-            const presentIds = new Set(teamAttendance.map(a => a.employeeId))
-
-            // Derive review status from latest performance review
-            const latestReview = await prisma.performanceReview.findFirst({
-                where: { employeeId: employee.id },
-                orderBy: { createdAt: "desc" },
-                select: { status: true, reviewPeriod: true },
-            })
+            const [
+                payrollAgg,
+                pendingCount,
+                processedCount,
+                paidCount,
+                totalActiveEmployees,
+                pfAgg,
+                pfRecordCount
+            ] = await Promise.all([
+                prisma.payroll.aggregate({
+                    where: { organizationId: ctx.organizationId, month: currentMonth },
+                    _sum: { netSalary: true }
+                }),
+                prisma.payroll.count({ where: { organizationId: ctx.organizationId, status: "PENDING" } }),
+                prisma.payroll.count({ where: { organizationId: ctx.organizationId, status: "PROCESSED" } }),
+                prisma.payroll.count({ where: { organizationId: ctx.organizationId, status: "PAID" } }),
+                prisma.employee.count({ where: { organizationId: ctx.organizationId, status: "ACTIVE" } }),
+                prisma.providentFund.aggregate({
+                    where: { organizationId: ctx.organizationId, month: currentMonth },
+                    _sum: { totalContribution: true }
+                }),
+                prisma.providentFund.count({ where: { organizationId: ctx.organizationId, month: currentMonth } }),
+            ])
 
             payload = {
                 ...payload,
-                stats: {
-                    attendanceCount: employee.attendanceRecords.length,
-                    leavesUsed: employee.leaves.length,
-                    pendingTrainingCount: employee.trainings.length,
-                    reviewStatus: latestReview
-                        ? `${latestReview.status}${latestReview.reviewPeriod ? ` (${latestReview.reviewPeriod})` : ""}`
-                        : "No reviews yet",
+                stats: personal?.stats || null,
+                teamStatus: personal?.teamStatus || [],
+                payrollStats: {
+                    totalPayout: payrollAgg._sum.netSalary || 0,
+                    pendingCount,
+                    processedCount,
+                    paidCount,
+                    totalEmployees: totalActiveEmployees,
                 },
-                teamStatus: teamMembers.map(tm => ({
-                    name: `${tm.firstName} ${tm.lastName}`,
-                    status: presentIds.has(tm.id) ? "Active" : "Away",
-                    initials: `${tm.firstName[0]}${tm.lastName[0]}`.toUpperCase()
-                }))
+                pfStats: {
+                    totalPFThisMonth: pfAgg._sum.totalContribution || 0,
+                    pfRecordCount,
+                },
+            }
+        } else if (ctx.role === Roles.TEAM_LEAD) {
+            // --- TEAM LEAD VIEW (Personal stats + Team overview) ---
+            const personal = await getPersonalStats(ctx.userId, ctx.organizationId)
+            const employeeId = personal?.employeeId || ctx.employeeId
+
+            let teamData: any = null
+            if (employeeId) {
+                const team = await prisma.team.findFirst({
+                    where: { leadId: employeeId, organizationId: ctx.organizationId },
+                    include: {
+                        members: {
+                            include: {
+                                employee: {
+                                    select: {
+                                        id: true,
+                                        firstName: true,
+                                        lastName: true,
+                                        designation: true,
+                                        avatarUrl: true,
+                                        // Explicitly NO salary, email, phone
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+
+                if (team) {
+                    const memberIds = team.members.map(m => m.employee.id)
+                    const today = new Date()
+                    today.setHours(0, 0, 0, 0)
+                    const memberAttendance = await prisma.attendance.findMany({
+                        where: {
+                            employeeId: { in: memberIds },
+                            date: { gte: today },
+                        },
+                        select: { employeeId: true },
+                    })
+                    const presentMemberIds = new Set(memberAttendance.map(a => a.employeeId))
+
+                    teamData = {
+                        id: team.id,
+                        name: team.name,
+                        description: team.description,
+                        memberCount: team.members.length,
+                        members: team.members.map(m => ({
+                            id: m.employee.id,
+                            name: `${m.employee.firstName} ${m.employee.lastName}`,
+                            designation: m.employee.designation,
+                            avatarUrl: m.employee.avatarUrl,
+                            attendanceStatus: presentMemberIds.has(m.employee.id) ? "PRESENT" : "ABSENT",
+                        }))
+                    }
+                }
+            }
+
+            payload = {
+                ...payload,
+                stats: personal?.stats || null,
+                teamStatus: personal?.teamStatus || [],
+                team: teamData,
+            }
+        } else {
+            // --- EMPLOYEE VIEW ---
+            const personal = await getPersonalStats(ctx.userId, ctx.organizationId)
+            if (!personal) {
+                return apiError("Employee profile not found", ApiErrorCode.NOT_FOUND, 404)
+            }
+            payload = {
+                ...payload,
+                stats: personal.stats,
+                teamStatus: personal.teamStatus,
             }
         }
 

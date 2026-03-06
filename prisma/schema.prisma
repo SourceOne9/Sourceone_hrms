@@ -537,6 +537,10 @@ model PerformanceReview {
   reviewType     ReviewType        @default(MANAGER)
   reviewPeriod   String?           // e.g. "2026-Q1", "2026-H1", "2026"
 
+  // Structured form data for Daily/Monthly reviews
+  formType       String?           // "DAILY" or "MONTHLY" (null = legacy)
+  formData       Json?             // Structured form sections as JSON
+
   employee       Employee          @relation(fields: [employeeId], references: [id])
   reviewer       Employee?         @relation("ReviewedBy", fields: [reviewerId], references: [id])
   organization   Organization      @relation(fields: [organizationId], references: [id])

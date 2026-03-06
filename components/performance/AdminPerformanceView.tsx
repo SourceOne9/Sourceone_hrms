@@ -1,177 +1,253 @@
+"use client"
+
 import * as React from "react"
-import { cn, extractArray } from "@/lib/utils"
-import { PlusIcon } from "@radix-ui/react-icons"
-import { Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter } from "@/components/ui/Dialog"
+import { extractArray } from "@/lib/utils"
+import { Dialog, DialogHeader, DialogTitle, DialogBody } from "@/components/ui/Dialog"
 import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Select } from "@/components/ui/Select"
-import { Textarea } from "@/components/ui/Textarea"
 import { Badge } from "@/components/ui/Badge"
 import { Avatar } from "@/components/ui/Avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { StatCard } from "@/components/ui/StatCard"
 import { PageHeader } from "@/components/ui/PageHeader"
-import { useForm, SubmitHandler } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs"
+import { Spinner } from "@/components/ui/Spinner"
+import { DailyReviewForm } from "./DailyReviewForm"
+import { MonthlyReviewForm } from "./MonthlyReviewForm"
+import { ReviewDetailView } from "./ReviewDetailView"
 import { toast } from "sonner"
 import { format } from "date-fns"
-
-const reviewSchema = z.object({
-    employeeId: z.string().min(1, "Employee is required"),
-    rating: z.number().min(1).max(5),
-    progress: z.number().min(0).max(100),
-    comments: z.string().min(1, "Comments are required"),
-    reviewDate: z.string().min(1, "Review date is required"),
-    status: z.enum(["EXCELLENT", "GOOD", "AVERAGE", "POOR", "PENDING"]),
-})
-
-type ReviewFormData = z.infer<typeof reviewSchema>
+import { useAuth } from "@/context/AuthContext"
 
 type Employee = {
     id: string
     firstName: string
     lastName: string
-    department: { name: string }
+    designation?: string
+    department?: { name: string }
 }
 
 type PerformanceReview = {
     id: string
     rating: number
     progress: number
-    comments: string
+    comments: string | null
     reviewDate: string
     status: string
+    formType: string | null
+    formData: any
+    reviewPeriod: string | null
     employeeId: string
     employee: {
+        id: string
         firstName: string
         lastName: string
-        department: { name: string }
+        designation?: string
+        department?: { name: string }
     }
+    reviewer?: {
+        id: string
+        firstName: string
+        lastName: string
+    } | null
 }
 
 function getStatusBadge(status: string) {
     switch (status) {
         case "EXCELLENT": return <Badge variant="success">{status}</Badge>
         case "GOOD": return <Badge variant="default">{status}</Badge>
-        case "AVERAGE": return <Badge variant="warning">{status}</Badge>
-        case "POOR": return <Badge variant="danger">{status}</Badge>
+        case "NEEDS_IMPROVEMENT": return <Badge variant="warning">NEEDS IMPROVEMENT</Badge>
+        case "COMPLETED": return <Badge variant="neutral">{status}</Badge>
         default: return <Badge variant="neutral">{status}</Badge>
     }
 }
 
 export function AdminPerformanceView() {
+    const { user } = useAuth()
     const [reviews, setReviews] = React.useState<PerformanceReview[]>([])
     const [employees, setEmployees] = React.useState<Employee[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
-    const [isModalOpen, setIsModalOpen] = React.useState(false)
+    const [dailyOpen, setDailyOpen] = React.useState(false)
+    const [monthlyOpen, setMonthlyOpen] = React.useState(false)
+    const [viewReview, setViewReview] = React.useState<PerformanceReview | null>(null)
+    const [filterTab, setFilterTab] = React.useState("ALL")
 
-    const form = useForm<ReviewFormData>({
-        resolver: zodResolver(reviewSchema),
-        defaultValues: {
-            employeeId: "",
-            rating: 5,
-            progress: 100,
-            comments: "",
-            reviewDate: format(new Date(), "yyyy-MM-dd"),
-            status: "PENDING",
-        }
-    })
-
+    // Fetch reviews + employees (team-scoped for TEAM_LEAD)
     const fetchAll = React.useCallback(async () => {
         try {
             setIsLoading(true)
-            const [revRes, empRes] = await Promise.all([
-                fetch("/api/performance"),
-                fetch("/api/employees?limit=100")
-            ])
-            if (revRes.ok && empRes.ok) {
-                setReviews(extractArray<PerformanceReview>(await revRes.json()))
-                setEmployees(extractArray<Employee>(await empRes.json()))
+            const role = user?.role
+
+            // Fetch reviews
+            const revRes = await fetch("/api/performance")
+
+            // Fetch employees — team lead gets their team members only
+            let empPromise: Promise<Response>
+            if (role === "TEAM_LEAD") {
+                empPromise = fetch("/api/teams").then(async (res) => {
+                    if (!res.ok) return new Response(JSON.stringify({ data: [] }))
+                    const json = await res.json()
+                    const teams = json.data || json || []
+                    // Find team where this user is lead, fetch members
+                    if (teams.length > 0) {
+                        const teamId = teams[0].id
+                        return fetch(`/api/teams/${teamId}/members`)
+                    }
+                    return new Response(JSON.stringify({ data: [] }))
+                })
+            } else {
+                empPromise = fetch("/api/employees?limit=200")
+            }
+
+            const [revResult, empResult] = await Promise.all([revRes, empPromise])
+
+            if (revResult.ok) {
+                setReviews(extractArray<PerformanceReview>(await revResult.json()))
+            }
+
+            if (empResult.ok) {
+                const empJson = await empResult.json()
+                const empArr = extractArray<any>(empJson)
+                // Team members come as { employee: {...} }, employees come directly
+                const mapped: Employee[] = empArr.map((e: any) => {
+                    if (e.employee) {
+                        return {
+                            id: e.employee.id,
+                            firstName: e.employee.firstName,
+                            lastName: e.employee.lastName,
+                            designation: e.employee.designation,
+                            department: e.employee.department,
+                        }
+                    }
+                    return e
+                })
+                setEmployees(mapped)
             }
         } catch (_error) {
             toast.error("Failed to load data")
         } finally {
             setIsLoading(false)
         }
-    }, [])
+    }, [user?.role])
 
     React.useEffect(() => { fetchAll() }, [fetchAll])
 
-    const onSubmit: SubmitHandler<ReviewFormData> = async (data) => {
-        try {
-            const res = await fetch("/api/performance", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            })
-            if (res.ok) {
-                toast.success("Review created successfully")
-                setIsModalOpen(false)
-                fetchAll()
-                form.reset()
-            } else {
-                toast.error("Failed to create review")
-            }
-        } catch (_error) {
-            toast.error("An error occurred")
+    const handleSubmitReview = async (data: any) => {
+        const res = await fetch("/api/performance", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        })
+        if (res.ok) {
+            toast.success("Review submitted successfully")
+            setDailyOpen(false)
+            setMonthlyOpen(false)
+            fetchAll()
+        } else {
+            const err = await res.json().catch(() => null)
+            toast.error(err?.message || "Failed to submit review")
         }
     }
 
+    // Stats
     const stats = React.useMemo(() => {
-        if (reviews.length === 0) return { avg: 0, top: 0, pending: 0, progress: 0 }
+        if (reviews.length === 0) return { avg: "0.0", total: 0, pending: 0, thisMonth: 0 }
         const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-        const top = reviews.filter(r => r.rating >= 4.5).length
         const pending = reviews.filter(r => r.status === "PENDING").length
-        const progress = reviews.reduce((sum, r) => sum + r.progress, 0) / reviews.length
-        return { avg: avg.toFixed(1), top, pending, progress: Math.round(progress) }
+        const now = new Date()
+        const thisMonth = reviews.filter(r => {
+            const d = new Date(r.reviewDate)
+            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+        }).length
+        return { avg: avg.toFixed(1), total: reviews.length, pending, thisMonth }
     }, [reviews])
+
+    // Filter reviews
+    const filteredReviews = React.useMemo(() => {
+        if (filterTab === "ALL") return reviews
+        return reviews.filter(r => r.formType === filterTab)
+    }, [reviews, filterTab])
 
     return (
         <div className="space-y-6 animate-page-in">
             <PageHeader
                 title="Performance Management"
-                description="Track and evaluate employee performance metrics"
+                description="Track and evaluate employee performance with structured reviews"
                 actions={
-                    <Button onClick={() => setIsModalOpen(true)} leftIcon={<PlusIcon className="w-4 h-4" />}>
-                        Create Review
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="secondary" onClick={() => setDailyOpen(true)}>
+                            Daily Review
+                        </Button>
+                        <Button onClick={() => setMonthlyOpen(true)}>
+                            Monthly Review
+                        </Button>
+                    </div>
                 }
             />
 
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard label="Avg Score" value={stats.avg} icon={<span className="text-lg">⭐</span>} />
-                <StatCard label="Top Performers" value={stats.top} icon={<span className="text-lg">🏆</span>} />
-                <StatCard label="Reviews Pending" value={stats.pending} icon={<span className="text-lg">📋</span>} />
-                <StatCard label="Avg Progress" value={`${stats.progress}%`} icon={<span className="text-lg">🎯</span>} />
+                <StatCard label="Total Reviews" value={stats.total} icon={<span className="text-lg">📋</span>} />
+                <StatCard label="Pending" value={stats.pending} icon={<span className="text-lg">⏳</span>} />
+                <StatCard label="This Month" value={stats.thisMonth} icon={<span className="text-lg">📅</span>} />
             </div>
 
-            {/* Table */}
+            {/* Filter Tabs + Review Table */}
             <Card>
                 <CardHeader className="border-b border-border">
-                    <CardTitle>Performance Reviews</CardTitle>
+                    <div className="flex items-center justify-between">
+                        <CardTitle>Performance Reviews</CardTitle>
+                        <Tabs value={filterTab} onValueChange={setFilterTab}>
+                            <TabsList>
+                                <TabsTrigger value="ALL">All</TabsTrigger>
+                                <TabsTrigger value="DAILY">Daily</TabsTrigger>
+                                <TabsTrigger value="MONTHLY">Monthly</TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+                    </div>
                 </CardHeader>
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                         <thead>
                             <tr className="border-b border-border bg-surface-2">
-                                {["Employee", "Department", "Rating", "Progress", "Review Date", "Status"].map((h) => (
+                                {["Employee", "Type", "Rating", "Period", "Date", "Reviewer", "Status", ""].map((h) => (
                                     <th key={h} className="px-4 py-3 text-xs font-bold text-text-3 text-left uppercase tracking-wider">{h}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
-                            {!isLoading ? reviews.map((rev) => (
-                                <tr key={rev.id} className="group hover:bg-accent/[0.03] transition-colors border-b border-border/30 last:border-0">
-                                    <td className="px-4 py-3.5 text-base text-text">
+                            {isLoading ? (
+                                <tr><td colSpan={8} className="p-10 text-center"><Spinner size="lg" className="mx-auto" /></td></tr>
+                            ) : filteredReviews.length === 0 ? (
+                                <tr><td colSpan={8} className="p-10 text-center text-text-3">No reviews found</td></tr>
+                            ) : filteredReviews.map((rev) => (
+                                <tr
+                                    key={rev.id}
+                                    className="group hover:bg-accent/[0.03] transition-colors border-b border-border/30 last:border-0 cursor-pointer"
+                                    onClick={() => setViewReview(rev)}
+                                >
+                                    <td className="px-4 py-3.5">
                                         <div className="flex items-center gap-3">
                                             <Avatar name={`${rev.employee.firstName} ${rev.employee.lastName}`} size="sm" />
-                                            <span className="font-semibold">{rev.employee.firstName} {rev.employee.lastName}</span>
+                                            <div>
+                                                <span className="font-semibold text-text block">{rev.employee.firstName} {rev.employee.lastName}</span>
+                                                {rev.employee.department?.name && (
+                                                    <span className="text-xs text-text-3">{rev.employee.department.name}</span>
+                                                )}
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="px-4 py-3.5">
-                                        <Badge variant="default" size="sm">{rev.employee.department?.name || "Unassigned"}</Badge>
+                                        {rev.formType ? (
+                                            <Badge
+                                                variant={rev.formType === "DAILY" ? "default" : "neutral"}
+                                                size="sm"
+                                            >
+                                                {rev.formType}
+                                            </Badge>
+                                        ) : (
+                                            <Badge variant="warning" size="sm">Legacy</Badge>
+                                        )}
                                     </td>
                                     <td className="px-4 py-3.5">
                                         <div className="flex items-center gap-1">
@@ -180,65 +256,60 @@ export function AdminPerformanceView() {
                                             <span className="text-sm text-text-3 ml-2 font-mono">{rev.rating.toFixed(1)}</span>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3.5">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-20 h-1.5 bg-bg-2 rounded-full overflow-hidden">
-                                                <div className="h-full rounded-full bg-gradient-to-r from-accent to-info transition-all duration-500" style={{ width: `${rev.progress}%` }} />
-                                            </div>
-                                            <span className="text-xs font-bold font-mono text-text-3">{rev.progress}%</span>
-                                        </div>
-                                    </td>
+                                    <td className="px-4 py-3.5 text-sm text-text-3">{rev.reviewPeriod || "—"}</td>
                                     <td className="px-4 py-3.5 text-sm text-text-3 font-mono">{format(new Date(rev.reviewDate), "MMM d, yyyy")}</td>
+                                    <td className="px-4 py-3.5 text-sm text-text-3">
+                                        {rev.reviewer ? `${rev.reviewer.firstName} ${rev.reviewer.lastName}` : "—"}
+                                    </td>
                                     <td className="px-4 py-3.5">{getStatusBadge(rev.status)}</td>
+                                    <td className="px-4 py-3.5">
+                                        <Button variant="ghost" size="sm">View</Button>
+                                    </td>
                                 </tr>
-                            )) : (
-                                <tr><td colSpan={6} className="p-10 text-center text-text-3">Loading reviews...</td></tr>
-                            )}
+                            ))}
                         </tbody>
                     </table>
                 </div>
             </Card>
 
-            {/* Create Review Dialog */}
-            <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} size="lg">
+            {/* Daily Review Dialog */}
+            <Dialog open={dailyOpen} onClose={() => setDailyOpen(false)} size="full">
                 <DialogHeader>
-                    <DialogTitle>Create Performance Review</DialogTitle>
+                    <DialogTitle>Daily Performance Review</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <DialogBody className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-medium text-text-2">Employee *</label>
-                                <select {...form.register("employeeId")} className="input-base">
-                                    <option value="">Select Employee...</option>
-                                    {employees.map((e) => (
-                                        <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <Input label="Review Date *" type="date" {...form.register("reviewDate")} />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <Input label="Rating (1-5) *" type="number" step="0.1" {...form.register("rating", { valueAsNumber: true })} />
-                            <Input label="Progress % *" type="number" {...form.register("progress", { valueAsNumber: true })} />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-medium text-text-2">Status</label>
-                            <select {...form.register("status")} className="input-base">
-                                <option value="PENDING">Pending</option>
-                                <option value="EXCELLENT">Excellent</option>
-                                <option value="GOOD">Good</option>
-                                <option value="AVERAGE">Average</option>
-                                <option value="POOR">Poor</option>
-                            </select>
-                        </div>
-                        <Textarea label="Comments *" {...form.register("comments")} placeholder="Provide detailed feedback..." rows={3} />
-                    </DialogBody>
-                    <DialogFooter>
-                        <Button variant="secondary" type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-                        <Button type="submit" loading={form.formState.isSubmitting}>Save Review</Button>
-                    </DialogFooter>
-                </form>
+                <DialogBody>
+                    <DailyReviewForm
+                        employees={employees}
+                        onSubmit={handleSubmitReview}
+                        onCancel={() => setDailyOpen(false)}
+                    />
+                </DialogBody>
+            </Dialog>
+
+            {/* Monthly Review Dialog */}
+            <Dialog open={monthlyOpen} onClose={() => setMonthlyOpen(false)} size="full">
+                <DialogHeader>
+                    <DialogTitle>Monthly Performance Review</DialogTitle>
+                </DialogHeader>
+                <DialogBody>
+                    <MonthlyReviewForm
+                        employees={employees}
+                        onSubmit={handleSubmitReview}
+                        onCancel={() => setMonthlyOpen(false)}
+                    />
+                </DialogBody>
+            </Dialog>
+
+            {/* View Review Detail Dialog */}
+            <Dialog open={!!viewReview} onClose={() => setViewReview(null)} size="full">
+                <DialogHeader>
+                    <DialogTitle>
+                        Review Details — {viewReview?.formType || "Legacy"} Review
+                    </DialogTitle>
+                </DialogHeader>
+                <DialogBody>
+                    {viewReview && <ReviewDetailView review={viewReview} />}
+                </DialogBody>
             </Dialog>
         </div>
     )

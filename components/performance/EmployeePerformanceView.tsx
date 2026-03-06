@@ -1,8 +1,14 @@
+"use client"
+
 import * as React from "react"
 import { cn, extractArray } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
+import { Dialog, DialogHeader, DialogTitle, DialogBody } from "@/components/ui/Dialog"
 import { PageHeader } from "@/components/ui/PageHeader"
+import { Spinner } from "@/components/ui/Spinner"
+import { ReviewDetailView } from "./ReviewDetailView"
 import { toast } from "sonner"
 import { format } from "date-fns"
 
@@ -10,20 +16,30 @@ type PerformanceReview = {
     id: string
     rating: number
     progress: number
-    comments: string
+    comments: string | null
     reviewDate: string
     status: string
+    formType: string | null
+    formData: any
+    reviewPeriod: string | null
+    employee: {
+        id: string
+        firstName: string
+        lastName: string
+        designation?: string
+        department?: { name: string }
+    }
+    reviewer?: {
+        id: string
+        firstName: string
+        lastName: string
+    } | null
 }
-
-const myGoals = [
-    { goal: "Complete React Certification", deadline: "Mar 31, 2026", status: "In Progress", progress: 65, color: "from-info to-accent" },
-    { goal: "Deliver Project X", deadline: "Apr 15, 2026", status: "On Track", progress: 40, color: "from-success to-success/70" },
-    { goal: "Team Mentorship", deadline: "Continuous", status: "Active", progress: 100, color: "from-warning to-warning/70" },
-]
 
 export function EmployeePerformanceView() {
     const [reviews, setReviews] = React.useState<PerformanceReview[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
+    const [viewReview, setViewReview] = React.useState<PerformanceReview | null>(null)
 
     React.useEffect(() => {
         const fetchReviews = async () => {
@@ -41,18 +57,18 @@ export function EmployeePerformanceView() {
         fetchReviews()
     }, [])
 
-    const latest = reviews[0]
     const avgRating = reviews.length > 0
         ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
         : "0.0"
 
+    const latest = reviews[0]
+
     return (
         <div className="space-y-6 animate-page-in">
-            <PageHeader title="My Performance" description="Review your goals and manager feedback" />
+            <PageHeader title="My Performance" description="Review your evaluations and feedback from your manager" />
 
-            {/* Hero + Rank Cards */}
+            {/* Hero Stats */}
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
-                {/* Rating Card */}
                 <Card className="p-8 bg-gradient-to-br from-accent to-purple text-white relative overflow-hidden">
                     <div className="relative z-10">
                         <div className="text-sm font-medium text-white/80 uppercase tracking-wider mb-2">Overall Rating</div>
@@ -62,11 +78,12 @@ export function EmployeePerformanceView() {
                         </div>
                         <div className="flex gap-1 mb-6">
                             {Array.from({ length: 5 }).map((_, i) => (
-                                <span key={i} className={cn(i < Math.floor(Number(avgRating)) ? "text-white" : "text-white/30")}>★</span>
+                                <span key={i} className={cn(i < Math.floor(Number(avgRating)) ? "text-white" : "text-white/30", "text-xl")}>★</span>
                             ))}
                         </div>
                         <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md">
-                            <span>{Number(avgRating) >= 4 ? "🎉" : Number(avgRating) >= 3 ? "👍" : "📈"}</span> {latest?.status || "No reviews yet"}
+                            <span>{Number(avgRating) >= 4 ? "🎉" : Number(avgRating) >= 3 ? "👍" : "📈"}</span>
+                            {latest?.status || "No reviews yet"}
                         </div>
                     </div>
                     <div className="absolute right-[-20px] bottom-[-20px] text-[200px] opacity-10 rotate-12 select-none">⭐</div>
@@ -88,63 +105,81 @@ export function EmployeePerformanceView() {
                 </div>
             </div>
 
-            {/* Table + OKRs */}
-            <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6">
-                <Card>
-                    <CardHeader className="border-b border-border">
-                        <CardTitle>Review History</CardTitle>
-                    </CardHeader>
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr className="border-b border-border bg-surface-2">
-                                    {["Date", "Rating", "Status", "Feedback"].map((h) => (
-                                        <th key={h} className="px-4 py-3 text-xs font-bold text-text-3 text-left uppercase tracking-wider">{h}</th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {!isLoading ? reviews.map((rev) => (
-                                    <tr key={rev.id} className="border-b border-border/30 last:border-0 hover:bg-bg transition-colors">
-                                        <td className="px-4 py-3.5 text-sm text-text font-mono">{format(new Date(rev.reviewDate), "MMM d, yyyy")}</td>
-                                        <td className="px-4 py-3.5 text-base font-bold text-accent">{rev.rating.toFixed(1)}</td>
-                                        <td className="px-4 py-3.5">
-                                            <Badge variant={rev.status === "EXCELLENT" ? "success" : rev.status === "PENDING" ? "warning" : "neutral"} size="sm">
-                                                {rev.status}
+            {/* Review List */}
+            <Card>
+                <CardHeader className="border-b border-border">
+                    <CardTitle>Review History</CardTitle>
+                </CardHeader>
+                <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr className="border-b border-border bg-surface-2">
+                                {["Date", "Type", "Rating", "Period", "Reviewer", "Status", ""].map((h) => (
+                                    <th key={h} className="px-4 py-3 text-xs font-bold text-text-3 text-left uppercase tracking-wider">{h}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {isLoading ? (
+                                <tr><td colSpan={7} className="p-10 text-center"><Spinner size="lg" className="mx-auto" /></td></tr>
+                            ) : reviews.length === 0 ? (
+                                <tr><td colSpan={7} className="p-10 text-center text-text-3">No reviews yet. Your manager will submit reviews here.</td></tr>
+                            ) : reviews.map((rev) => (
+                                <tr
+                                    key={rev.id}
+                                    className="border-b border-border/30 last:border-0 hover:bg-accent/[0.03] transition-colors cursor-pointer"
+                                    onClick={() => setViewReview(rev)}
+                                >
+                                    <td className="px-4 py-3.5 text-sm text-text font-mono">{format(new Date(rev.reviewDate), "MMM d, yyyy")}</td>
+                                    <td className="px-4 py-3.5">
+                                        {rev.formType ? (
+                                            <Badge variant={rev.formType === "DAILY" ? "default" : "neutral"} size="sm">
+                                                {rev.formType}
                                             </Badge>
-                                        </td>
-                                        <td className="px-4 py-3.5 text-sm text-text-3 max-w-[200px] truncate">{rev.comments}</td>
-                                    </tr>
-                                )) : (
-                                    <tr><td colSpan={4} className="p-10 text-center text-text-3">Loading...</td></tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </Card>
+                                        ) : (
+                                            <Badge variant="warning" size="sm">Legacy</Badge>
+                                        )}
+                                    </td>
+                                    <td className="px-4 py-3.5">
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-warning tracking-wider">{"★".repeat(Math.floor(rev.rating))}</span>
+                                            <span className="text-text-4 tracking-wider">{"★".repeat(5 - Math.floor(rev.rating))}</span>
+                                            <span className="text-sm text-text-3 ml-2 font-mono">{rev.rating.toFixed(1)}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3.5 text-sm text-text-3">{rev.reviewPeriod || "—"}</td>
+                                    <td className="px-4 py-3.5 text-sm text-text-3">
+                                        {rev.reviewer ? `${rev.reviewer.firstName} ${rev.reviewer.lastName}` : "—"}
+                                    </td>
+                                    <td className="px-4 py-3.5">
+                                        <Badge
+                                            variant={rev.status === "EXCELLENT" ? "success" : rev.status === "GOOD" ? "default" : rev.status === "PENDING" ? "warning" : "neutral"}
+                                            size="sm"
+                                        >
+                                            {rev.status}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-4 py-3.5">
+                                        <Button variant="ghost" size="sm">View</Button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
 
-                <Card>
-                    <CardHeader className="border-b border-border">
-                        <CardTitle>My Objectives (OKRs)</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-5">
-                        {myGoals.map((g, i) => (
-                            <div key={i} className="flex items-center gap-4">
-                                <div className="flex-1">
-                                    <div className="flex justify-between mb-2">
-                                        <span className="font-semibold text-base text-text">{g.goal}</span>
-                                        <Badge variant="neutral" size="sm">{g.status}</Badge>
-                                    </div>
-                                    <div className="w-full h-1.5 bg-bg-2 rounded-full overflow-hidden">
-                                        <div className={cn("h-full rounded-full bg-gradient-to-r", g.color)} style={{ width: `${g.progress}%` }} />
-                                    </div>
-                                </div>
-                                <span className="text-sm font-mono font-bold text-text w-10 text-right">{g.progress}%</span>
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
-            </div>
+            {/* View Review Detail */}
+            <Dialog open={!!viewReview} onClose={() => setViewReview(null)} size="full">
+                <DialogHeader>
+                    <DialogTitle>
+                        Review Details — {viewReview?.formType || "Legacy"} Review
+                    </DialogTitle>
+                </DialogHeader>
+                <DialogBody>
+                    {viewReview && <ReviewDetailView review={viewReview} />}
+                </DialogBody>
+            </Dialog>
         </div>
     )
 }

@@ -118,6 +118,8 @@ export const performanceReviewSchema = z.object({
     reviewerId: z.string().optional().nullable(),
     reviewType: z.enum(["MANAGER", "SELF", "PEER"]).default("MANAGER"),
     reviewPeriod: z.string().optional().nullable(),
+    formType: z.enum(["DAILY", "MONTHLY"]).optional().nullable(),
+    formData: z.any().optional().nullable(),
 })
 
 export const teamSchema = z.object({

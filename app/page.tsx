@@ -6,6 +6,8 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { AdminDashboard } from "@/components/dashboard/AdminDashboard"
 import { EmployeeDashboard } from "@/components/dashboard/EmployeeDashboard"
+import { PayrollDashboard } from "@/components/dashboard/PayrollDashboard"
+import { TeamLeadDashboard } from "@/components/dashboard/TeamLeadDashboard"
 import { Roles, type Role } from "@/lib/permissions"
 
 export default function Dashboard() {
@@ -24,15 +26,14 @@ export default function Dashboard() {
 
   const role = user?.role as Role
 
-  // CEO and HR get the full admin dashboard
-  // PAYROLL and TEAM_LEAD get admin dashboard (components self-filter by role)
-  // EMPLOYEE gets the employee dashboard
   switch (role) {
     case Roles.CEO:
     case Roles.HR:
-    case Roles.PAYROLL:
-    case Roles.TEAM_LEAD:
       return <AdminDashboard />
+    case Roles.PAYROLL:
+      return <PayrollDashboard />
+    case Roles.TEAM_LEAD:
+      return <TeamLeadDashboard />
     case Roles.EMPLOYEE:
     default:
       return <EmployeeDashboard />
