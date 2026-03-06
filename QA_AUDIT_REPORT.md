@@ -1,61 +1,94 @@
 # QA Audit Report — EMS Pro
 
-**Last Updated:** 2026-02-26
-**Build Status:** ✅ PASS — 0 TypeScript errors, 72 routes generated
+**Last Updated:** 2026-03-06
+**Build Status:** PASS — 0 TypeScript errors, 100+ routes generated
+**Schema:** 55 models, 38 enums (Prisma 7.4)
 
 ---
 
 ## Build Health
 
 | Check | Status | Notes |
-|---|---|---|
-| TypeScript Compilation | ✅ PASS | 0 errors after Phase 6 fixes |
-| JSX Parsing | ✅ PASS | Unescaped `>` in performance page fixed |
-| Prisma Schema Sync | ✅ PASS | `npx prisma db push` — no drift |
-| Static Page Generation | ✅ PASS | 72/72 pages generated |
+| --- | --- | --- |
+| TypeScript Compilation | PASS | 0 errors |
+| JSX Parsing | PASS | All components clean |
+| Prisma Schema Sync | PASS | `npx prisma generate` — no drift |
+| Static Page Generation | PASS | 100+ pages generated |
+| RBAC System | PASS | 5 roles, 18 modules, permission matrix validated |
 
 ---
 
-## Issues Found & Fixed This Session
+## Recent Changes (v3.0 - v4.0)
 
-### 1. Employee Creation — Internal Server Error (500)
-- **Root Cause:** Stale `.next` Prisma client cache (dev server running 2+ hours with schema changes unrebundled)
-- **Fix:** Deleted `.next` cache, ran `npx prisma generate`
-- **Affected:** `app/api/employees/route.ts`
+### RBAC Permission System (v3.0)
 
-### 2. Department Creation — Name Collision (409 swallowed as 500)
-- **Root Cause:** `Department.name` had a global `@unique` constraint causing silent 409 conflicts shown as generic "Failed" toast
-- **Fix:** Changed to `@@unique([name, organizationId])` for multi-tenant scoping; frontend now surfaces exact server error
-- **Affected:** `prisma/schema.prisma`, `app/employees/page.tsx`
+- 5 roles: CEO, HR, PAYROLL, TEAM_LEAD, EMPLOYEE
+- 18 modules with granular action permissions (VIEW, CREATE, UPDATE, DELETE, REVIEW, ASSIGN, EXPORT, IMPORT)
+- `withAuth({ module, action })` middleware on all API routes
+- `scopeEmployeeQuery()` and `scopeEntityQuery()` for role-based data isolation
+- Sidebar dynamically shows modules based on `canAccessModule()`
 
-### 3. Build Error — JSX Unescaped Character
-- **Root Cause:** `>90` text in JSX was not escaped
-- **Fix:** Changed to `{'>'}{`90`}`
-- **Affected:** `app/admin/performance/page.tsx`
+### Role-Based Dashboards (v3.0)
 
-### 4. Build Error — Wrong TimeSession Field Names
-- **Root Cause:** Cron worker referenced `userId`, `startTime`, `totalWorkSec`, `totalIdleSec` — none of which exist on `TimeSession`
-- **Fix:** Updated to `employeeId`, `checkIn`, `totalWork`, `totalIdle`
-- **Affected:** `app/api/cron/evaluate-performance/route.ts`
+- Admin Dashboard (CEO/HR): employee counts, dept split, hiring trends, salary ranges
+- Payroll Dashboard: personal stats + payroll ops (payout, pending/processed/paid, PF)
+- Team Lead Dashboard: personal stats + team overview with live attendance
+- Employee Dashboard: personal stats, time tracker, kudos, onboarding
 
-### 5. Build Error — Seed.ts Department Upsert Type Error
-- **Root Cause:** Both `seed.ts` files used `where: { name }` which became invalid after the unique constraint change
-- **Fix:** Replaced with `findFirst + create` pattern
-- **Affected:** `prisma/seed.ts`, `seed.ts`
+### Performance Review Redesign (v4.0)
+
+- Daily review: activity metrics (8 defaults), behavioral ratings (6 competencies, 1-5), priorities, blockers, summary
+- Monthly review: KPI scorecard (10 defaults, auto-calc %), competency ratings (10 areas), overall rating, goals, development
+- `formType` (DAILY/MONTHLY) and `formData` (Json) fields on PerformanceReview model
+- Role-scoped GET: CEO/HR see all, TEAM_LEAD sees own + created, EMPLOYEE sees own only
+- Reviewer tracking: `reviewerId`, `reviewType`, `reviewPeriod` populated on POST
+
+### UI Design System (v3.0)
+
+- 15+ custom components replacing inline styles
+- Tailwind design tokens (text, surface, border, accent, etc.)
+- Sonner toasts (migrated from react-hot-toast)
+- Dark/light theme support
+
+### Infrastructure (v3.0)
+
+- Normalized API responses: `apiSuccess()`/`apiError()` envelope
+- Structured JSON logging with request IDs (`lib/logger.ts`)
+- Metrics collection with auto-alerting (`lib/metrics.ts`)
+- Session management with revocation (`UserSession` model)
+
+---
+
+## Previous Issues Fixed
+
+| Issue | Status |
+| --- | --- |
+| Employee Creation 500 Error (stale cache) | FIXED |
+| Department 409 Conflict (global unique) | FIXED — `@@unique([name, organizationId])` |
+| Build errors (4 TypeScript/JSX) | FIXED |
+| Org chart edit crash (missing fields) | FIXED |
+| Dashboard polling storm | FIXED — 30s + visibilitychange |
+| Inconsistent response envelopes | FIXED — `apiSuccess()`/`apiError()` |
+| No structured logging | FIXED — `lib/logger.ts` |
+| No request tracing | FIXED — AsyncLocalStorage `logContext` |
+| No session revocation | FIXED — `UserSession` model |
+| RBAC only ADMIN/EMPLOYEE | FIXED — 5 roles, 18 modules |
 
 ---
 
 ## Known Warnings (Non-Blocking)
 
 | Warning | Severity | Notes |
-|---|---|---|
-| `"middleware" file deprecated, use "proxy"` | Low | Next.js 16+ renaming convention; proxy.ts already exists |
-| `UPSTASH_REDIS_REST_URL missing` | Low | Falls back to in-memory mock for local dev; production should configure Upstash |
+| --- | --- | --- |
+| `"middleware" deprecated, use "proxy"` | Low | Next.js 16+ convention |
+| `UPSTASH_REDIS_REST_URL missing` | Low | Falls back to in-memory mock |
+| Metadata viewport warnings | Low | Next.js migration from metadata to viewport export |
 
 ---
 
 ## Recommendations
 
-1. **Configure Upstash Redis** — Add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to production env
-2. **Set CRON_SECRET** — Required to trigger the AI performance evaluation agent
-3. **Clean up duplicate departments in DB** — Engineering/engineering duplicates from early testing can be removed via the new Manage Departments modal
+1. **Run `npx prisma db push`** — Apply `formType`/`formData` columns to production DB
+2. **Configure Upstash Redis** — Add `UPSTASH_REDIS_REST_URL` and token for production
+3. **Set CRON_SECRET** — Required for AI performance evaluation agent
+4. **Test all 5 roles** — Verify dashboard, sidebar, and API scoping per role
