@@ -58,6 +58,8 @@ export const POST = withAuth({ module: Module.PAYROLL, action: Action.IMPORT }, 
                 }
 
                 if (existing) {
+                    // Prevent overwriting finalized payroll records
+                    if (existing.isFinalized) { skipped++; continue }
                     await prisma.payroll.update({
                         where: { id: existing.id },
                         data

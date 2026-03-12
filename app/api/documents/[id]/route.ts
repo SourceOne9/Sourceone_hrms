@@ -36,7 +36,7 @@ export const PUT = withAuth({ module: Module.DOCUMENTS, action: Action.UPDATE },
         const { id } = await ctx.params
         const body = await req.json()
 
-        const existing = await prisma.document.findUnique({ where: { id } })
+        const existing = await prisma.document.findFirst({ where: { id, organizationId: ctx.organizationId } })
         if (!existing) {
             return apiError("Document not found", ApiErrorCode.NOT_FOUND, 404)
         }
@@ -66,7 +66,7 @@ export const DELETE = withAuth({ module: Module.DOCUMENTS, action: Action.DELETE
     try {
         const { id } = await ctx.params
 
-        const existing = await prisma.document.findUnique({ where: { id } })
+        const existing = await prisma.document.findFirst({ where: { id, organizationId: ctx.organizationId } })
         if (!existing) {
             return apiError("Document not found", ApiErrorCode.NOT_FOUND, 404)
         }

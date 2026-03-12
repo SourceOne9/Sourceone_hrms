@@ -20,7 +20,7 @@ if (upstashUrl && upstashToken) {
 }
 
 // In-memory fallback
-const inMemoryStore = new Map<string, { value: number; expiresAt: number }>()
+const inMemoryStore = new Map<string, { value: unknown; expiresAt: number }>()
 
 export const redis = {
     async set(key: string, value: unknown, config?: { ex?: number }) {
@@ -35,7 +35,7 @@ export const redis = {
         if (config?.ex !== undefined) {
             expiresAt = Date.now() + config.ex * 1000
         }
-        inMemoryStore.set(key, { value: value as number, expiresAt })
+        inMemoryStore.set(key, { value, expiresAt })
         return "OK"
     },
 
@@ -64,7 +64,7 @@ export const redis = {
         }
 
         const current = inMemoryStore.get(key)
-        const newValue = (current ? current.value : 0) + 1
+        const newValue = (current ? Number(current.value) || 0 : 0) + 1
 
         inMemoryStore.set(key, {
             value: newValue,

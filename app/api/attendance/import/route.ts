@@ -1,24 +1,25 @@
-import { NextResponse } from "next/server"
+import { withAuth } from "@/lib/security"
+import { Module, Action } from "@/lib/permissions"
 import { queue } from "@/lib/queue"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 
 // POST /api/attendance/import
-export async function POST(req: Request) {
+export const POST = withAuth({ module: Module.ATTENDANCE, action: Action.UPDATE }, async (req, ctx) => {
     try {
         const { rows } = await req.json()
         if (!Array.isArray(rows) || rows.length === 0) {
-            return NextResponse.json({ error: "No rows provided" }, { status: 400 })
+            return apiError("No rows provided", ApiErrorCode.BAD_REQUEST, 400)
         }
 
-        const jobId = await queue.enqueue("ATTENDANCE_IMPORT", rows)
+        const jobId = await queue.enqueue("ATTENDANCE_IMPORT", { rows, organizationId: ctx.organizationId })
 
-        // Return immediately with 202 Accepted, and notify client that jobs are queued.
-        return NextResponse.json(
+        return apiSuccess(
             { message: `Accepted ${rows.length} rows for background processing`, jobId, status: "queued" },
-            { status: 202 }
+            undefined,
+            202
         )
     } catch (error) {
         console.error("[ATTENDANCE_IMPORT]", error)
-        return NextResponse.json({ error: "Job enqueue failed" }, { status: 500 })
+        return apiError("Job enqueue failed", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
-
+})

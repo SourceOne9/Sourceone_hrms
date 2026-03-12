@@ -6,6 +6,14 @@ export interface AccountingExportOption {
 /**
  * Transforms payroll data into a CSV format compatible with Quickbooks.
  */
+function csvQuote(val: unknown): string {
+    const s = String(val ?? "")
+    if (s.includes(",") || s.includes('"') || s.includes("\n")) {
+        return `"${s.replace(/"/g, '""')}"`
+    }
+    return s
+}
+
 export function generateQuickbooksCSV(payrolls: any[]): string {
     const headers = ["EmployeeID", "EmployeeName", "Month", "BasicSalary", "Allowances", "PFDeduction", "Tax", "NetSalary"]
     const rows = payrolls.map(p => [
@@ -17,9 +25,9 @@ export function generateQuickbooksCSV(payrolls: any[]): string {
         p.pfDeduction,
         p.tax,
         p.netSalary
-    ].join(","))
+    ].map(csvQuote).join(","))
 
-    return [headers.join(","), ...rows].join("\n")
+    return [headers.map(csvQuote).join(","), ...rows].join("\n")
 }
 
 /**

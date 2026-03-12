@@ -12,7 +12,32 @@
       "Bash(node -e \"require\\(''dotenv''\\).config\\(\\); const u = process.env.DATABASE_URL || ''''; console.log\\(''Has URL:'', u.length > 0\\); console.log\\(''Host:'', \\(u.split\\(''@''\\)[1] || ''''\\).split\\(''/''\\)[0] || ''N/A''\\)\")",
       "Bash(grep -r \"px-\\\\\\\\[.*\\\\\\\\].*py-\\\\\\\\[.*\\\\\\\\]\" \"c:\\\\Users\\\\Ashish Singh\\\\Desktop\\\\Employee directory/components\")",
       "Bash(npm install @radix-ui/react-tooltip @radix-ui/react-dropdown-menu)",
-      "Bash(npx next build)"
+      "Bash(npx next build)",
+      "WebFetch(domain:www.firecrawl.dev)",
+      "WebFetch(domain:composio.dev)",
+      "Bash(npx @anthropic-ai/claude-code plugin marketplace add anthropics/claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install frontend-design@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install playground@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install typescript-lsp@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install supabase@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install firebase@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install context7@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install code-review@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install security-guidance@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install code-simplifier@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install pr-review-toolkit@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install ralph-loop@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install playwright@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install hookify@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install github@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install linear@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install pyright-lsp@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install gopls-lsp@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install feature-dev@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install skill-creator@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install commit-commands@claude-plugins-official)",
+      "Bash(npx @anthropic-ai/claude-code plugin install claude-md-management@claude-plugins-official)",
+      "Bash(npm test)"
     ]
   }
 }

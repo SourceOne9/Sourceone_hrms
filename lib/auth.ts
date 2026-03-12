@@ -9,7 +9,7 @@ import { Roles, type Role } from "@/lib/permissions"
 export const { handlers, auth, signIn, signOut } = NextAuth({
     session: { strategy: "jwt" },
     trustHost: true,
-    debug: true,
+    debug: process.env.NODE_ENV === "development",
     pages: {
         signIn: "/login",
     },
@@ -133,9 +133,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 // Session persistence (Week 9)
                 if (token.sub && token.organizationId && token.sessionToken && (user || trigger === "signIn")) {
-                    if ((prisma as any).userSession) {
-                        try {
-                            await (prisma as any).userSession.upsert({
+                    try {
+                        await prisma.userSession.upsert({
                                 where: { sessionToken: token.sessionToken as string },
                                 update: { lastActive: new Date() },
                                 create: {
@@ -147,9 +146,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                     ipAddress: null,
                                 }
                             })
-                        } catch (e) {
-                            console.error("Failed to upsert userSession:", e)
-                        }
+                    } catch (e) {
+                        console.error("Failed to upsert userSession:", e)
                     }
                 }
 
@@ -175,22 +173,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
 })
 
-declare module "next-auth" {
-    interface Session {
-        user: {
-            id: string
-            role?: Role
-            organizationId?: string | null
-            avatar?: string | null
-            mustChangePassword?: boolean
-        } & DefaultSession["user"]
-        accessToken?: string
-    }
-
-    interface User {
-        role: Role
-        organizationId?: string | null
-        avatar?: string | null
-        mustChangePassword?: boolean
-    }
-}
+// Types consolidated in types/next-auth.d.ts

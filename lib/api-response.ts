@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { logContext } from "@/lib/logger"
 
 /**
  * Standardized API Response Envelope
@@ -17,8 +18,6 @@ export interface ApiResponse<T = unknown> {
         [key: string]: unknown
     }
 }
-
-import { logger, logContext } from "@/lib/logger"
 
 /**
  * Global API Error Codes

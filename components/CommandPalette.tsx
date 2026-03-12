@@ -15,6 +15,9 @@ export function CommandPalette() {
                 e.preventDefault()
                 setOpen((open) => !open)
             }
+            if (e.key === "Escape") {
+                setOpen(false)
+            }
         }
 
         document.addEventListener("keydown", down)
@@ -29,7 +32,7 @@ export function CommandPalette() {
     if (!open) return null
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-start justify-center pt-[14vh] animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-start justify-center pt-[14vh] animate-in fade-in duration-200" onClick={() => setOpen(false)}>
             <Command className="w-full max-w-[640px] bg-surface rounded-xl border border-border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
                 <div className="flex items-center border-b border-border px-3 bg-glass-bg">
                     <MagnifyingGlassIcon className="mr-2 h-5 w-5 shrink-0 opacity-50" />
@@ -82,11 +85,11 @@ export function CommandPalette() {
                     <div className="h-[1px] bg-border my-2 mx-2" />
 
                     <Command.Group heading="Actions" className="text-xs font-bold text-text-3 uppercase tracking-wider mb-2 px-2">
-                        <Command.Item className="flex items-center gap-2 px-2 py-2 text-base text-text rounded-md cursor-pointer hover:bg-accent hover:text-white transition-colors aria-selected:bg-accent aria-selected:text-white group">
+                        <Command.Item onSelect={() => runCommand(() => router.push('/employees'))} className="flex items-center gap-2 px-2 py-2 text-base text-text rounded-md cursor-pointer hover:bg-accent hover:text-white transition-colors aria-selected:bg-accent aria-selected:text-white group">
                             <span className="w-4 h-4 flex items-center justify-center text-[10px] border border-current rounded-full group-hover:border-white opacity-60">+</span>
                             New Employee
                         </Command.Item>
-                        <Command.Item className="flex items-center gap-2 px-2 py-2 text-base text-text rounded-md cursor-pointer hover:bg-accent hover:text-white transition-colors aria-selected:bg-accent aria-selected:text-white group">
+                        <Command.Item onSelect={() => runCommand(() => router.push('/leave'))} className="flex items-center gap-2 px-2 py-2 text-base text-text rounded-md cursor-pointer hover:bg-accent hover:text-white transition-colors aria-selected:bg-accent aria-selected:text-white group">
                             <span className="w-4 h-4 flex items-center justify-center text-[10px] border border-current rounded-full group-hover:border-white opacity-60">✉️</span>
                             Request Leave
                         </Command.Item>

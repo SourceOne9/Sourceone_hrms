@@ -1,47 +1,48 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { workflowActionSchema } from '@/lib/schemas/workflow'
-import { apiError, apiSuccess } from '@/lib/api-response'
-import { auth } from '@/lib/auth'
+import { z } from 'zod'
+import { withAuth, orgFilter } from '@/lib/security'
+import { Module, Action } from '@/lib/permissions'
+import { apiError, apiSuccess, ApiErrorCode } from '@/lib/api-response'
 import { WorkflowEngine } from '@/lib/workflow-engine'
 import { prisma } from '@/lib/prisma'
 
-export async function POST(req: NextRequest) {
+const workflowActionBody = z.object({
+    instanceId: z.string().min(1),
+    action: z.enum(["APPROVE", "REJECT", "REQUEST_CHANGES"]),
+    comments: z.string().optional(),
+})
+
+export const POST = withAuth({ module: Module.WORKFLOWS, action: Action.UPDATE }, async (req, ctx) => {
     try {
-        const session = await auth()
-        if (!session?.user?.id) {
-            return NextResponse.json(apiError('Unauthorized', 'UNAUTHORIZED', 401), { status: 401 })
-        }
-
         const body = await req.json()
-        const validated = workflowActionSchema.extend({
-            instanceId: workflowActionSchema.shape.action.constructor !== undefined ? require('zod').string() : require('zod').string()
-        }).safeParse(body)
+        const parsed = workflowActionBody.safeParse(body)
 
-        if (!validated.success) {
-            return NextResponse.json(apiError('Validation Error', 'VALIDATION_ERROR', 400, validated.error), { status: 400 })
+        if (!parsed.success) {
+            return apiError('Validation Error', ApiErrorCode.VALIDATION_ERROR, 400)
         }
 
-        const { instanceId, action, comments } = validated.data
+        const { instanceId, action, comments } = parsed.data
 
-        // Find employee mapping
-        const employee = await prisma.employee.findUnique({
-            where: { userId: session.user.id }
+        // Find employee mapping scoped to org
+        const employee = await prisma.employee.findFirst({
+            where: { userId: ctx.userId, organizationId: ctx.organizationId }
         })
 
         if (!employee) {
-            return NextResponse.json(apiError('Employee profile not found', 'NOT_FOUND', 404), { status: 404 })
+            return apiError('Employee profile not found', ApiErrorCode.NOT_FOUND, 404)
         }
 
-        const result = await WorkflowEngine.processAction(instanceId, employee.id, action as any, comments)
+        const result = await WorkflowEngine.processAction(instanceId, employee.id, ctx.organizationId, action as any, comments)
 
-        return NextResponse.json(apiSuccess(result), { status: 200 })
-    } catch (err: any) {
-        if (err.message === 'Workflow instance not found') {
-            return NextResponse.json(apiError('Not Found', 'NOT_FOUND', 404), { status: 404 })
+        return apiSuccess(result)
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error'
+        if (message === 'Workflow instance not found') {
+            return apiError('Not Found', ApiErrorCode.NOT_FOUND, 404)
         }
-        if (err.message.includes('already completed') || err.message.includes('missing')) {
-            return NextResponse.json(apiError(err.message, 'BAD_REQUEST', 400), { status: 400 })
+        if (message.includes('already completed') || message.includes('missing') || message.includes('Not authorized')) {
+            return apiError(message, ApiErrorCode.BAD_REQUEST, 400)
         }
-        return NextResponse.json(apiError('Internal Server Error', 'INTERNAL_ERROR', 500, err), { status: 500 })
+        console.error("[WORKFLOW_ACTION]", err)
+        return apiError('Internal Server Error', ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

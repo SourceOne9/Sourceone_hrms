@@ -1,5 +1,5 @@
 import { Shift, AttendancePolicy, Holiday } from "@prisma/client"
-import { parse, differenceInMinutes, isWithinInterval, set, isSameDay } from "date-fns"
+import { parse, differenceInMinutes, isSameDay } from "date-fns"
 
 export interface AttendanceEvaluation {
     isLate: boolean

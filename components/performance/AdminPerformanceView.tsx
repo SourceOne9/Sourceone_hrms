@@ -132,19 +132,23 @@ export function AdminPerformanceView() {
     React.useEffect(() => { fetchAll() }, [fetchAll])
 
     const handleSubmitReview = async (data: any) => {
-        const res = await fetch("/api/performance", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        })
-        if (res.ok) {
-            toast.success("Review submitted successfully")
-            setDailyOpen(false)
-            setMonthlyOpen(false)
-            fetchAll()
-        } else {
-            const err = await res.json().catch(() => null)
-            toast.error(err?.message || "Failed to submit review")
+        try {
+            const res = await fetch("/api/performance", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            })
+            if (res.ok) {
+                toast.success("Review submitted successfully")
+                setDailyOpen(false)
+                setMonthlyOpen(false)
+                fetchAll()
+            } else {
+                const err = await res.json().catch(() => null)
+                toast.error(err?.message || "Failed to submit review")
+            }
+        } catch (error) {
+            toast.error("An error occurred while submitting the review")
         }
     }
 

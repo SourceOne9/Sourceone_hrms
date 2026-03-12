@@ -6,6 +6,12 @@ import { addDays, addWeeks, addMonths } from "date-fns"
 // This endpoint should be called by an external cron service (e.g. hourly)
 export const GET = async (req: Request) => {
     try {
+        // Auth: require CRON_SECRET
+        const authHeader = req.headers.get("authorization")
+        if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
         const now = new Date()
 
         // 1. Find active schedules that are due

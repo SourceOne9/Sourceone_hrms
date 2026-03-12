@@ -7,12 +7,19 @@ export const exportToCSV = (data: Record<string, unknown>[], filename: string) =
     // Get headers from first object
     const headers = Object.keys(data[0]);
 
-    // Create CSV content
+    // RFC 4180 CSV quoting
+    const quoteField = (val: string) => {
+        if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+            return `"${val.replace(/"/g, '""')}"`;
+        }
+        return val;
+    };
+
     const csvContent = [
-        headers.join(','),
+        headers.map(quoteField).join(','),
         ...data.map(row => headers.map(header => {
-            const val = row[header] ? row[header].toString().replace(/,/g, '') : '';
-            return val;
+            const val = row[header] != null ? String(row[header]) : '';
+            return quoteField(val);
         }).join(','))
     ].join('\n');
 
@@ -25,6 +32,7 @@ export const exportToCSV = (data: Record<string, unknown>[], filename: string) =
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
 
 export const exportToPDF = (headers: string[], data: any[], filename: string, title: string = 'Report') => {

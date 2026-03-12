@@ -16,10 +16,10 @@ export interface AuthContext {
     employeeId?: string
     name?: string | null
     sessionToken?: string
-    params: any
+    params: Record<string, string>
 }
 
-type AuthHandler = (req: Request, context: AuthContext) => Promise<NextResponse>
+type AuthHandler = (req: Request, context: AuthContext) => Promise<NextResponse | Response>
 
 // ── Auth requirement types ─────────────────────────────────
 
@@ -57,7 +57,11 @@ function isLegacyAuth(req: AuthRequirement): req is LegacyRoleAuth {
  *   - Legacy: withAuth("CEO", handler) or withAuth(["CEO", "HR"], handler)
  */
 export function withAuth(requirement: AuthRequirement, handler: AuthHandler) {
-    return async (req: Request, { params }: { params: any } = { params: {} }) => {
+    return async (req: Request, routeContext?: { params?: Promise<Record<string, string>> | Record<string, string> }) => {
+        const rawParams = routeContext?.params
+        const params: Record<string, string> = rawParams && typeof (rawParams as any).then === 'function'
+            ? await (rawParams as Promise<Record<string, string>>)
+            : (rawParams as Record<string, string>) || {}
         const requestId = crypto.randomUUID()
         const startTime = Date.now()
         const url = new URL(req.url)
@@ -70,7 +74,9 @@ export function withAuth(requirement: AuthRequirement, handler: AuthHandler) {
                 return apiError("Unauthorized", ApiErrorCode.UNAUTHORIZED, 401)
             }
 
-            const { id: userId, organizationId, role, name, sessionToken } = session.user as any
+            const { id: userId, organizationId, role, name, sessionToken } = session.user as {
+                id: string; organizationId: string | null | undefined; role: Role; name?: string | null; sessionToken?: string
+            }
             if (!organizationId) {
                 logger.error("Organization account missing in session", { userId, path, requestId })
                 return apiError("Organization account required. Please log in again.", ApiErrorCode.FORBIDDEN, 403)

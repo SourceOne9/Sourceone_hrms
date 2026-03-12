@@ -32,7 +32,7 @@ export const updateLeaveSchema = z.object({
 export const ticketSchema = z.object({
     subject: z.string().min(5, "Subject must be at least 5 characters"),
     description: z.string().min(10, "Description must be at least 10 characters").optional().nullable(),
-    category: z.enum(["IT", "HR", "FACILITIES", "OTHER"]),
+    category: z.enum(["IT", "HR", "FACILITIES", "FINANCE", "OTHER"]),
     priority: z.enum(["URGENT", "HIGH", "MEDIUM", "LOW"]).default("MEDIUM"),
     employeeId: z.string().optional(), // Can be inferred from session
 })
@@ -62,7 +62,7 @@ export const eventSchema = z.object({
     start: z.string().or(z.date()),
     end: z.string().or(z.date()),
     allDay: z.boolean().default(false),
-    type: z.enum(["EVENT", "MEETING", "HOLIDAY"]).default("EVENT"),
+    type: z.enum(["EVENT", "MEETING", "HOLIDAY", "LEAVE", "BIRTHDAY"]).default("EVENT"),
 })
 
 export const announcementSchema = z.object({
@@ -119,7 +119,7 @@ export const performanceReviewSchema = z.object({
     reviewType: z.enum(["MANAGER", "SELF", "PEER"]).default("MANAGER"),
     reviewPeriod: z.string().optional().nullable(),
     formType: z.enum(["DAILY", "MONTHLY"]).optional().nullable(),
-    formData: z.any().optional().nullable(),
+    formData: z.record(z.string(), z.unknown()).optional().nullable(),
 })
 
 export const teamSchema = z.object({
@@ -161,7 +161,7 @@ export const resignationSchema = z.object({
 
 export const trainingSchema = z.object({
     name: z.string().min(3, "Training name must be at least 3 characters"),
-    type: z.enum(["TECHNICAL", "COMPLIANCE", "SOFT_SKILLS", "ONBOARDING", "OTHER"]),
+    type: z.enum(["TECHNICAL", "COMPLIANCE", "SECURITY", "SOFT_SKILLS", "LEADERSHIP", "ONBOARDING", "OTHER"]),
     description: z.string().optional().nullable(),
     dueDate: z.string().or(z.date()).optional().nullable(),
     videoUrl: z.string().url().optional().nullable(),

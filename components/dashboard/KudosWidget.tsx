@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react"
+"use client"
+
+import { useState, useEffect, useCallback } from "react"
 import { cn } from "@/lib/utils"
 import { PaperPlaneIcon, HeartFilledIcon, ReloadIcon } from "@radix-ui/react-icons"
 import { toast } from "sonner"
@@ -25,26 +27,26 @@ export function KudosWidget() {
     const [selectedRecipient, setSelectedRecipient] = useState("")
     const [colleagues, setColleagues] = useState<{ id: string, name: string }[]>([])
 
-    const fetchKudos = async () => {
+    const fetchKudos = useCallback(async () => {
         try {
             const res = await fetch("/api/kudos")
             if (res.ok) {
                 const data = await res.json()
-                setKudos(data)
+                setKudos(Array.isArray(data) ? data : data.data || [])
             }
         } catch (error) {
             console.error("Failed to fetch kudos:", error)
         } finally {
             setLoading(false)
         }
-    }
+    }, [])
 
-    const fetchColleagues = async () => {
+    const fetchColleagues = useCallback(async () => {
         try {
             const res = await fetch("/api/employees?limit=100")
             if (res.ok) {
                 const data = await res.json()
-                setColleagues(data.data.map((e: any) => ({
+                setColleagues((data.data || []).map((e: any) => ({
                     id: e.id,
                     name: `${e.firstName} ${e.lastName}`
                 })))
@@ -52,14 +54,14 @@ export function KudosWidget() {
         } catch (error) {
             console.error("Failed to fetch colleagues:", error)
         }
-    }
+    }, [])
 
     useEffect(() => {
         fetchKudos()
         fetchColleagues()
-        const interval = setInterval(fetchKudos, 60000) // Refresh every minute
+        const interval = setInterval(fetchKudos, 60000)
         return () => clearInterval(interval)
-    }, [])
+    }, [fetchKudos, fetchColleagues])
 
     const handleSendKudos = async () => {
         if (!selectedRecipient || !message.trim()) return

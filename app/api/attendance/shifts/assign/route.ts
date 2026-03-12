@@ -19,6 +19,14 @@ export const POST = withAuth({ module: Module.ATTENDANCE, action: Action.UPDATE 
             return apiError("Shift not found", ApiErrorCode.NOT_FOUND, 404)
         }
 
+        // Validate employee belongs to the same organization
+        const employee = await prisma.employee.findFirst({
+            where: { id: validatedData.employeeId, organizationId: ctx.organizationId }
+        })
+        if (!employee) {
+            return apiError("Employee not found in this organization", ApiErrorCode.NOT_FOUND, 404)
+        }
+
         const assignment = await prisma.shiftAssignment.create({
             data: {
                 ...validatedData,
@@ -27,10 +35,11 @@ export const POST = withAuth({ module: Module.ATTENDANCE, action: Action.UPDATE 
         })
 
         return apiSuccess(assignment, { message: "Shift assigned successfully" }, 201)
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("[SHIFT_ASSIGN_POST]", error)
-        if (error.name === "ZodError") {
-            return apiError(error.errors[0].message, ApiErrorCode.BAD_REQUEST, 400)
+        const err = error as { name?: string; errors?: Array<{ message: string }> }
+        if (err.name === "ZodError") {
+            return apiError(err.errors?.[0]?.message || "Validation error", ApiErrorCode.BAD_REQUEST, 400)
         }
         return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }

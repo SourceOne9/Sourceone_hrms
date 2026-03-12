@@ -32,7 +32,7 @@ const publicRoutes = [
     "/login",
     "/api/auth",
     "/api/health",
-    "/api/seed-load-test",
+    // seed-load-test removed — requires CRON_SECRET auth
     "/api/raw-health",
 ]
 
@@ -109,13 +109,13 @@ export default async function middleware(req: NextRequest) {
         return addSecurityHeaders(response)
     }
 
-    // Allow static files and Next.js internals
+    // Allow static files and Next.js internals (with security headers)
     if (
         pathname.startsWith("/_next") ||
         pathname.startsWith("/favicon") ||
         pathname.includes(".")
     ) {
-        return response
+        return addSecurityHeaders(response)
     }
 
     // Check session cookie (Edge-compatible — no Node.js modules)

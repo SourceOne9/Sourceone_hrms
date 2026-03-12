@@ -348,7 +348,7 @@ export function AdminPayrollView() {
                 </TabsContent>
 
                 <TabsContent value="payroll">
-                    <div className="grid grid-cols-4 gap-4 mb-5">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
                         <StatCard
                             label={totals.label1}
                             value={`₹${totals.net.toLocaleString()}`}
@@ -447,7 +447,7 @@ export function AdminPayrollView() {
                 </TabsContent>
 
                 <TabsContent value="pf">
-                    <div className="grid grid-cols-4 gap-4 mb-5">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
                         <StatCard
                             label={totals.label1}
                             value={`₹${totals.net.toLocaleString()}`}

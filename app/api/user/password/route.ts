@@ -22,8 +22,9 @@ export const PUT = withAuth({ module: Module.DASHBOARD, action: Action.VIEW }, a
             return apiError("User not found or using social login", ApiErrorCode.NOT_FOUND, 404)
         }
 
-        // First-login flow: no current password check required
-        if (!isFirstLogin) {
+        // First-login flow: only skip current password if server confirms mustChangePassword
+        const isFirstLoginVerified = user.mustChangePassword === true
+        if (!isFirstLoginVerified) {
             if (!currentPassword) {
                 return apiError("Current password required", ApiErrorCode.BAD_REQUEST, 400)
             }

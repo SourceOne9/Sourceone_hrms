@@ -65,11 +65,27 @@ async function runReportQuery(config: any, organizationId: string) {
     }
 }
 
+// Sanitize CSV values to prevent formula injection (=, +, -, @, \t, \r)
+function sanitizeCsvValue(val: string): string {
+    if (/^[=+\-@\t\r]/.test(val)) {
+        return "'" + val
+    }
+    return val
+}
+
+function csvQuote(val: string): string {
+    const sanitized = sanitizeCsvValue(val)
+    if (sanitized.includes(',') || sanitized.includes('"') || sanitized.includes('\n')) {
+        return `"${sanitized.replace(/"/g, '""')}"`
+    }
+    return sanitized
+}
+
 function convertToCSV(data: any[], columns: string[]) {
     if (!data || data.length === 0) return ""
 
     // Header
-    const header = columns.join(",") + "\n"
+    const header = columns.map(c => csvQuote(c)).join(",") + "\n"
 
     // Rows
     const rows = data.map(item => {
@@ -85,8 +101,8 @@ function convertToCSV(data: any[], columns: string[]) {
             // Format value for CSV
             if (val === null || val === undefined) return ""
             if (val instanceof Date) return val.toISOString()
-            if (typeof val === "string") return `"${val.replace(/"/g, '""')}"`
-            return val
+            if (typeof val === "string") return csvQuote(val)
+            return String(val)
         }).join(",")
     }).join("\n")
 

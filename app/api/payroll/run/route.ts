@@ -88,7 +88,8 @@ export const POST = withAuth({ module: Module.PAYROLL, action: Action.CREATE }, 
         })
 
         return NextResponse.json(apiSuccess(record), { status: 201 })
-    } catch (err: any) {
-        return NextResponse.json(apiError("Internal Server Error", "INTERNAL_ERROR", 500, err), { status: 500 })
+    } catch (err: unknown) {
+        console.error("[PAYROLL_RUN]", err)
+        return NextResponse.json(apiError("Internal Server Error", "INTERNAL_ERROR", 500), { status: 500 })
     }
 })

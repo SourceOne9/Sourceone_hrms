@@ -1,26 +1,39 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+let _supabase: SupabaseClient | null = null
+let _supabaseAdmin: SupabaseClient | null = null
 
-if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-        "Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL and/or NEXT_PUBLIC_SUPABASE_ANON_KEY. " +
-        "Please check your .env file."
-    )
+function getSupabaseClient(): SupabaseClient {
+    if (_supabase) return _supabase
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !key) {
+        throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    }
+    _supabase = createClient(url, key)
+    return _supabase
 }
 
-// For server-side operations, we should use the service role key if available
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-// Separate client for server-side storage management
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false
+function getSupabaseAdmin(): SupabaseClient {
+    if (_supabaseAdmin) return _supabaseAdmin
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !anonKey) {
+        throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY")
     }
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || anonKey
+    _supabaseAdmin = createClient(url, serviceKey, {
+        auth: { autoRefreshToken: false, persistSession: false }
+    })
+    return _supabaseAdmin
+}
+
+export const supabase = new Proxy({} as SupabaseClient, {
+    get(_, prop) { return Reflect.get(getSupabaseClient(), prop) }
+})
+
+export const supabaseAdmin = new Proxy({} as SupabaseClient, {
+    get(_, prop) { return Reflect.get(getSupabaseAdmin(), prop) }
 })
 
 export const BUCKETS = {

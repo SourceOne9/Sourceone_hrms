@@ -20,6 +20,7 @@ export function MobileSidebar() {
       <button
         onClick={() => setIsOpen(true)}
         className="fixed top-4 left-4 z-50 p-2 bg-surface border border-border rounded-md shadow-sm text-text hover:bg-bg-2 transition-colors"
+        aria-label="Open navigation menu"
       >
         <HamburgerMenuIcon className="w-5 h-5" />
       </button>
@@ -42,6 +43,7 @@ export function MobileSidebar() {
         <button
           onClick={() => setIsOpen(false)}
           className="absolute top-4 right-4 p-2 text-text-3 hover:text-text transition-colors rounded-md hover:bg-bg-2"
+          aria-label="Close navigation menu"
         >
           <Cross1Icon />
         </button>

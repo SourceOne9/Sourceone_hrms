@@ -33,7 +33,8 @@ export function AIChatbot() {
 
     useEffect(() => {
         if (isOpen) {
-            setTimeout(() => inputRef.current?.focus(), 200)
+            const timeoutId = setTimeout(() => inputRef.current?.focus(), 200)
+            return () => clearTimeout(timeoutId)
         }
     }, [isOpen])
 
@@ -67,6 +68,10 @@ export function AIChatbot() {
             })
 
             const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.error || "Chat request failed")
+            }
 
             const assistantMessage: Message = {
                 id: (Date.now() + 1).toString(),

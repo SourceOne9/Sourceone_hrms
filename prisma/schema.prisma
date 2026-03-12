@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
+  url        = env("DATABASE_URL")
   extensions = [vector]
 }
 
@@ -343,7 +344,7 @@ model Resignation {
   organizationId String
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
-  employee       Employee          @relation(fields: [employeeId], references: [id])
+  employee       Employee          @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   organization   Organization      @relation(fields: [organizationId], references: [id])
 
   @@index([employeeId])
@@ -494,12 +495,14 @@ model Payroll {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   
-  employee       Employee      @relation(fields: [employeeId], references: [id])
+  employee       Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   organization   Organization  @relation(fields: [organizationId], references: [id])
   audits         PayrollAudit[]
 
+  @@unique([employeeId, month])
   @@index([employeeId])
   @@index([organizationId])
+  @@index([organizationId, month])
 }
 
 model ProvidentFund {
@@ -514,9 +517,10 @@ model ProvidentFund {
   employeeId           String
   organizationId       String
   createdAt            DateTime     @default(now())
-  employee             Employee     @relation(fields: [employeeId], references: [id])
+  employee             Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   organization         Organization @relation(fields: [organizationId], references: [id])
 
+  @@index([employeeId])
   @@index([organizationId])
 }
 
@@ -742,7 +746,7 @@ model PerformanceMetrics {
   qualityScore   Decimal?  @db.Decimal(5, 2)
   organizationId String
   
-  employee     Employee      @relation(fields: [employeeId], references: [id])
+  employee     Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id])
 
   @@index([employeeId, date])
@@ -821,8 +825,8 @@ model Kudos {
   organizationId String
   createdAt      DateTime     @default(now())
 
-  from         Employee     @relation("KudosSent", fields: [fromId], references: [id])
-  to           Employee     @relation("KudosReceived", fields: [toId], references: [id])
+  from         Employee     @relation("KudosSent", fields: [fromId], references: [id], onDelete: SetNull)
+  to           Employee     @relation("KudosReceived", fields: [toId], references: [id], onDelete: SetNull)
   organization Organization @relation(fields: [organizationId], references: [id])
 
   @@index([fromId])

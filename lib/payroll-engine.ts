@@ -56,7 +56,7 @@ export function calculateDynamicTax(annualSalary: number, config: PayrollComplia
     if (taxableIncome <= 0) return { taxAmount: 0, effectiveRate: 0 }
 
     let tax = 0
-    let applicableSlabs = config.taxSlabs.sort((a: any, b: any) => a.minIncome - b.minIncome)
+    const applicableSlabs = [...config.taxSlabs].sort((a, b) => a.minIncome - b.minIncome)
 
     for (let i = applicableSlabs.length - 1; i >= 0; i--) {
         const slab = applicableSlabs[i]

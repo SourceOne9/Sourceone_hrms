@@ -16,44 +16,46 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "No active session" }, { status: 404 })
         }
 
-        // Close the previous activity if same session
-        const lastActivity = await prisma.activityLog.findFirst({
-            where: { sessionId: session.id, endedAt: null },
-            orderBy: { startedAt: "desc" }
-        })
-
-        if (lastActivity) {
-            const durationSec = Math.floor((Date.now() - new Date(lastActivity.startedAt).getTime()) / 1000)
-            await prisma.activityLog.update({
-                where: { id: lastActivity.id },
-                data: { endedAt: new Date(), durationSec }
+        // Wrap close+create in a transaction to prevent orphaned states
+        const result = await prisma.$transaction(async (tx) => {
+            // Close the previous activity if same session
+            const lastActivity = await tx.activityLog.findFirst({
+                where: { sessionId: session.id, endedAt: null },
+                orderBy: { startedAt: "desc" }
             })
-        }
 
-        // Skip creating a duplicate if same app+url
-        if (lastActivity && lastActivity.appName === appName && lastActivity.url === url) {
-            // Reopen the same activity instead
-            const reopened = await prisma.activityLog.update({
-                where: { id: lastActivity.id },
-                data: { endedAt: null, durationSec: 0 }
-            })
-            return NextResponse.json(reopened)
-        }
-
-        const activity = await prisma.activityLog.create({
-            data: {
-                sessionId: session.id,
-                appName: appName || "Unknown",
-                windowTitle,
-                url,
-                domain,
-                category: category || "OTHER",
+            if (lastActivity) {
+                const durationSec = Math.floor((Date.now() - new Date(lastActivity.startedAt).getTime()) / 1000)
+                await tx.activityLog.update({
+                    where: { id: lastActivity.id },
+                    data: { endedAt: new Date(), durationSec }
+                })
             }
+
+            // Skip creating a duplicate if same app+url
+            if (lastActivity && lastActivity.appName === appName && lastActivity.url === url) {
+                // Reopen the same activity instead
+                return await tx.activityLog.update({
+                    where: { id: lastActivity.id },
+                    data: { endedAt: null, durationSec: 0 }
+                })
+            }
+
+            return await tx.activityLog.create({
+                data: {
+                    sessionId: session.id,
+                    appName: appName || "Unknown",
+                    windowTitle,
+                    url,
+                    domain,
+                    category: category || "OTHER",
+                }
+            })
         })
 
-        return NextResponse.json(activity, { status: 201 })
-    } catch (error: any) {
-        console.error("[TIME_TRACKER_ACTIVITY]", error?.message)
+        return NextResponse.json(result, { status: 201 })
+    } catch (error: unknown) {
+        console.error("[TIME_TRACKER_ACTIVITY]", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }

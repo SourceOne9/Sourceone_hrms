@@ -9,7 +9,9 @@ export async function POST(req: Request) {
         const employee = await getSessionEmployee()
         if (!employee) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-        const { mouseClicks, keystrokes } = await req.json() as { mouseClicks: number; keystrokes: number }
+        const body = await req.json()
+        const mouseClicks = Math.max(0, Math.floor(Number(body.mouseClicks) || 0))
+        const keystrokes = Math.max(0, Math.floor(Number(body.keystrokes) || 0))
 
         const session = await prisma.timeSession.findFirst({
             where: { employeeId: employee.id, status: { in: ["ACTIVE", "BREAK"] } }
@@ -45,8 +47,8 @@ export async function POST(req: Request) {
         })
 
         return NextResponse.json({ snapshot, status })
-    } catch (error: any) {
-        console.error("[TIME_TRACKER_HEARTBEAT]", error?.message)
+    } catch (error: unknown) {
+        console.error("[TIME_TRACKER_HEARTBEAT]", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }

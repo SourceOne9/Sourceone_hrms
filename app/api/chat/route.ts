@@ -54,13 +54,13 @@ If the user asks something outside HR/EMS scope, politely redirect them. Never m
                 const vectorString = `[${embedding.join(',')}]`
 
                 // Scoped by organizationId to prevent cross-tenant data leaks in RAG
-                const relevantDocs = await prisma.$queryRawUnsafe<Array<{ content: string }>>(`
+                const relevantDocs = await prisma.$queryRaw<Array<{ content: string }>>`
                     SELECT content
                     FROM "DocumentEmbedding"
-                    WHERE "organizationId" = $1
-                    ORDER BY embedding <=> $2::vector
-                    LIMIT 3;
-                `, ctx.organizationId, vectorString)
+                    WHERE "organizationId" = ${ctx.organizationId}
+                    ORDER BY embedding <=> ${vectorString}::vector
+                    LIMIT 3
+                `
 
                 if (relevantDocs && relevantDocs.length > 0) {
                     systemInstruction += `\n\n### Official Company Policies / Handbooks Context:\n`
@@ -79,7 +79,7 @@ If the user asks something outside HR/EMS scope, politely redirect them. Never m
 
         try {
             const { text } = await generateText({
-                model: google("gemini-1.5-pro"),
+                model: google("gemini-2.5-flash"),
                 system: systemInstruction,
                 messages,
                 tools: {

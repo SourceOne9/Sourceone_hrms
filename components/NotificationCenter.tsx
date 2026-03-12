@@ -50,6 +50,7 @@ export function NotificationCenter() {
         try {
             const res = await fetch("/api/notifications", {
                 method: "PATCH",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ markAll: true })
             })
             if (res.ok) {
@@ -66,6 +67,7 @@ export function NotificationCenter() {
         try {
             const res = await fetch("/api/notifications", {
                 method: "PATCH",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id })
             })
             if (res.ok) {

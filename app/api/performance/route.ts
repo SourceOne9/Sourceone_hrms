@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 import { withAuth, orgFilter } from "@/lib/security"
 import { Module, Action, Roles } from "@/lib/permissions"
 import { performanceReviewSchema } from "@/lib/schemas"
@@ -86,7 +87,7 @@ export const POST = withAuth({ module: Module.PERFORMANCE, action: Action.CREATE
                 reviewType: parsed.data.reviewType,
                 reviewPeriod: parsed.data.reviewPeriod,
                 formType: parsed.data.formType,
-                formData: parsed.data.formData,
+                formData: parsed.data.formData ? (parsed.data.formData as Prisma.InputJsonValue) : Prisma.JsonNull,
             },
             include: {
                 employee: {

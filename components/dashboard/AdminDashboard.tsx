@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { extractArray, cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -162,7 +164,7 @@ export function AdminDashboard() {
             </div>
 
             {/* Stat Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
                 {loading ? (
                     Array(6).fill(0).map((_, i) => (
                         <div key={i} className="bg-surface rounded-xl border border-border p-5 h-[130px] flex flex-col gap-3">

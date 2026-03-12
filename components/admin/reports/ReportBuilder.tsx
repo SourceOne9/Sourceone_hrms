@@ -77,6 +77,7 @@ export function ReportBuilder() {
         try {
             const res = await fetch("/api/reports/query", {
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     entityType,
                     columns: selectedColumns,
@@ -102,6 +103,7 @@ export function ReportBuilder() {
         try {
             const res = await fetch("/api/reports/saved", {
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: reportName,
                     entityType,
@@ -122,6 +124,7 @@ export function ReportBuilder() {
         try {
             const res = await fetch("/api/reports/export", {
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     config: { entityType, columns: selectedColumns, filters },
                     format: "CSV"
@@ -134,6 +137,7 @@ export function ReportBuilder() {
                 a.href = url
                 a.download = `Report_${format(new Date(), "yyyyMMdd")}.csv`
                 a.click()
+                window.URL.revokeObjectURL(url)
             }
         } catch (error) {
             toast.error("Export failed")

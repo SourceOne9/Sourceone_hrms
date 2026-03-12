@@ -8,8 +8,8 @@ export const GET = withAuth({ module: Module.LEAVES, action: Action.VIEW }, asyn
     try {
         const { id } = await ctx.params
 
-        const leave = await prisma.leave.findUnique({
-            where: { id },
+        const leave = await prisma.leave.findFirst({
+            where: { id, employee: { organizationId: ctx.organizationId } },
             include: { employee: true },
         })
 
@@ -35,7 +35,7 @@ export const PUT = withAuth({ module: Module.LEAVES, action: Action.UPDATE }, as
         const { id } = await ctx.params
         const body = await req.json()
 
-        const existing = await prisma.leave.findUnique({ where: { id } })
+        const existing = await prisma.leave.findFirst({ where: { id, employee: { organizationId: ctx.organizationId } } })
         if (!existing) {
             return apiError("Leave not found", ApiErrorCode.NOT_FOUND, 404)
         }
@@ -58,7 +58,7 @@ export const DELETE = withAuth({ module: Module.LEAVES, action: Action.DELETE },
     try {
         const { id } = await ctx.params
 
-        const existing = await prisma.leave.findUnique({ where: { id } })
+        const existing = await prisma.leave.findFirst({ where: { id, employee: { organizationId: ctx.organizationId } } })
         if (!existing) {
             return apiError("Leave not found", ApiErrorCode.NOT_FOUND, 404)
         }

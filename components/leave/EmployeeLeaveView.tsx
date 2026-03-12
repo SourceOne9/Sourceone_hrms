@@ -83,7 +83,8 @@ export function EmployeeLeaveView() {
         try {
             const res = await fetch("/api/leaves")
             if (!res.ok) throw new Error("Failed to fetch")
-            setLeaves(await res.json())
+            const data = await res.json()
+            setLeaves(Array.isArray(data) ? data : data.data || [])
         } catch {
             toast.error("Failed to load leave history")
         } finally {
@@ -124,8 +125,8 @@ export function EmployeeLeaveView() {
             setIsModalOpen(false)
             setFormData({ type: "CASUAL", startDate: "", endDate: "", reason: "" })
             fetchLeaves()
-        } catch (error: any) {
-            toast.error(error.message || "Failed to submit leave request")
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : "Failed to submit leave request")
         } finally {
             setSaving(false)
         }
@@ -158,7 +159,7 @@ export function EmployeeLeaveView() {
             />
 
             {/* Leave Balance Cards */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                 <Card variant="glass" className="p-6 relative overflow-hidden">
                     <div className="flex justify-between items-start mb-4">
                         <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center text-info">

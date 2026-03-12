@@ -38,14 +38,18 @@ export const GET = withAuth({ module: Module.PERFORMANCE, action: Action.VIEW },
             return NextResponse.json({ report: "No employee data found for the last 7 days." })
         }
 
+        // Anonymize PII before sending to external AI — use employee ID instead of name
         const rawAnalytics = stats.map(emp => ({
-            name: `${emp.firstName} ${emp.lastName}`,
+            employeeId: emp.id,
             departmentId: emp.departmentId,
             totalWorkHoursOver7Days: Math.round(emp.totalWorkHours * 10) / 10,
             totalIdleMinutes: Math.floor(emp.totalIdleSeconds / 60),
             isOverworked: emp.totalWorkHours > 50,
             sessionCount: emp.sessionCount,
         }))
+
+        // Build a lookup map for re-hydrating names in the final report (stays server-side)
+        const nameMap = new Map(stats.map(emp => [emp.id, `${emp.firstName} ${emp.lastName}`]))
 
         const systemInstruction = `You are a Senior HR Analytics AI Agent. 
 Your job is to analyze raw employee time and activity data from the last 7 days and write a comprehensive, actionable Team Health & Burnout Report in Markdown format.
@@ -81,14 +85,20 @@ Please generate the "Weekly Team Health & Productivity Report".`
                 abortSignal: controller.signal,
             })
 
-            return NextResponse.json({ report: text })
+            // Re-hydrate employee IDs back to names before returning
+            let report = text
+            for (const [id, name] of nameMap) {
+                report = report.replaceAll(id, name)
+            }
+
+            return NextResponse.json({ report })
         } finally {
             clearTimeout(timeout)
         }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("[BURNOUT_ANALYTICS_GET]", error)
-        if (error?.name === "AbortError") {
+        if (error instanceof Error && error.name === "AbortError") {
             return NextResponse.json({ error: "Report generation timed out. Please try again." }, { status: 504 })
         }
         return NextResponse.json({ error: "Failed to generate report" }, { status: 500 })

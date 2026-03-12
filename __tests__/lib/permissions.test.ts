@@ -103,9 +103,9 @@ describe('Permission Matrix', () => {
         expect(hasPermission(Roles.TEAM_LEAD, Module.PERFORMANCE, Action.REVIEW)).toBe(true)
     })
 
-    test('TEAM_LEAD cannot create employees', () => {
+    test('TEAM_LEAD cannot access employees module', () => {
         expect(hasPermission(Roles.TEAM_LEAD, Module.EMPLOYEES, Action.CREATE)).toBe(false)
-        expect(hasPermission(Roles.TEAM_LEAD, Module.EMPLOYEES, Action.VIEW)).toBe(true)
+        expect(hasPermission(Roles.TEAM_LEAD, Module.EMPLOYEES, Action.VIEW)).toBe(false)
     })
 
     test('TEAM_LEAD can manage tickets', () => {

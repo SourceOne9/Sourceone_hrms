@@ -1,19 +1,20 @@
 import { WebhookEventType } from "../webhooks"
 
+const MAX_RETRIES = 2
+const RETRY_DELAY_MS = 1000
+
 export async function sendSlackNotification(webhookUrl: string, event: WebhookEventType, data: any) {
     const blocks = []
 
-    // Header
     blocks.push({
         type: "header",
         text: {
             type: "plain_text",
-            text: `🚀 EMS Event: ${event}`,
+            text: `EMS Event: ${event}`,
             emoji: true
         }
     })
 
-    // Content Based on Event
     let detailText = ""
     switch (event) {
         case "employee.created":
@@ -31,37 +32,45 @@ export async function sendSlackNotification(webhookUrl: string, event: WebhookEv
 
     blocks.push({
         type: "section",
-        text: {
-            type: "mrkdwn",
-            text: detailText
-        }
+        text: { type: "mrkdwn", text: detailText }
     })
 
-    // Footer/Context
     blocks.push({
         type: "context",
-        elements: [
-            {
-                type: "mrkdwn",
-                text: `Timestamp: ${new Date().toLocaleString()}`
-            }
-        ]
+        elements: [{ type: "mrkdwn", text: `Timestamp: ${new Date().toLocaleString()}` }]
     })
 
-    try {
-        const response = await fetch(webhookUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ blocks })
-        })
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const controller = new AbortController()
+            const timeout = setTimeout(() => controller.abort(), 10000)
 
-        if (!response.ok) {
-            console.error("[SLACK_NOTIFICATION_ERROR]", await response.text())
+            const response = await fetch(webhookUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ blocks }),
+                signal: controller.signal
+            })
+
+            clearTimeout(timeout)
+
+            if (response.ok) return true
+
+            if (response.status >= 500 && attempt < MAX_RETRIES) {
+                await new Promise(r => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)))
+                continue
+            }
+
+            console.error("[SLACK_NOTIFICATION_ERROR]", response.status, await response.text())
+            return false
+        } catch (error) {
+            if (attempt < MAX_RETRIES) {
+                await new Promise(r => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)))
+                continue
+            }
+            console.error("[SLACK_NOTIFICATION_EXCEPTION]", error)
             return false
         }
-        return true
-    } catch (error) {
-        console.error("[SLACK_NOTIFICATION_EXCEPTION]", error)
-        return false
     }
+    return false
 }

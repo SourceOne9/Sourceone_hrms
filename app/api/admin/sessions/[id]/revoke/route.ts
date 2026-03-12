@@ -6,10 +6,11 @@ import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 // POST /api/admin/sessions/[id]/revoke - Revoke a specific user session
 export const POST = withAuth({ module: Module.SETTINGS, action: Action.UPDATE }, async (req, ctx) => {
     try {
+        const { id } = ctx.params
         const session = await prisma.userSession.findFirst({
             where: {
-                id: ctx.params.id,
-                organizationId: ctx.organizationId // Ensure scoping
+                id,
+                organizationId: ctx.organizationId
             }
         })
 

@@ -9,8 +9,10 @@ export async function getSessionEmployee() {
     const session = await auth()
     if (!session?.user?.id) return null
 
+    const orgId = (session.user as any).organizationId
     const employee = await prisma.employee.findFirst({
         where: {
+            ...(orgId ? { organizationId: orgId } : {}),
             OR: [
                 { userId: session.user.id },
                 ...(session.user.email ? [{ email: session.user.email }] : []),

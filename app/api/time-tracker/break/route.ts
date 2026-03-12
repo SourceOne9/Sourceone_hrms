@@ -17,46 +17,52 @@ export async function POST(req: Request) {
         }
 
         if (action === "start") {
-            // Close any existing open break first
-            await prisma.breakEntry.updateMany({
-                where: { sessionId: session.id, endedAt: null },
-                data: { endedAt: new Date() }
-            })
+            const breakEntry = await prisma.$transaction(async (tx) => {
+                // Close any existing open break first
+                await tx.breakEntry.updateMany({
+                    where: { sessionId: session.id, endedAt: null },
+                    data: { endedAt: new Date() }
+                })
 
-            const breakEntry = await prisma.breakEntry.create({
-                data: {
-                    sessionId: session.id,
-                    reason: reason || "break",
-                }
-            })
+                const entry = await tx.breakEntry.create({
+                    data: {
+                        sessionId: session.id,
+                        reason: reason || "break",
+                    }
+                })
 
-            await prisma.timeSession.update({
-                where: { id: session.id },
-                data: { status: "BREAK" }
+                await tx.timeSession.update({
+                    where: { id: session.id },
+                    data: { status: "BREAK" }
+                })
+
+                return entry
             })
 
             return NextResponse.json(breakEntry, { status: 201 })
         } else {
-            // End break
-            const openBreak = await prisma.breakEntry.findFirst({
-                where: { sessionId: session.id, endedAt: null }
-            })
-            if (openBreak) {
-                await prisma.breakEntry.update({
-                    where: { id: openBreak.id },
-                    data: { endedAt: new Date() }
+            await prisma.$transaction(async (tx) => {
+                // End break
+                const openBreak = await tx.breakEntry.findFirst({
+                    where: { sessionId: session.id, endedAt: null }
                 })
-            }
+                if (openBreak) {
+                    await tx.breakEntry.update({
+                        where: { id: openBreak.id },
+                        data: { endedAt: new Date() }
+                    })
+                }
 
-            await prisma.timeSession.update({
-                where: { id: session.id },
-                data: { status: "ACTIVE" }
+                await tx.timeSession.update({
+                    where: { id: session.id },
+                    data: { status: "ACTIVE" }
+                })
             })
 
             return NextResponse.json({ message: "Break ended" })
         }
-    } catch (error: any) {
-        console.error("[TIME_TRACKER_BREAK]", error?.message)
+    } catch (error: unknown) {
+        console.error("[TIME_TRACKER_BREAK]", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }

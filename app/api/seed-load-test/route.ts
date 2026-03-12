@@ -6,8 +6,17 @@ import bcrypt from "bcryptjs"
 
 export const runtime = "nodejs"
 
-export async function POST() {
-    console.log("🚀 Starting Load Test Data Seeding via API...")
+export async function POST(req: Request) {
+    // Block in production
+    if (process.env.NODE_ENV !== "development") {
+        return NextResponse.json({ error: "Not available" }, { status: 404 })
+    }
+    // Require CRON_SECRET
+    const authHeader = req.headers.get("authorization")
+    if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    console.log("Starting Load Test Data Seeding via API...")
     const startTime = Date.now()
 
     try {

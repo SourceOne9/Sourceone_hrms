@@ -10,9 +10,9 @@ export function cn(...inputs: ClassValue[]) {
  * Handles both the standard envelope { data: [...] } and direct array responses.
  * returns [] if input is null, undefined, or not an array/envelope.
  */
-export function extractArray<T>(json: any): T[] {
+export function extractArray<T>(json: unknown): T[] {
     if (!json) return []
     if (Array.isArray(json)) return json
-    if (json.data && Array.isArray(json.data)) return json.data
+    if (typeof json === 'object' && json !== null && 'data' in json && Array.isArray((json as Record<string, unknown>).data)) return (json as Record<string, unknown>).data as T[]
     return []
 }

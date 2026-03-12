@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     try {
         const authHeader = req.headers.get("Authorization")
         // In production, verify authHeader matching an environment secret
-        if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
             return NextResponse.json({ error: "Unauthorized worker invocation" }, { status: 401 })
         }
 
@@ -25,13 +25,18 @@ export async function POST(req: Request) {
         let skipped = 0
 
         if (type === "ATTENDANCE_IMPORT") {
-            for (const row of rows) {
+            const { rows: importRows, organizationId } = (rawRows as any) || {}
+            const attendanceRows = Array.isArray(importRows) ? importRows : rows
+            for (const row of attendanceRows) {
                 try {
                     const employeeCode = String(row["employeeCode"] || row["Employee Code"] || "").trim()
                     const employee = await prisma.employee.findFirst({
-                        where: employeeCode
-                            ? { employeeCode }
-                            : { firstName: { contains: String(row["firstName"] || row["First Name"] || ""), mode: "insensitive" } }
+                        where: {
+                            ...(organizationId ? { organizationId } : {}),
+                            ...(employeeCode
+                                ? { employeeCode }
+                                : { firstName: { contains: String(row["firstName"] || row["First Name"] || ""), mode: "insensitive" as const } })
+                        }
                     })
                     if (!employee) { skipped++; continue }
 
@@ -63,13 +68,18 @@ export async function POST(req: Request) {
                 } catch { skipped++ }
             }
         } else if (type === "PF_IMPORT") {
-            for (const row of rows) {
+            const { rows: pfRows, organizationId: pfOrgId } = (rawRows as any) || {}
+            const pfImportRows = Array.isArray(pfRows) ? pfRows : rows
+            for (const row of pfImportRows) {
                 try {
                     const employeeCode = String(row["employeeCode"] || row["Employee Code"] || "").trim()
                     const employee = await prisma.employee.findFirst({
-                        where: employeeCode
-                            ? { employeeCode }
-                            : { firstName: { contains: String(row["firstName"] || row["First Name"] || ""), mode: "insensitive" } }
+                        where: {
+                            ...(pfOrgId ? { organizationId: pfOrgId } : {}),
+                            ...(employeeCode
+                                ? { employeeCode }
+                                : { firstName: { contains: String(row["firstName"] || row["First Name"] || ""), mode: "insensitive" as const } })
+                        }
                     })
                     if (!employee) { skipped++; continue }
 

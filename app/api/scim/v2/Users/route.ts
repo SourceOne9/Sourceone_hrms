@@ -107,7 +107,7 @@ export async function POST(req: Request) {
                 mustChangePassword: true,
                 employee: {
                     create: {
-                        employeeCode: `SCIM-${Date.now().toString().slice(-4)}`,
+                        employeeCode: `SCIM-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
                         firstName,
                         lastName,
                         email,

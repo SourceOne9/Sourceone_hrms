@@ -2,6 +2,22 @@ import { prisma } from "@/lib/prisma"
 import { withAuth, orgFilter } from "@/lib/security"
 import { Module, Action } from "@/lib/permissions"
 import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
+import { z } from "zod"
+
+const employeeUpdateSchema = z.object({
+    employeeCode: z.string().min(1).optional(),
+    firstName: z.string().min(1).optional(),
+    lastName: z.string().min(1).optional(),
+    email: z.string().email().optional(),
+    phone: z.string().nullable().optional(),
+    designation: z.string().optional(),
+    departmentId: z.string().optional(),
+    dateOfJoining: z.string().optional(),
+    salary: z.union([z.string(), z.number()]).transform(v => typeof v === 'string' ? parseFloat(v) : v).optional(),
+    status: z.enum(["ACTIVE", "ON_LEAVE", "RESIGNED", "TERMINATED", "INACTIVE", "ARCHIVED"]).optional(),
+    address: z.string().nullable().optional(),
+    managerId: z.string().nullable().optional(),
+})
 
 // GET /api/employees/[id] – Get single employee
 export const GET = withAuth({ module: Module.EMPLOYEES, action: Action.VIEW }, async (req, ctx) => {
@@ -34,7 +50,12 @@ export const GET = withAuth({ module: Module.EMPLOYEES, action: Action.VIEW }, a
 export const PUT = withAuth({ module: Module.EMPLOYEES, action: Action.UPDATE }, async (req, ctx) => {
     try {
         const { id } = await ctx.params
-        const body = await req.json()
+        const raw = await req.json()
+        const parsed = employeeUpdateSchema.safeParse(raw)
+        if (!parsed.success) {
+            return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
+        }
+        const body = parsed.data
 
         const existing = await prisma.employee.findFirst({
             where: orgFilter(ctx, { id }),
@@ -54,7 +75,7 @@ export const PUT = withAuth({ module: Module.EMPLOYEES, action: Action.UPDATE },
                 designation: body.designation,
                 departmentId: body.departmentId,
                 dateOfJoining: body.dateOfJoining ? new Date(body.dateOfJoining) : undefined,
-                salary: body.salary !== undefined ? parseFloat(body.salary) : undefined,
+                salary: body.salary,
                 status: body.status,
                 address: body.address ?? undefined,
                 managerId: body.managerId ?? undefined,

@@ -3,6 +3,7 @@ import { withAuth, orgFilter } from "@/lib/security"
 import { Module, Action, Roles } from "@/lib/permissions"
 import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import bcrypt from "bcryptjs"
+import crypto from "node:crypto"
 import { employeeSchema } from "@/lib/schemas"
 import { redis } from "@/lib/redis"
 
@@ -77,10 +78,9 @@ export const POST = withAuth({ module: Module.EMPLOYEES, action: Action.CREATE }
             avatarUrl,
         } = parsed.data
 
-        // Generate temp password: EmployeeCode@Year
-        const year = new Date().getFullYear()
-        const tempPassword = `${employeeCode}@${year}`
-        const hashedPassword = await bcrypt.hash(tempPassword, 10)
+        // Generate cryptographically random temp password
+        const tempPassword = crypto.randomUUID()
+        const hashedPassword = await bcrypt.hash(tempPassword, 12)
 
         // Use a transaction to ensure both User and Employee are created or none
         const result = await prisma.$transaction(async (tx) => {
@@ -125,10 +125,11 @@ export const POST = withAuth({ module: Module.EMPLOYEES, action: Action.CREATE }
         console.log(`[NEW_EMPLOYEE] ${employeeCode} created in org ${ctx.organizationId}.`)
 
         return apiSuccess(result, undefined, 201)
-    } catch (error: any) {
-        console.error("[EMPLOYEES_POST] FULL ERROR:", error)
-        if (error.code === 'P2002') {
-            const target = error.meta?.target || []
+    } catch (error: unknown) {
+        console.error("[EMPLOYEES_POST]", error)
+        const prismaErr = error as { code?: string; meta?: { target?: string[] } }
+        if (prismaErr.code === 'P2002') {
+            const target = prismaErr.meta?.target || []
             let message = "A conflict occurred."
             if (target.includes('email')) {
                 message = "An account or employee with this email already exists."
@@ -137,7 +138,7 @@ export const POST = withAuth({ module: Module.EMPLOYEES, action: Action.CREATE }
             }
             return apiError(message, ApiErrorCode.CONFLICT, 409)
         }
-        if (error.code === 'P2003') {
+        if (prismaErr.code === 'P2003') {
             return apiError("Invalid department or manager selected.", ApiErrorCode.BAD_REQUEST, 400)
         }
         return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)

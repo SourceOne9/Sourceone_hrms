@@ -45,7 +45,7 @@ export async function dispatchWebhookEvent(
         if (webhooks.length === 0) return
 
         const payload = {
-            id: `wh_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+            id: `wh_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
             event,
             data,
             timestamp: new Date().toISOString()
@@ -64,8 +64,7 @@ export async function dispatchWebhookEvent(
 
             await queue.enqueue("WEBHOOK_DELIVERY", {
                 deliveryId: delivery.id,
-                webhookUrl: webhook.url,
-                secret: webhook.secret,
+                webhookId: webhook.id,
                 payload
             })
         }

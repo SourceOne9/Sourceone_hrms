@@ -1,12 +1,14 @@
-import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { withAuth } from "@/lib/security"
+import { Module, Action } from "@/lib/permissions"
+import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 
 // POST /api/resignations/import
-export async function POST(req: Request) {
+export const POST = withAuth({ module: Module.RESIGNATION, action: Action.UPDATE }, async (req, ctx) => {
     try {
         const { rows } = await req.json()
         if (!Array.isArray(rows) || rows.length === 0) {
-            return NextResponse.json({ error: "No rows provided" }, { status: 400 })
+            return apiError("No rows provided", ApiErrorCode.BAD_REQUEST, 400)
         }
 
         let inserted = 0
@@ -16,9 +18,12 @@ export async function POST(req: Request) {
             try {
                 const employeeCode = String(row["employeeCode"] || row["Employee Code"] || "").trim()
                 const employee = await prisma.employee.findFirst({
-                    where: employeeCode
-                        ? { employeeCode }
-                        : { firstName: { contains: String(row["firstName"] || row["First Name"] || ""), mode: "insensitive" } }
+                    where: {
+                        organizationId: ctx.organizationId,
+                        ...(employeeCode
+                            ? { employeeCode }
+                            : { firstName: { contains: String(row["firstName"] || row["First Name"] || ""), mode: "insensitive" as const } })
+                    }
                 })
                 if (!employee) { skipped++; continue }
 
@@ -32,15 +37,15 @@ export async function POST(req: Request) {
                 const status = validStatuses.includes(statusRaw) ? statusRaw as any : "UNDER_REVIEW"
 
                 await prisma.resignation.create({
-                    data: { employeeId: employee.id, organizationId: employee.organizationId, reason, lastDay, status }
+                    data: { employeeId: employee.id, organizationId: ctx.organizationId, reason, lastDay, status }
                 })
                 inserted++
             } catch { skipped++ }
         }
 
-        return NextResponse.json({ inserted, skipped })
+        return apiSuccess({ inserted, skipped })
     } catch (error) {
         console.error("[RESIGNATION_IMPORT]", error)
-        return NextResponse.json({ error: "Import failed" }, { status: 500 })
+        return apiError("Import failed", ApiErrorCode.INTERNAL_ERROR, 500)
     }
-}
+})

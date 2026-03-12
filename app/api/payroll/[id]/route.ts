@@ -90,7 +90,8 @@ export const PUT = withAuth({ module: Module.PAYROLL, action: Action.UPDATE }, a
 
         return NextResponse.json(apiError("Invalid action or payload", "BAD_REQUEST", 400), { status: 400 })
 
-    } catch (err: any) {
-        return NextResponse.json(apiError("Internal Server Error", "INTERNAL_ERROR", 500, err), { status: 500 })
+    } catch (err: unknown) {
+        console.error("[PAYROLL_UPDATE]", err)
+        return NextResponse.json(apiError("Internal Server Error", "INTERNAL_ERROR", 500), { status: 500 })
     }
 })

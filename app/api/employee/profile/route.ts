@@ -38,23 +38,17 @@ export async function GET() {
             }
         }
 
+        const organizationId = (session.user as any).organizationId
         let employee = await prisma.employee.findFirst({
-            where: { userId: session.user.id },
+            where: { userId: session.user.id, ...(organizationId ? { organizationId } : {}) },
             include: includeRelations
         })
 
-        if (!employee && session.user.email) {
+        if (!employee && session.user.email && organizationId) {
             employee = await prisma.employee.findFirst({
-                where: { email: session.user.email },
+                where: { email: session.user.email, organizationId },
                 include: includeRelations
             })
-
-            if (employee && !employee.userId) {
-                await prisma.employee.update({
-                    where: { id: employee.id },
-                    data: { userId: session.user.id }
-                })
-            }
         }
 
         if (!employee) {
@@ -64,7 +58,7 @@ export async function GET() {
         return NextResponse.json(flattenEmployee(employee))
     } catch (error: any) {
         console.error("[EMPLOYEE_PROFILE_GET] Error:", error?.message || error)
-        return NextResponse.json({ error: "Internal Server Error", details: error?.message }, { status: 500 })
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }
 
@@ -75,14 +69,10 @@ export async function PUT(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
+        const organizationId = (session.user as any).organizationId
         let employee = await prisma.employee.findFirst({
-            where: { userId: session.user.id },
+            where: { userId: session.user.id, ...(organizationId ? { organizationId } : {}) },
         })
-        if (!employee && session.user.email) {
-            employee = await prisma.employee.findFirst({
-                where: { email: session.user.email },
-            })
-        }
 
         if (!employee) {
             return NextResponse.json({ error: "Employee profile not found" }, { status: 404 })
@@ -146,6 +136,6 @@ export async function PUT(req: Request) {
         return NextResponse.json(flattenEmployee(updated))
     } catch (error: any) {
         console.error("[EMPLOYEE_PROFILE_PUT] Error:", error?.message || error)
-        return NextResponse.json({ error: "Internal Server Error", details: error?.message }, { status: 500 })
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }

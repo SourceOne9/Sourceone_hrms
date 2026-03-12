@@ -10,12 +10,13 @@ export async function GET() {
         }
 
         // If we have an accessToken, try to fetch from Google Calendar
-        if (session.accessToken) {
+        const accessToken = (session as any).accessToken as string | undefined
+        if (accessToken) {
             const oauth2Client = new google.auth.OAuth2(
                 process.env.GOOGLE_CLIENT_ID,
                 process.env.GOOGLE_CLIENT_SECRET
             )
-            oauth2Client.setCredentials({ access_token: session.accessToken })
+            oauth2Client.setCredentials({ access_token: accessToken })
 
             const calendar = google.calendar({ version: 'v3', auth: oauth2Client })
 
