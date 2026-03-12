@@ -1,8 +1,8 @@
-# System Architecture — EMS Pro
+# System Architecture - EMS Pro
 
 ## Overview
 
-EMS Pro is a multi-tenant Employee Management System built on Next.js 16 (App Router) with React 19, Prisma 7.4 ORM, and a hybrid AI layer powered by Google Gemini 2.0. It features a comprehensive RBAC system with 5 roles, 18 modules, and 55 database models.
+EMS Pro is a multi-tenant HRMS built on Next.js 16, React 19, Prisma 7.4, and PostgreSQL. The current system includes 5 roles, 19 permissioned modules, 100+ API routes, 63 database models, AI-assisted workflows, and a desktop agent telemetry/reporting pipeline.
 
 ---
 
@@ -11,40 +11,48 @@ EMS Pro is a multi-tenant Employee Management System built on Next.js 16 (App Ro
 ```mermaid
 graph TB
     subgraph Client Layer
-        Browser["Browser / React 19 Client"]
+        Browser["Browser / React Client"]
+        DesktopAgent["Desktop Agent"]
     end
 
-    subgraph Next.js App Server
-        Middleware["Auth Middleware (NextAuth v5)"]
-        WithAuth["withAuth() — RBAC + Permission Check"]
-        APIRoutes["API Routes (82+ endpoints)"]
-        AIRoutes["AI API Routes (Gemini 2.0)"]
-        CronAgent["Cron Worker: Evaluate Performance"]
-        Logger["Structured Logger + Metrics"]
+    subgraph App Layer
+        Middleware["Auth Middleware"]
+        WithAuth["withAuth()"]
+        AgentAuth["withAgentAuth()"]
+        APIRoutes["Session API Routes"]
+        AgentRoutes["Agent API Routes"]
+        CronWorkers["Cron / Worker Routes"]
+        Logger["Logger + Metrics"]
     end
 
     subgraph Data Layer
-        Prisma["Prisma 7.4 ORM (PrismaPg adapter)"]
-        PostgreSQL["PostgreSQL (Supabase)"]
-        Redis["Upstash Redis (Cache + Rate Limit)"]
+        Prisma["Prisma ORM"]
+        PostgreSQL["PostgreSQL"]
+        Redis["Redis Cache / Queue"]
     end
 
     subgraph External Services
-        Gemini["Google Gemini 2.0 Flash"]
-        Supabase["Supabase Storage (Files)"]
+        Gemini["Gemini 2.0 Flash"]
+        Supabase["Supabase Storage"]
+        Resend["Resend Email"]
         Google["Google OAuth"]
-        Auth0["Auth0 (Optional)"]
+        Auth0["Auth0"]
     end
 
     Browser --> Middleware
     Middleware --> WithAuth
     WithAuth --> APIRoutes
+    DesktopAgent --> AgentAuth
+    AgentAuth --> AgentRoutes
     APIRoutes --> Prisma
     APIRoutes --> Redis
     APIRoutes --> Logger
-    AIRoutes --> Gemini
-    CronAgent --> Gemini
-    CronAgent --> Prisma
+    AgentRoutes --> Prisma
+    AgentRoutes --> Redis
+    CronWorkers --> Prisma
+    CronWorkers --> Redis
+    CronWorkers --> Gemini
+    CronWorkers --> Resend
     Prisma --> PostgreSQL
     Browser --> Supabase
     Browser --> Google
@@ -52,121 +60,194 @@ graph TB
 
 ---
 
-## Component Breakdown
+## Frontend
 
-### 1. Frontend (Next.js 16 App Router, React 19)
+- App Router-based UI with role-aware dashboards
+- Shared design system components for cards, dialogs, inputs, tables, tabs, and status surfaces
+- Employee dashboard now includes an activity tracker widget powered by the agent reporting pipeline
+- Admin dashboard area now includes an agent-tracking page for workforce monitoring
 
-- **24 pages**: Role-gated via `canAccessModule()` — sidebar dynamically shows modules per role
-- **41 components**: Custom UI design system (Card, Badge, Button, Dialog, Input, Select, Textarea, Avatar, StatCard, PageHeader, Tabs, DataTable, Spinner, EmptyState, Skeleton)
-- **4 dashboards**: AdminDashboard (CEO/HR), PayrollDashboard, TeamLeadDashboard, EmployeeDashboard
-- **State**: React `useState/useCallback/useMemo`, `react-hook-form` + Zod for all forms
-- **Auth Context**: `useAuth()` hook provides `user.role`, `user.name`, `user.organizationId`
-- **Theming**: TailwindCSS 3.4 with custom design tokens (`text`, `text-2`, `text-3`, `bg`, `surface`, `border`, `accent`, etc.)
-- **Toasts**: Sonner (migrated from react-hot-toast)
+---
 
-### 2. API Layer (82+ Route Handlers)
+## API Layer
 
-All routes use:
+The repository currently contains 100+ route handlers.
 
-- **`withAuth({ module, action })`** — RBAC permission check via `lib/permissions.ts`
-- **Zod schema validation** on all POST/PUT bodies (`lib/schemas/*.ts`, 30+ schemas)
-- **`apiSuccess()`/`apiError()`** normalized response envelope
-- **`orgFilter(ctx)`** for multi-tenant query scoping
-- **Structured logging** — `lib/logger.ts` with `logContext` (AsyncLocalStorage for requestId/orgId/userId)
-- **Metrics collection** — `lib/metrics.ts` with auto-alerting on latency thresholds
+### Main route groups
 
-Key route groups:
+| Prefix | Description |
+|---|---|
+| `/api/employees` | Employee CRUD, credentials, profile, documents |
+| `/api/attendance` | Attendance, shifts, holidays, regularization, policies |
+| `/api/time-tracker` | Check-in/out, heartbeat, break, history, status |
+| `/api/payroll` | Payroll CRUD, config, import, run, payslip |
+| `/api/performance` | Daily/monthly performance reviews |
+| `/api/agent` | Device registration, heartbeat, config, commands, activity, idle events, report fetch |
+| `/api/admin/agent` | Agent dashboard, device inventory, remote commands |
+| `/api/cron` | AI performance evaluation, agent aggregation, agent reports, scheduled jobs |
+| `/api/admin` | Sessions, metrics, analytics, performance, assets, agent management |
 
-| Prefix | Count | Description |
-| --- | --- | --- |
-| `/api/employees` | 6 | Employee CRUD, credentials, profile, documents |
-| `/api/attendance` | 9 | Attendance, holidays, policy, shifts, regularization |
-| `/api/time-tracker` | 7 | Check-in/out, heartbeat, break, status, history |
-| `/api/payroll` | 6 | Payroll CRUD, run, config, import, payslip |
-| `/api/performance` | 1 | Performance reviews (Daily/Monthly forms) |
-| `/api/teams` | 4+ | Team CRUD, members |
-| `/api/admin/*` | 7 | Analytics, sessions, metrics, performance |
-| `/api/cron/*` | 4 | AI agents, workers |
-| Other | 30+ | Leaves, training, tickets, docs, assets, etc. |
+All session-auth routes use:
+- `withAuth({ module, action })`
+- `apiSuccess()` / `apiError()`
+- organization scoping
+- Zod validation for mutations
 
-### 3. RBAC System (`lib/permissions.ts`)
+Desktop agent routes use:
+- `withAgentAuth()`
+- device API keys
+- Zod validation via `lib/schemas/agent.ts`
 
-```
-Roles: CEO, HR, PAYROLL, TEAM_LEAD, EMPLOYEE
-Modules: 18 (EMPLOYEES, PAYROLL, TEAMS, PERFORMANCE, FEEDBACK, DASHBOARD, REPORTS,
-          ATTENDANCE, LEAVES, TRAINING, ANNOUNCEMENTS, ASSETS, DOCUMENTS, TICKETS,
-          RECRUITMENT, RESIGNATION, ORGANIZATION, SETTINGS, WORKFLOWS)
-Actions: VIEW, CREATE, UPDATE, DELETE, REVIEW, ASSIGN, EXPORT, IMPORT
-```
+---
 
-Key helpers:
+## RBAC
 
-- `hasPermission(role, module, action)` — Check specific permission
-- `canAccessModule(role, module)` — Check if role has any access
-- `getModulesForRole(role)` — Get accessible modules (drives sidebar)
-- `scopeEmployeeQuery(ctx, module)` — Prisma `where` clause for data isolation
-- `scopeEntityQuery(ctx, module)` — Prisma `where` for entity-level scoping
+Roles:
+- CEO
+- HR
+- PAYROLL
+- TEAM_LEAD
+- EMPLOYEE
 
-### 4. Database (PostgreSQL via Prisma 7.4)
+Modules:
+- EMPLOYEES
+- PAYROLL
+- TEAMS
+- PERFORMANCE
+- FEEDBACK
+- DASHBOARD
+- REPORTS
+- ATTENDANCE
+- LEAVES
+- TRAINING
+- ANNOUNCEMENTS
+- ASSETS
+- DOCUMENTS
+- TICKETS
+- RECRUITMENT
+- RESIGNATION
+- ORGANIZATION
+- SETTINGS
+- WORKFLOWS
+- AGENT_TRACKING
 
-**55 models, 38 enums** in `prisma/schema.prisma` (1300+ lines)
+Actions:
+- VIEW
+- CREATE
+- UPDATE
+- DELETE
+- REVIEW
+- ASSIGN
+- EXPORT
+- IMPORT
 
-Core: `Organization`, `User`, `Employee` (+Profile/Address/Banking), `Department`, `Education`
-Features: `Attendance`, `TimeSession`, `BreakEntry`, `Leave`, `Payroll`, `ProvidentFund`, `PerformanceReview`, `Training`, `Asset`, `Document`, `Ticket`, `Announcement`, `Candidate`, `Resignation`, `CalendarEvent`, `Kudos`
-Teams: `Team`, `TeamMember`, `Shift`, `ShiftAssignment`, `AttendancePolicy`, `Holiday`
-Compliance: `PayrollComplianceConfig`, `TaxSlab`, `PayrollAudit`
-AI: `PerformanceMetrics`, `WeeklyScores`, `AgentExecutionLogs`, `Notifications`, `AdminAlerts`
-Workflow: `WorkflowTemplate`, `WorkflowStep`, `WorkflowInstance`, `WorkflowAction`
-Enterprise: `UserSession`, `Webhook`, `WebhookDelivery`, `SavedReport`, `ReportSchedule`, `InAppNotification`
+---
 
-Key constraints:
+## Database
 
-- `Department` — `@@unique([name, organizationId])` (multi-tenant scoped)
-- `Employee` — `@@unique([employeeCode])`, `@@unique([email])`
-- All queries scoped by `organizationId` via `orgFilter()`
+The current Prisma schema has **63 models** and **38 enums**.
 
-### 5. Autonomous AI Agent
+### Core HR models
+- `Organization`
+- `User`
+- `Employee`
+- `EmployeeProfile`
+- `EmployeeAddress`
+- `EmployeeBanking`
+- `Department`
+- `Team`
+- `TeamMember`
 
-See [PERFORMANCE_AGENT_ARCHITECTURE.md](./PERFORMANCE_AGENT_ARCHITECTURE.md)
+### Operations models
+- `Attendance`
+- `TimeSession`
+- `BreakEntry`
+- `Leave`
+- `Payroll`
+- `ProvidentFund`
+- `Training`
+- `Asset`
+- `Document`
+- `Ticket`
+- `Resignation`
+- `CalendarEvent`
 
-### 6. Caching Strategy
+### Workflow and reporting
+- `WorkflowTemplate`
+- `WorkflowStep`
+- `WorkflowInstance`
+- `WorkflowAction`
+- `SavedReport`
+- `ReportSchedule`
+- `Webhook`
+- `WebhookDelivery`
+- `AuditLog`
 
-| Cache Key | TTL | Purpose |
-| --- | --- | --- |
-| `admin:dashboard:metrics` | 5 min | Dashboard stats |
-| `ratelimit:{ip}:{window}` | 70s | Rate limiting |
-| Redis FIFO queue | — | Background job queue |
+### AI and monitoring
+- `PerformanceMetrics`
+- `WeeklyScores`
+- `AgentExecutionLogs`
+- `Notifications`
+- `AdminAlerts`
+
+### Agent tracking
+- `AgentDevice`
+- `AgentCommand`
+- `AgentActivitySnapshot`
+- `AppUsageSummary`
+- `WebsiteUsageSummary`
+- `IdleEvent`
+- `DailyActivityReport`
+
+---
+
+## Queue and Async Work
+
+Redis-backed queue jobs currently include:
+- webhook delivery
+- agent aggregation
+- agent report generation
+- other import/export jobs
+
+These flows are implemented in `lib/queue.ts`, worker routes, and webhook dispatch helpers.
+
+---
+
+## Integrations
+
+- Supabase Storage for files
+- Gemini for AI chat, performance analysis, and activity summaries
+- Resend for transactional email delivery
+- Google OAuth and optional Auth0 for sign-in
+- Webhook subscriptions for downstream integrations
 
 ---
 
 ## Security Model
 
-- **Auth**: JWT-based sessions via NextAuth v5 (Credentials + Google OAuth + Auth0)
-- **RBAC**: 5 roles × 18 modules × 8 actions permission matrix enforced at middleware and route level
-- **Session Management**: `UserSession` model with `isRevoked` flag, session listing/revocation for admins
-- **Cron Security**: Bearer token (`CRON_SECRET`) required
-- **Input Validation**: 30+ Zod schemas on all mutation endpoints
-- **Rate Limiting**: 60 requests/minute per IP (Redis-backed, in-memory fallback)
-- **Data Isolation**: Multi-tenant `organizationId` scoping on all queries
-- **PII Protection**: Safe `select` on sensitive routes (no salary/bank data leaks across roles)
-- **Structured Logging**: JSON logging with request IDs, org context, latency metrics
-- **Security Headers**: X-Frame-Options, X-Content-Type-Options, Referrer-Policy in middleware
+- Multi-tenant scoping via `organizationId`
+- Session auth with NextAuth v5
+- Route-level RBAC with `withAuth()`
+- Device-level auth with `withAgentAuth()`
+- Structured logging and request tracing
+- Rate limiting via Redis with in-memory fallback
+- Webhook signing via HMAC
+- Session revocation through `UserSession`
 
 ---
 
-## Key Library Files
+## Key Libraries
 
-| File | Key Exports |
-| --- | --- |
-| `lib/auth.ts` | `auth`, `signIn`, `signOut` — NextAuth config |
-| `lib/security.ts` | `withAuth()`, `orgFilter()` — RBAC middleware |
-| `lib/permissions.ts` | `hasPermission()`, `canAccessModule()`, `PERMISSIONS` matrix |
-| `lib/prisma.ts` | `prisma` — Singleton with PrismaPg adapter |
-| `lib/api-response.ts` | `apiSuccess()`, `apiError()`, `ApiErrorCode` |
-| `lib/logger.ts` | `logger`, `logContext` — Structured JSON logging |
-| `lib/metrics.ts` | `MetricsCollector` — API metrics + auto-alerting |
-| `lib/redis.ts` | `redis` — Upstash + in-memory fallback |
-| `lib/payroll-engine.ts` | `calculateNetSalary()`, `calculatePFContributions()` |
-| `lib/attendance-engine.ts` | `evaluateAttendance()`, `isWorkingDay()` |
-| `lib/workflow-engine.ts` | `WorkflowEngine.initiateWorkflow()`, `.processAction()` |
-| `lib/schemas/*.ts` | 30+ Zod schemas for validation |
+| File | Purpose |
+|---|---|
+| `lib/auth.ts` | NextAuth config |
+| `lib/security.ts` | Session route authorization |
+| `lib/permissions.ts` | RBAC matrix and scoping helpers |
+| `lib/agent-auth.ts` | Device auth for desktop agent routes |
+| `lib/queue.ts` | Background job queue |
+| `lib/webhooks.ts` | Outbound webhook dispatch |
+| `lib/agent-report-generator.ts` | Daily activity report generation |
+| `lib/activity-classifier.ts` | Activity categorization and productivity scoring |
+| `lib/email.ts` | Email sending |
+| `lib/logger.ts` | Structured logging |
+| `lib/metrics.ts` | Metrics collection |

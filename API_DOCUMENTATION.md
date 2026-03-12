@@ -2,197 +2,166 @@
 
 ## Authentication
 
-All protected routes require a valid NextAuth session cookie. Routes are protected by the `withAuth()` middleware (`lib/security.ts`) which enforces:
+### Session-auth routes
 
-1. **Session validation** — Valid NextAuth JWT required
-2. **Permission check** — `{ module, action }` verified against the RBAC permission matrix in `lib/permissions.ts`
-3. **Session revocation check** — `UserSession.isRevoked` verified against database
-4. **Organization scoping** — `organizationId` injected into context
-5. **Employee resolution** — `employeeId` resolved eagerly for the authenticated user
+Protected application routes use `withAuth()` and enforce:
+1. valid NextAuth session
+2. module/action permission check
+3. session revocation check
+4. organization scoping
+5. employee resolution where required
 
-### Roles
+### Agent routes
 
-| Role | Description |
-| --- | --- |
-| CEO | Full access to all 18 modules |
-| HR | Employee management, attendance, leaves, training, recruitment, workflows |
-| PAYROLL | Payroll CRUD, PF, attendance (view), reports (view/export) |
-| TEAM_LEAD | Team overview, performance reviews (create/review), leave approvals, tickets |
-| EMPLOYEE | Own data only: attendance, leaves, feedback, tickets, resignation |
+Desktop agent routes use `withAgentAuth()` and authenticate devices via API keys issued at registration time.
 
-### Cron Routes
+### Cron routes
 
-Require: `Authorization: Bearer {CRON_SECRET}`
+Cron routes require:
 
-### API Response Envelope
-
-All responses use the normalized envelope from `lib/api-response.ts`:
-
-```json
-{ "success": true, "data": { ... } }
-{ "success": false, "error": { "message": "...", "code": "VALIDATION_ERROR" } }
+```text
+Authorization: Bearer {CRON_SECRET}
 ```
 
 ---
 
-## Endpoints
+## Roles
+
+| Role | Summary |
+|---|---|
+| CEO | Full access across all 19 modules |
+| HR | HR operations, workflow visibility, agent tracking visibility |
+| PAYROLL | Payroll and compliance operations |
+| TEAM_LEAD | Team, review, leave, ticket, limited agent visibility |
+| EMPLOYEE | Own data, self-service, personal activity visibility |
+
+---
+
+## Response Envelope
+
+```json
+{ "success": true, "data": {} }
+{ "success": false, "error": { "message": "Validation Error", "code": "VALIDATION_ERROR" } }
+```
+
+---
+
+## Key Endpoints
 
 ### Dashboard
 
-#### `GET /api/dashboard`
-
-**Permission:** `DASHBOARD.VIEW`
-
-Returns role-specific dashboard data:
-
-- **CEO/HR**: Total employees, active/on-leave/resigned counts, department split, hiring trend, salary ranges, recent hires
-- **PAYROLL**: Personal stats + payroll aggregates (totalPayout, pendingCount, processedCount, paidCount, PF stats)
-- **TEAM_LEAD**: Personal stats + team data (members with live attendance status)
-- **EMPLOYEE**: Personal stats (attendance, leaves, training, review status) + team colleagues
-
-#### `GET /api/dashboard/logins`
-
-**Permission:** `DASHBOARD.VIEW` (CEO/HR only) — Recent login activity.
-
----
+- `GET /api/dashboard`
+- `GET /api/dashboard/logins`
 
 ### Employees
 
-#### `GET /api/employees`
+- `GET /api/employees`
+- `POST /api/employees`
+- `PUT /api/employees/{id}`
+- `DELETE /api/employees/{id}`
+- `POST /api/employees/{id}/credentials`
 
-**Permission:** `EMPLOYEES.VIEW`
-**Query params:** `page`, `limit`, `search`
-**Response:** `{ data: Employee[], total, page, limit }`
+### Performance
 
-#### `POST /api/employees`
+- `GET /api/performance`
+- `POST /api/performance`
+- `POST /api/cron/evaluate-performance`
+- `GET /api/admin/performance`
+- `GET /api/employee/performance`
 
-**Permission:** `EMPLOYEES.CREATE`
-Auto-creates a User account with temp password `{employeeCode}@{year}`.
-**Body:** Validated by `employeeSchema`.
-**Responses:** `201` Created, `400` Validation error, `409` Duplicate
+### Attendance and Time Tracking
 
-#### `PUT /api/employees/{id}` — `EMPLOYEES.UPDATE`
+- `GET/POST /api/attendance`
+- `GET/POST /api/attendance/holidays`
+- `GET/PUT /api/attendance/policy`
+- `GET/POST /api/attendance/shifts`
+- `POST /api/time-tracker/check-in`
+- `POST /api/time-tracker/check-out`
+- `POST /api/time-tracker/break`
+- `POST /api/time-tracker/heartbeat`
+- `GET /api/time-tracker/status`
+- `GET /api/time-tracker/history`
 
-#### `DELETE /api/employees/{id}` — `EMPLOYEES.DELETE`
+### Payroll
 
-#### `POST /api/employees/{id}/credentials` — `EMPLOYEES.UPDATE` — Reset temp password
+- `GET/POST /api/payroll`
+- `POST /api/payroll/run`
+- `GET/POST /api/payroll/config`
+- `POST /api/payroll/import`
+- `GET /api/payroll/{id}/payslip`
+- `GET/POST /api/pf`
 
----
+### Agent Tracking
 
-### Performance Reviews
+#### Employee / device endpoints
+- `POST /api/agent/register`
+- `POST /api/agent/heartbeat`
+- `GET /api/agent/config`
+- `POST /api/agent/activity`
+- `POST /api/agent/idle-event`
+- `GET /api/agent/commands`
+- `PUT /api/agent/commands/{id}`
+- `GET /api/agent/report/{date}`
 
-#### `GET /api/performance`
+#### Admin endpoints
+- `GET /api/admin/agent/dashboard`
+- `GET /api/admin/agent/devices`
+- `PATCH /api/admin/agent/devices`
+- `POST /api/admin/agent/command`
 
-**Permission:** `PERFORMANCE.VIEW`
-**Query params:** `employeeId`, `formType` (DAILY/MONTHLY)
-
-Role-scoped results:
-
-- **CEO/HR**: All reviews in organization
-- **TEAM_LEAD**: Reviews they created + reviews about them
-- **EMPLOYEE**: Reviews about them only
-
-Includes `employee`, `reviewer`, `formType`, `formData` relations.
-
-#### `POST /api/performance`
-
-**Permission:** `PERFORMANCE.CREATE`
-**Body:**
-
-```json
-{
-  "employeeId": "string (required)",
-  "rating": "number (0-5)",
-  "formType": "DAILY | MONTHLY (optional)",
-  "formData": "JSON (structured form sections)",
-  "reviewPeriod": "string (e.g. 'March 2026')",
-  "status": "PENDING | COMPLETED | EXCELLENT | GOOD | NEEDS_IMPROVEMENT"
-}
-```
-
-`reviewerId` auto-set from authenticated user. `reviewType` defaults to `MANAGER`.
-
----
-
-### Teams
-
-#### `GET /api/teams` — `TEAMS.VIEW` — All teams in org
-
-#### `POST /api/teams` — `TEAMS.CREATE` — Body: `{ name, description?, leadId }`
-
-#### `GET /api/teams/{id}` — `TEAMS.VIEW` — Team with lead + members
-
-#### `GET /api/teams/{id}/members` — `TEAMS.VIEW` — Member list with employee details
-
----
-
-### Departments
-
-#### `GET /api/departments` — Returns all departments with employee count
-
-#### `POST /api/departments` — `EMPLOYEES.CREATE` — Body: `{ name, color? }`
-
-#### `DELETE /api/departments/{id}` — `EMPLOYEES.DELETE` — Blocked if employees assigned (409)
-
----
-
-### Time Tracker
-
-| Endpoint | Method | Description |
-| --- | --- | --- |
-| `/api/time-tracker/check-in` | POST | Create new TimeSession |
-| `/api/time-tracker/check-out` | POST | Close active TimeSession |
-| `/api/time-tracker/break` | POST | Toggle break state |
-| `/api/time-tracker/heartbeat` | POST | Idle/active telemetry |
-| `/api/time-tracker/status` | GET | Current session state |
-| `/api/time-tracker/history` | GET | Past sessions |
-
----
-
-### AI Performance Agent
-
-#### `POST /api/cron/evaluate-performance`
-
-**Auth:** `Bearer {CRON_SECRET}`
-Runs AI evaluation for all ACTIVE employees. Response: `{ success, batchId, processed, errors, timeMs }`
-
-#### `GET /api/admin/performance` — CEO/HR — Alerts + scores
-
-#### `GET /api/employee/performance` — EMPLOYEE — Personal score history
-
----
+#### Cron / worker endpoints
+- `POST /api/cron/agent-aggregate`
+- `POST /api/cron/agent-reports`
+- `POST /api/worker/process-queue`
 
 ### Other Modules
 
-| Route | Method | Module | Description |
-| --- | --- | --- | --- |
-| `/api/attendance` | GET, POST | ATTENDANCE | Attendance records |
-| `/api/attendance/holidays` | GET, POST | ATTENDANCE | Holiday management |
-| `/api/attendance/policy` | GET, PUT | ATTENDANCE | Attendance policy |
-| `/api/attendance/shifts` | GET, POST | ATTENDANCE | Shift management |
-| `/api/attendance/regularization` | GET, POST | ATTENDANCE | Regularization requests |
-| `/api/leaves` | GET, POST | LEAVES | Leave applications |
-| `/api/payroll` | GET, POST | PAYROLL | Payroll records |
-| `/api/payroll/run` | POST | PAYROLL | Run payroll batch |
-| `/api/payroll/config` | GET, PUT | PAYROLL | Payroll compliance config |
-| `/api/payroll/import` | POST | PAYROLL | CSV import |
-| `/api/pf` | GET, POST | PAYROLL | Provident fund records |
-| `/api/training` | GET, POST | TRAINING | Training programs |
-| `/api/announcements` | GET, POST | ANNOUNCEMENTS | Company announcements |
-| `/api/assets` | GET, POST | ASSETS | Asset management |
-| `/api/documents` | GET, POST | DOCUMENTS | Document management |
-| `/api/tickets` | GET, POST | TICKETS | Help desk tickets |
-| `/api/recruitment` | GET, POST | RECRUITMENT | Candidate pipeline |
-| `/api/resignation` | GET, POST | RESIGNATION | Resignation workflow |
-| `/api/events` | GET, POST | DASHBOARD | Calendar events |
-| `/api/kudos` | GET, POST | FEEDBACK | Kudos/recognition |
-| `/api/notifications` | GET | DASHBOARD | In-app notifications |
-| `/api/workflows/templates` | GET, POST | WORKFLOWS | Workflow templates |
-| `/api/workflows/action` | POST | WORKFLOWS | Workflow actions |
-| `/api/reports` | GET, POST | REPORTS | Custom reports |
-| `/api/webhooks` | GET, POST | SETTINGS | Webhook management |
-| `/api/organization` | GET, PUT | ORGANIZATION | Org settings/chart |
-| `/api/chat` | POST | DASHBOARD | AI chatbot relay |
-| `/api/health` | GET | Public | Health check + DB status |
-| `/api/admin/sessions` | GET, DELETE | SETTINGS | Session management |
-| `/api/admin/metrics` | GET | REPORTS | API metrics |
+- `/api/leaves`
+- `/api/training`
+- `/api/announcements`
+- `/api/assets`
+- `/api/documents`
+- `/api/tickets`
+- `/api/recruitment`
+- `/api/resignations`
+- `/api/events`
+- `/api/kudos`
+- `/api/notifications`
+- `/api/workflows/templates`
+- `/api/workflows/action`
+- `/api/reports/query`
+- `/api/reports/export`
+- `/api/settings/webhooks`
+- `/api/organization`
+- `/api/chat`
+- `/api/health`
+- `/api/admin/sessions`
+- `/api/admin/metrics`
+
+---
+
+## Agent Payload Schemas
+
+Defined in `lib/schemas/agent.ts`:
+
+- `agentRegisterSchema`
+- `agentHeartbeatSchema`
+- `agentActivityBatchSchema`
+- `agentIdleEventSchema`
+- `agentCommandConfirmSchema`
+- `adminAgentCommandSchema`
+- `adminDeviceListSchema`
+- `adminDeviceUpdateSchema`
+
+---
+
+## Webhook Events
+
+Current notable webhook events include:
+- `employee.created`
+- `employee.updated`
+- `payroll.finalized`
+- `attendance.late`
+- `agent.device.registered`
+- `agent.command.executed`
+- `agent.report.generated`

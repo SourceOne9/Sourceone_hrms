@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { queue } from "@/lib/queue"
 import { createHmacSignature } from "@/lib/webhooks"
+import { generateDailyReport } from "@/lib/agent-report-generator"
 
 // POST /api/worker/process-queue
 // Use a secure secret in production to invoke this
@@ -162,6 +163,41 @@ export async function POST(req: Request) {
                         nextRetryAt: new Date(Date.now() + 60 * 1000)
                     }
                 })
+                skipped++
+            }
+        } else if (type === "AGENT_REPORT_GENERATE") {
+            const { employeeId, date } = rawRows as any
+            try {
+                await generateDailyReport(employeeId, new Date(date))
+                inserted++
+            } catch {
+                skipped++
+            }
+        } else if (type === "AGENT_AGGREGATE") {
+            // Delegate to the cron endpoint logic inline
+            try {
+                const { date: aggDate } = rawRows as any
+                const d = new Date(aggDate)
+                d.setHours(0, 0, 0, 0)
+                const dEnd = new Date(d)
+                dEnd.setHours(23, 59, 59, 999)
+
+                const snapshots = await prisma.agentActivitySnapshot.findMany({
+                    where: { timestamp: { gte: d, lte: dEnd } },
+                    include: { device: { select: { employeeId: true, organizationId: true } } },
+                })
+
+                for (const snap of snapshots) {
+                    if (snap.primaryApp) {
+                        await prisma.appUsageSummary.upsert({
+                            where: { employeeId_date_appName: { employeeId: snap.device.employeeId, date: d, appName: snap.primaryApp } },
+                            create: { employeeId: snap.device.employeeId, organizationId: snap.device.organizationId, date: d, appName: snap.primaryApp, category: snap.category, totalSeconds: snap.activeSeconds },
+                            update: { totalSeconds: { increment: snap.activeSeconds } },
+                        })
+                    }
+                }
+                inserted++
+            } catch {
                 skipped++
             }
         }

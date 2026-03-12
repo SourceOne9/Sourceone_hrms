@@ -1,191 +1,98 @@
-# User Flows — EMS Pro
+# User Flows - EMS Pro
 
-## CEO / HR User Flows
+## CEO / HR
 
 ### Dashboard
-
-1. Login with CEO/HR credentials
-2. Dashboard shows: total employees, active/on-leave counts, department split chart, hiring trends, salary distribution, recent hires
-3. Quick actions: Manage Employees, View Reports
+1. Log in with CEO or HR credentials.
+2. Review total employees, active/on-leave counts, department split, hiring trends, and salary distribution.
+3. Open reports, employees, workflows, and agent-tracking insights from quick actions.
 
 ### Create Employee
+1. Navigate to `/employees`.
+2. Click **Add Employee**.
+3. Complete employee details and optional avatar upload.
+4. Submit the form.
+5. The system creates the employee plus linked login credentials.
 
-1. Navigate to `/employees`
-2. Click **Add Employee**
-3. Fill in all fields (name, code, email, department, designation, salary, status)
-4. Optionally upload avatar
-5. Click **Create Employee**
-6. System auto-creates login credentials: `{EmployeeCode}@{Year}`
-7. Credentials card shown — copy and share with employee
+### Performance Review Management
+1. Navigate to `/performance`.
+2. Choose **Daily Review** or **Monthly Review**.
+3. Select an employee.
+4. Complete structured form sections.
+5. Submit and review history in the table view.
 
-### Manage Departments
+### Agent Tracking Management
+1. Navigate to `/admin/agent-tracking`.
+2. Review device counts, stale devices, and organization activity totals.
+3. Inspect top apps and top websites.
+4. Search/filter the device inventory.
+5. Suspend or reactivate devices.
+6. Issue commands such as force sync or resume.
 
-1. Navigate to `/employees` > click **+ New** next to Department field
-2. **Manage Departments** modal opens showing existing departments with Delete buttons
-3. To delete: click Delete (blocked if employees still assigned)
-4. To create: type name, press Create Department
+## Payroll Admin
 
-### Create Performance Review (CEO/HR)
-
-1. Navigate to `/performance`
-2. Click **Daily Review** or **Monthly Review** button
-3. Select any employee from the organization
-4. Fill in the structured form (metrics, ratings, comments)
-5. Submit — review visible to employee, team lead, and other admins
-
-### View All Performance Reviews
-
-1. Navigate to `/performance`
-2. See stats: Avg Score, Total Reviews, Pending, This Month
-3. Filter by: All / Daily / Monthly tabs
-4. Click any review row to view full structured form data
-
-### Manage Teams
-
-1. Navigate to `/teams`
-2. Create team with name, description, and assigned team lead
-3. Add/remove team members
-
-### View AI Performance Dashboard
-
-1. Navigate to `/admin/performance`
-2. Top cards: Org Avg Score, Active Alerts, Burnout Risks, Top Performers
-3. Left panel: Critical AI Escalations with Dismiss/Intervene buttons
-4. Right panel: Weekly score table with base/AI adjustment/final scores
-
----
-
-## Payroll Admin User Flows
-
-### Dashboard
-
-1. Login with PAYROLL credentials
-2. Dashboard shows: personal stats (attendance, leave, training) + payroll operations section
-3. Payroll operations: Total Payout, Pending Payrolls, PF This Month
-4. Payroll Status Breakdown: progress bars for Pending/Processed/Paid
-5. Time Tracker widget for own check-in/out
-6. Quick actions: Run Payroll, Manage PF, Export Reports, View Leaves
+### Payroll Dashboard
+1. Log in as PAYROLL.
+2. Review payroll operations summary, PF stats, and personal time tracker.
+3. Navigate to payroll runs, PF, and exports.
 
 ### Run Payroll
+1. Open `/payroll`.
+2. Select a period.
+3. Review payroll records.
+4. Process pending items and export outputs.
 
-1. Navigate to `/payroll`
-2. Select month/year
-3. Review employee payroll records
-4. Process pending payrolls
-5. Export to CSV/PDF
+## Team Lead
 
-### Manage PF
+### Team Dashboard
+1. Log in as TEAM_LEAD.
+2. Review personal stats and team overview.
+3. Check live attendance states.
+4. Open review and leave approval actions.
+5. In agent-enabled orgs, review team activity visibility where permitted.
 
-1. Navigate to `/payroll` > PF tab
-2. View/edit provident fund contributions
-3. Import PF data via CSV
+### Daily or Monthly Reviews
+1. Navigate to `/performance`.
+2. Select a team member.
+3. Fill the appropriate review form.
+4. Submit and review historical entries.
 
----
+## Employee
 
-## Team Lead User Flows
+### Employee Dashboard
+1. Log in as EMPLOYEE.
+2. Review attendance, leave balance, training, review status, and team presence.
+3. Use the time tracker for check-in, break, resume, and check-out.
+4. View the activity tracker widget when agent tracking is enabled.
+5. Access kudos and onboarding companion widgets.
 
-### Dashboard
-
-1. Login with TEAM_LEAD credentials
-2. Hero banner shows team name and member count
-3. Personal stats: Attendance, Leave Balance, Training, Review Status
-4. Team Overview card: member list with live attendance status (Active/Away dots)
-5. Time Tracker and Kudos widgets
-6. Quick actions: Review Team Member, Approve Leaves, Raise Ticket, View Attendance
-
-### Create Daily Performance Review
-
-1. Navigate to `/performance`
-2. Click **Daily Review**
-3. Select team member from dropdown (only own team members shown)
-4. Fill in:
-   - **Activity Metrics** — 8 pre-populated rows (Tasks Completed, Meetings Attended, etc.) with Target/Actual/Notes
-   - **Behavioral Ratings** — 6 competencies rated 1-5 (Communication, Collaboration, Problem Solving, etc.)
-   - **Priorities** — Top 3 priorities for the day
-   - **Blockers** — Challenges faced
-   - **End-of-Day Summary** — Key wins + action items
-5. Overall score auto-calculated from behavioral ratings average
-6. Submit — review visible to the employee, HR, and CEO
-
-### Create Monthly Performance Review
-
-1. Navigate to `/performance`
-2. Click **Monthly Review**
-3. Select team member, review month, review date
-4. Fill in:
-   - **KPI Scorecard** — 10 pre-populated rows with Target/Actual/% Achievement (auto-calc)/Trend
-   - **Competency Ratings** — 10 areas rated 1-5 (Technical, Communication, Leadership, etc.)
-   - **Overall Rating** — Select 1-5 (Needs Improvement to Outstanding)
-   - **Goals & Development** — Accomplishments, areas for improvement, goals for next month, training plan
-   - **Manager Comments** — Overall feedback
-5. Submit — review visible to the employee, HR, and CEO
-
-### Approve Leaves
-
-1. Navigate to `/leave`
-2. View pending leave requests from team members
-3. Approve or reject with comments
-
----
-
-## Employee User Flows
-
-### Dashboard
-
-1. Login with EMPLOYEE credentials
-2. Dashboard shows: personal stats (attendance, leave balance, pending training, review status)
-3. Team colleagues with status (Active/Away)
-4. Time Tracker widget
-5. Kudos widget + Onboarding Companion (for new employees)
-
-### Check In / Check Out
-
-1. Dashboard shows Time Tracker widget
-2. Click **Check In** — session starts, live timer runs
-3. Click **Break** — break timer starts
-4. Click **Resume** — break ends, work timer resumes
-5. Click **Check Out** — session saved to attendance
-
-### View Performance Reviews
-
-1. Navigate to `/performance`
-2. Hero card: Overall average rating, review count, performance rank
-3. Review History table: Date, Type (Daily/Monthly), Rating, Period, Reviewer, Status
-4. Click any review to view full structured form data (read-only)
+### View Daily Activity Report
+1. Open the activity tracker widget.
+2. Click **View Full Report**.
+3. Review active time, idle time, top apps, top websites, AI summary, and recommendations.
+4. Receive the report by email if delivery is enabled.
 
 ### Apply for Leave
+1. Navigate to `/leave`.
+2. Create a leave request.
+3. Submit for approval.
 
-1. Navigate to `/leave`
-2. Click **Apply for Leave**
-3. Fill in type, date range, reason
-4. Submit — team lead/HR receives notification
+### Change Password
+1. On first login, open `/change-password`.
+2. Enter the current temporary password.
+3. Set a new password.
+4. Return to the dashboard.
 
-### Change Password (First Login)
+## Authentication
 
-1. On first login, redirected to `/change-password`
-2. Enter current temp password
-3. Set new password
-4. Redirected to dashboard
-
----
-
-## Auth Flow
-
-### Login
-
-1. Navigate to `/login`
-2. Enter email **or** employee code + password
-3. Optional: Google Sign-In or Auth0
-4. If `mustChangePassword = true` — force redirect to `/change-password`
-5. Redirected to role-specific dashboard:
-   - CEO/HR → Admin Dashboard
-   - PAYROLL → Payroll Dashboard
-   - TEAM_LEAD → Team Lead Dashboard
-   - EMPLOYEE → Employee Dashboard
+### Login Flow
+1. Navigate to `/login`.
+2. Log in with email or employee code and password.
+3. Optionally use Google or Auth0.
+4. If `mustChangePassword` is true, complete the password-change flow.
+5. The user lands on a role-specific dashboard.
 
 ### Session Management
-
 - JWT-based sessions via NextAuth v5
-- Sessions tracked in `UserSession` model
-- Admins can view and revoke active sessions via `/admin/identity`
-- If session expires or is revoked, middleware redirects to `/login`
+- Session records stored in `UserSession`
+- Admin session revocation via `/admin/identity`

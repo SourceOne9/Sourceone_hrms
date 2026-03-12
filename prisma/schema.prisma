@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  url        = env("DATABASE_URL")
   extensions = [vector]
 }
 
@@ -61,6 +60,13 @@ model Organization {
   // Integrations (Week 8)
   webhooks           Webhook[]
   kudos              Kudos[]
+
+  // Agent Tracking
+  agentDevices           AgentDevice[]
+  appUsageSummaries      AppUsageSummary[]
+  websiteUsageSummaries  WebsiteUsageSummary[]
+  idleEvents             IdleEvent[]
+  dailyActivityReports   DailyActivityReport[]
 
   // Enterprise Identity (Week 9)
   scimSecret         String?      @unique
@@ -171,6 +177,13 @@ model Employee {
   workflowActions    WorkflowAction[]   @relation("WorkflowActor")
   kudosSent          Kudos[]            @relation("KudosSent")
   kudosReceived      Kudos[]            @relation("KudosReceived")
+
+  // Agent Tracking
+  agentDevices           AgentDevice[]
+  appUsageSummaries      AppUsageSummary[]
+  websiteUsageSummaries  WebsiteUsageSummary[]
+  idleEvents             IdleEvent[]
+  dailyActivityReports   DailyActivityReport[]
 
   @@index([departmentId])
   @@index([userId])
@@ -688,7 +701,9 @@ model TimeSession {
   employee   Employee           @relation(fields: [employeeId], references: [id])
   breaks     BreakEntry[]
   activities ActivityLog[]
-  snapshots  ActivitySnapshot[]
+  snapshots       ActivitySnapshot[]
+  agentSnapshots  AgentActivitySnapshot[]
+  idleEvents      IdleEvent[]
 
   @@index([employeeId])
   @@index([createdAt])
@@ -1410,4 +1425,190 @@ model InAppNotification {
   @@index([userId])
   @@index([organizationId])
   @@index([createdAt])
+}
+
+// ─── Agent Tracking System ───
+
+enum AgentDeviceStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  UNINSTALLED
+}
+
+enum AgentCommandType {
+  UNINSTALL
+  WIPE_DATA
+  SUSPEND
+  RESUME
+  UPDATE_CONFIG
+  FORCE_UPDATE
+  FORCE_SYNC
+  KILL_SWITCH
+}
+
+enum CommandStatus {
+  PENDING_CMD
+  DELIVERED
+  EXECUTED
+  FAILED_CMD
+  EXPIRED
+}
+
+enum IdleResponse {
+  YES
+  NO
+  TIMEOUT
+}
+
+model AgentDevice {
+  id             String            @id @default(cuid())
+  employeeId     String
+  organizationId String
+  deviceName     String
+  platform       String            // "windows" | "macos" | "linux"
+  fingerprint    String            @unique
+  apiKey         String            @unique
+  agentVersion   String
+  status         AgentDeviceStatus @default(PENDING)
+  lastHeartbeat  DateTime?
+  lastSyncAt     DateTime?
+  configJson     Json?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  employee     Employee                  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  organization Organization              @relation(fields: [organizationId], references: [id])
+  commands     AgentCommand[]
+  snapshots    AgentActivitySnapshot[]
+
+  @@index([employeeId])
+  @@index([organizationId])
+  @@index([status])
+}
+
+model AgentCommand {
+  id          String           @id @default(cuid())
+  deviceId    String
+  type        AgentCommandType
+  status      CommandStatus    @default(PENDING_CMD)
+  payload     Json?
+  issuedBy    String
+  issuedAt    DateTime         @default(now())
+  deliveredAt DateTime?
+  executedAt  DateTime?
+  expiresAt   DateTime?
+  result      String?
+
+  device AgentDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId])
+  @@index([status])
+}
+
+model AgentActivitySnapshot {
+  id                String           @id @default(cuid())
+  sessionId         String
+  deviceId          String
+  timestamp         DateTime         @default(now())
+  keystrokeCount    Int              @default(0)
+  mouseClickCount   Int              @default(0)
+  mouseDistance      Float            @default(0)
+  scrollCount       Int              @default(0)
+  activeSeconds     Int              @default(0)
+  idleSeconds       Int              @default(0)
+  productivityScore Float?
+  primaryApp        String?
+  primaryUrl        String?
+  category          ActivityCategory @default(OTHER)
+
+  session TimeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  device  AgentDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([deviceId])
+  @@index([timestamp])
+}
+
+model AppUsageSummary {
+  id             String           @id @default(cuid())
+  employeeId     String
+  organizationId String
+  date           DateTime
+  appName        String
+  category       ActivityCategory @default(OTHER)
+  totalSeconds   Int              @default(0)
+
+  employee     Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([employeeId, date, appName])
+  @@index([organizationId, date])
+  @@index([employeeId, date])
+}
+
+model WebsiteUsageSummary {
+  id             String           @id @default(cuid())
+  employeeId     String
+  organizationId String
+  date           DateTime
+  domain         String
+  category       ActivityCategory @default(OTHER)
+  totalSeconds   Int              @default(0)
+
+  employee     Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([employeeId, date, domain])
+  @@index([organizationId, date])
+  @@index([employeeId, date])
+}
+
+model IdleEvent {
+  id             String       @id @default(cuid())
+  sessionId      String
+  employeeId     String
+  organizationId String
+  startedAt      DateTime
+  endedAt        DateTime?
+  durationSec    Int          @default(0)
+  response       IdleResponse @default(TIMEOUT)
+  notes          String?
+  createdAt      DateTime     @default(now())
+
+  session      TimeSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  employee     Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([sessionId])
+  @@index([employeeId, createdAt])
+  @@index([organizationId])
+}
+
+model DailyActivityReport {
+  id                     String   @id @default(cuid())
+  employeeId             String
+  organizationId         String
+  date                   DateTime
+  totalActiveSeconds     Int      @default(0)
+  totalIdleSeconds       Int      @default(0)
+  totalBreakSeconds      Int      @default(0)
+  totalSessionSeconds    Int      @default(0)
+  productivityScore      Float?
+  focusScore             Float?
+  topApps                Json?
+  topWebsites            Json?
+  aiSummary              String?  @db.Text
+  aiRecommendations      String?  @db.Text
+  burnoutRiskFlag        Boolean  @default(false)
+  snapshotCount          Int      @default(0)
+  idleEventCount         Int      @default(0)
+  emailSentAt            DateTime?
+  generatedAt            DateTime @default(now())
+
+  employee     Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([employeeId, date])
+  @@index([organizationId, date])
 }

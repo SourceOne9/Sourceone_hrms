@@ -39,6 +39,7 @@ export enum Module {
   ORGANIZATION = "ORGANIZATION",
   SETTINGS = "SETTINGS",
   WORKFLOWS = "WORKFLOWS",
+  AGENT_TRACKING = "AGENT_TRACKING",
 }
 
 // ── Actions ────────────────────────────────────────────────
@@ -82,6 +83,7 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.ORGANIZATION]:  [VIEW, UPDATE],
     [Module.SETTINGS]:      [VIEW, UPDATE],
     [Module.WORKFLOWS]:     FULL_CRUD,
+    [Module.AGENT_TRACKING]: FULL_CRUD,
   },
 
   HR: {
@@ -104,6 +106,7 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.ORGANIZATION]:  [VIEW],
     [Module.SETTINGS]:      [],
     [Module.WORKFLOWS]:     [VIEW, CREATE, UPDATE],
+    [Module.AGENT_TRACKING]: [VIEW, UPDATE],
   },
 
   PAYROLL: {
@@ -126,6 +129,7 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.ORGANIZATION]:  [],
     [Module.SETTINGS]:      [],
     [Module.WORKFLOWS]:     [],
+    [Module.AGENT_TRACKING]: [],
   },
 
   TEAM_LEAD: {
@@ -148,6 +152,7 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.ORGANIZATION]:  [],
     [Module.SETTINGS]:      [],
     [Module.WORKFLOWS]:     [],
+    [Module.AGENT_TRACKING]: [VIEW],
   },
 
   EMPLOYEE: {
@@ -170,6 +175,7 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.ORGANIZATION]:  [],
     [Module.SETTINGS]:      [],
     [Module.WORKFLOWS]:     [],
+    [Module.AGENT_TRACKING]: [VIEW],
   },
 }
 

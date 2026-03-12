@@ -7,6 +7,9 @@ export const WEBHOOK_EVENTS = {
     EMPLOYEE_UPDATED: "employee.updated",
     PAYROLL_FINALIZED: "payroll.finalized",
     ATTENDANCE_LATE: "attendance.late",
+    AGENT_DEVICE_REGISTERED: "agent.device.registered",
+    AGENT_COMMAND_EXECUTED: "agent.command.executed",
+    AGENT_REPORT_GENERATED: "agent.report.generated",
 } as const
 
 export type WebhookEventType = typeof WEBHOOK_EVENTS[keyof typeof WEBHOOK_EVENTS]

@@ -10,6 +10,7 @@ import { CalendarIcon, ClockIcon, BackpackIcon } from "@radix-ui/react-icons"
 import { KudosWidget } from "./KudosWidget"
 import { TimeTracker } from "./TimeTracker"
 import { OnboardingCompanion } from "./OnboardingCompanion"
+import { AgentActivityWidget } from "@/components/agent/AgentActivityWidget"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
@@ -156,6 +157,7 @@ export function EmployeeDashboard() {
 
                     <div className="flex flex-col gap-6">
                         <TimeTracker />
+                        <AgentActivityWidget />
                         <KudosWidget />
 
                         {/* My Team + Quick Actions */}

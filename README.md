@@ -1,25 +1,25 @@
-# EMS Pro — Employee Management System
+# EMS Pro - Employee Management System
 
 ## Overview
-A production-grade, multi-tenant Employee Management System built with **Next.js 16**, **React 19**, **Prisma 7.4 ORM**, **PostgreSQL (Supabase)**, **NextAuth.js v5**, and **Google Gemini AI**. Features a comprehensive RBAC system with 5 roles, 18+ modules, and structured performance reviews.
+EMS Pro is a production-grade, multi-tenant Employee Management System built with **Next.js 16**, **React 19**, **Prisma 7.4 ORM**, **PostgreSQL (Supabase)**, **NextAuth.js v5**, and **Google Gemini AI**. The current codebase includes 5 roles, 19 permissioned modules, 100+ API routes, structured performance reviews, and a new desktop agent-based workforce activity tracking surface.
 
 ## Build Status
-**All TypeScript checks pass. 100+ routes compiled cleanly. 55 database models, 38 enums.**
+**TypeScript checks pass. 100+ API routes compile cleanly. 63 database models, 38 enums.**
 
 ---
 
 ## Tech Stack
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 16 (Turbopack), React 19, TailwindCSS 3.4, Radix UI |
-| Backend | Next.js API Routes (App Router), Prisma 7.4 |
-| Database | PostgreSQL via Supabase (PrismaPg driver adapter) |
-| Auth | NextAuth.js v5 (Credentials + Google OAuth + Auth0) |
-| AI | Google Gemini 2.0 Flash (`@ai-sdk/google`) |
-| Cache | Upstash Redis (in-memory fallback for local dev) |
+| Frontend | Next.js 16 (App Router), React 19, TailwindCSS 3.4, Radix UI |
+| Backend | Next.js API Routes, Prisma 7.4 |
+| Database | PostgreSQL via Supabase |
+| Auth | NextAuth.js v5, Google OAuth, Auth0 |
+| AI | Google Gemini 2.0 Flash |
+| Cache / Queue | Upstash Redis with in-memory fallback |
 | File Storage | Supabase Storage |
-| Forms | react-hook-form + Zod validation |
-| Charts | Recharts, Reactflow (org chart) |
+| Email | Resend |
+| Validation | Zod + react-hook-form |
 | Export | XLSX, jsPDF |
 | Testing | Vitest, Playwright |
 
@@ -27,133 +27,111 @@ A production-grade, multi-tenant Employee Management System built with **Next.js
 
 ## Features
 
-### Core Modules
-- **Employee Directory** — Full CRUD with avatar upload, bulk CSV/XLSX import
-- **Department Management** — Create/delete departments with employee-guard protection
-- **Teams** — Create teams, assign team leads, manage team members
-- **Organization Chart** — Interactive org chart with drag-and-drop hierarchy
+### Core HR
+- Employee directory with CRUD, avatar upload, and bulk CSV/XLSX import
+- Department management with guarded deletion
+- Teams with team lead assignment and membership management
+- Organization chart and reporting hierarchy management
 
 ### HR Operations
-- **Attendance & Time Tracking** — Real-time check-in/out with activity logging, break tracking, heartbeat
-- **Leave Management** — Apply, approve/reject leaves with duplicate detection
-- **Payroll Management** — Monthly payroll with PF calculations, CSV import/export, payslip generation
-- **Provident Fund** — PF contribution tracking and management
-- **Training Module** — Enroll employees in training programs, track completion
+- Attendance and time tracking with check-in/out, breaks, heartbeat, and regularization
+- Leave management with apply, approve/reject, and duplicate detection
+- Payroll management with PF calculations, import/export, and payslip generation
+- Provident fund tracking
+- Training enrollment and completion tracking
 
-### Performance & Reviews
-- **Daily Performance Reviews** — Structured forms with activity metrics, behavioral ratings (1-5), priorities, blockers
-- **Monthly Performance Reviews** — KPI scorecards with auto-calculated achievement %, competency ratings, goals, development plans
-- **AI Performance Monitoring** — Weekly AI-driven evaluation agent with burnout detection
+### Performance and AI
+- Daily performance review forms
+- Monthly performance review forms
+- Weekly AI-driven performance evaluation with burnout detection
+- AI chatbot for employee and HR support
+- Onboarding companion for new employees
 
-### Communication & Support
-- **Announcements** — Company-wide announcements
-- **Help Desk Ticketing** — Employee support tickets
-- **Kudos Widget** — Peer recognition system
-- **AI Chatbot** — Embedded Gemini-powered HR assistant
-- **Notification Center** — In-app notifications
+### Workforce Monitoring
+- Desktop agent registration and device authentication
+- Agent heartbeat, config fetch, command polling, and command confirmation
+- Activity snapshot ingestion and idle-event capture
+- Productivity scoring, app usage summaries, and website usage summaries
+- Employee daily activity reports with AI summary and email delivery
+- Admin dashboard for device health, stale devices, top apps, top websites, and org-level activity metrics
 
-### Admin & Compliance
-- **Document Management** — Upload and manage employee documents
-- **Asset Management** — Track company assets assigned to employees
-- **Recruitment** — Candidate pipeline management
-- **Resignation** — Resignation workflow management
-- **Workflows** — Configurable approval workflows
-- **Reports** — Custom report builder with scheduling and export
-- **Session Manager** — Active session monitoring, revocation
-- **Calendar** — Company events and scheduling
+### Admin and Compliance
+- Document management
+- Asset management
+- Recruitment pipeline
+- Resignation workflows
+- Configurable workflows
+- Report builder and exports
+- Session management and revocation
+- Calendar and event scheduling
+- Webhook subscriptions and deliveries
 
 ### Platform
-- **RBAC** — 5 roles with 18-module permission matrix (see below)
-- **Multi-tenant** — All queries scoped by `organizationId`
-- **Custom UI Design System** — 15+ purpose-built components (Card, Badge, Dialog, StatCard, etc.)
-- **Dark/Light Theme** — System-aware theme toggle
-- **Command Palette** — Cmd+K quick navigation
-- **Structured Logging** — JSON logging with request tracing, metrics collection, auto-alerting
+- RBAC with 5 roles across 19 modules
+- Multi-tenant scoping via `organizationId`
+- Structured logging and request tracing
+- Metrics collection and alerting hooks
+- Queue-backed jobs for webhooks and agent report/aggregation flows
+- Command palette and custom UI design system
 
 ---
 
-## Role-Based Access Control (RBAC)
+## Role-Based Access Control
 
-5 roles with granular module-level permissions:
-
-| Role | Access Level |
+| Role | Access Summary |
 |---|---|
-| **CEO** | Full access to all 18 modules including settings and organization |
-| **HR** | Employee management, attendance, leaves, training, recruitment, workflows |
-| **PAYROLL** | Payroll CRUD, PF, attendance (view), reports (view/export) |
-| **TEAM_LEAD** | Team overview, performance reviews (create/review), leaves (approve), tickets |
-| **EMPLOYEE** | Own data: attendance, leaves, feedback, tickets, resignation |
+| CEO | Full access across all 19 modules including organization, settings, and agent tracking |
+| HR | Employee management, attendance, leaves, training, recruitment, workflows, and agent tracking visibility |
+| PAYROLL | Payroll CRUD, PF, attendance view, reports, and payroll operations |
+| TEAM_LEAD | Team overview, performance reviews, leave approvals, tickets, and limited agent visibility |
+| EMPLOYEE | Own attendance, leaves, feedback, tickets, resignation, and personal activity visibility |
 
-Permission matrix defined in `lib/permissions.ts` with `hasPermission()`, `canAccessModule()`, and `scopeEmployeeQuery()` helpers.
+RBAC is defined in `lib/permissions.ts` and enforced through `withAuth({ module, action })` for session-auth routes and `withAgentAuth()` for desktop agent routes.
 
 ---
 
-## Role-Based Dashboards
+## Dashboards
 
-Each role gets a tailored dashboard experience:
-
-| Role | Dashboard | Key Features |
-|---|---|---|
-| CEO / HR | Admin Dashboard | Total employees, active/on-leave counts, department split chart, hiring trends, salary distribution, recent hires |
-| PAYROLL | Payroll Dashboard | Personal stats + payroll operations (total payout, pending/processed/paid counts, PF stats), time tracker |
-| TEAM_LEAD | Team Lead Dashboard | Personal stats + team overview (member list with live attendance status), quick actions (review, approve leaves) |
-| EMPLOYEE | Employee Dashboard | Attendance, leave balance, training, review status, time tracker, kudos, onboarding companion |
+| Role | Dashboard Highlights |
+|---|---|
+| CEO / HR | Org stats, hiring trends, salary distribution, recent hires, agent tracking insights |
+| PAYROLL | Personal stats, payroll operations, PF, and time tracker |
+| TEAM_LEAD | Personal stats, team overview, attendance visibility, review actions |
+| EMPLOYEE | Attendance, leave balance, training, time tracker, kudos, onboarding companion, activity tracker |
 
 ---
 
 ## Getting Started
 
 ```bash
-# Install dependencies
 npm install
-
-# Configure environment
 cp .env.example .env
-# Fill in DATABASE_URL, AUTH_SECRET, GEMINI_API_KEY, etc.
-
-# Push schema to database
 npx prisma db push
-
-# Create initial admin user
 node scripts/create_admin.js
-
-# Start development server
 npm run dev
 ```
 
-## Environment Variables
-| Variable | Description |
+## Important Environment Variables
+
+| Variable | Purpose |
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string |
-| `AUTH_SECRET` | Random secret for JWT signing |
-| `NEXTAUTH_URL` | App base URL (e.g. `http://localhost:3000`) |
-| `GEMINI_API_KEY` | Google Gemini API key |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `AUTH0_CLIENT_ID` | Auth0 client ID (optional) |
-| `AUTH0_CLIENT_SECRET` | Auth0 client secret (optional) |
-| `AUTH0_ISSUER` | Auth0 issuer URL (optional) |
-| `UPSTASH_REDIS_REST_URL` | Upstash Redis URL (optional) |
-| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis token (optional) |
-| `CRON_SECRET` | Bearer token for cron endpoints |
+| `AUTH_SECRET` | NextAuth signing secret |
+| `NEXTAUTH_URL` | App base URL |
+| `GEMINI_API_KEY` | Gemini API access |
+| `CRON_SECRET` | Auth for cron routes |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Cache, rate limiting, and queue backend |
+| `RESEND_API_KEY` | Email delivery for activity reports |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth |
+| `AUTH0_CLIENT_ID` / `AUTH0_CLIENT_SECRET` / `AUTH0_ISSUER` | Optional Auth0 support |
 
 ---
 
-## Default Credentials
-| Role | Email | Password |
-|---|---|---|
-| CEO | `admin@emspro.com` | `admin123` |
-| HR | `hr@emspro.com` | `password123` |
-| Payroll | `payroll@emspro.com` | `password123` |
-| Team Lead | `teamlead@emspro.com` | `password123` |
-| Employee | `employee@emspro.com` | `password123` |
+## Documentation
 
-> Additional employees get auto-generated credentials: `{EmployeeCode}@{Year}` (must change on first login)
-
----
-
-## Architecture
-See [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md) for the full system design.
-See [PERFORMANCE_AGENT_ARCHITECTURE.md](./PERFORMANCE_AGENT_ARCHITECTURE.md) for the AI agent design.
-See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) for the API reference.
-See [USER_FLOWS.md](./USER_FLOWS.md) for detailed user workflows.
+- [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md)
+- [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
+- [USER_FLOWS.md](./USER_FLOWS.md)
+- [PERFORMANCE_AGENT_ARCHITECTURE.md](./PERFORMANCE_AGENT_ARCHITECTURE.md)
+- [AI_AGENTS.md](./AI_AGENTS.md)
+- [QA_AUDIT_REPORT.md](./QA_AUDIT_REPORT.md)

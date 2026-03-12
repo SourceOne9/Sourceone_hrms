@@ -3,7 +3,7 @@ import crypto from "node:crypto"
 
 export interface JobPayload {
     id: string
-    type: "ATTENDANCE_IMPORT" | "PF_IMPORT" | "EMPLOYEE_IMPORT" | "WEBHOOK_DELIVERY"
+    type: "ATTENDANCE_IMPORT" | "PF_IMPORT" | "EMPLOYEE_IMPORT" | "WEBHOOK_DELIVERY" | "AGENT_REPORT_GENERATE" | "AGENT_AGGREGATE"
     data: unknown
     createdAt: number
 }

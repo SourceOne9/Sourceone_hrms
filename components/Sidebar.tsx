@@ -104,6 +104,7 @@ const navGroups: NavGroup[] = [
       { name: "Resignation", href: "/resignation", icon: ExitIcon, module: Module.RESIGNATION },
       { name: "Reports", href: "/admin/reports", icon: BarChartIcon, module: Module.REPORTS },
       { name: "Workflows", href: "/admin/workflows", icon: MixIcon, module: Module.WORKFLOWS },
+      { name: "Agent Tracking", href: "/admin/agent-tracking", icon: LaptopIcon, module: Module.AGENT_TRACKING },
       { name: "Settings", href: "/settings", icon: GearIcon, module: Module.SETTINGS },
     ],
   },
