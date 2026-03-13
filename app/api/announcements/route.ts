@@ -31,11 +31,14 @@ export const POST = withAuth({ module: Module.ANNOUNCEMENTS, action: Action.CREA
             return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
+        // Auto-fill author from session if not provided
+        const authorName = parsed.data.author || ctx.name || "Admin"
+
         const announcement = await prisma.announcement.create({
             data: {
                 title: parsed.data.title,
                 content: parsed.data.content,
-                author: parsed.data.author || "Admin",
+                author: authorName,
                 category: parsed.data.category,
                 priority: parsed.data.priority,
                 isPinned: parsed.data.isPinned,
@@ -75,8 +78,7 @@ export const DELETE = withAuth({ module: Module.ANNOUNCEMENTS, action: Action.DE
 })
 
 // PUT /api/announcements – Update an announcement
-export const status = withAuth({ module: Module.ANNOUNCEMENTS, action: Action.UPDATE }, async (req, ctx) => {
-    // Note: Renovating to use PUT export correctly
+export const PUT = withAuth({ module: Module.ANNOUNCEMENTS, action: Action.UPDATE }, async (req, ctx) => {
     try {
         const body = await req.json()
         const { id, ...data } = body
@@ -113,4 +115,3 @@ export const status = withAuth({ module: Module.ANNOUNCEMENTS, action: Action.UP
     }
 })
 
-export const PUT = status // Re-export as PUT

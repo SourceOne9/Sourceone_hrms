@@ -7,6 +7,7 @@ import { format } from "date-fns"
 import { PlusIcon, TrashIcon, Pencil2Icon, DrawingPinFilledIcon, DrawingPinIcon } from "@radix-ui/react-icons"
 import { Modal } from "@/components/ui/Modal"
 import { GoogleCalendarWidget } from "./GoogleCalendarWidget"
+import { KudosSidebarWidget } from "./KudosSidebarWidget"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -257,7 +258,7 @@ export function AdminAnnouncementsView() {
                 </div>
 
                 <div className="flex flex-col gap-5">
-                    <div className="glass p-[22px] bg-gradient-to-br from-[#1c1c1e] to-[#2c2c2e] text-white">
+                    <div className="p-[22px] rounded-xl shadow-sm bg-gradient-to-br from-[#1c1c1e] to-[#2c2c2e] text-white">
                         <div className="text-md font-bold mb-3 flex items-center gap-2">
                             <span>📌</span> Pinned
                         </div>
@@ -284,6 +285,8 @@ export function AdminAnnouncementsView() {
                     </div>
 
                     <GoogleCalendarWidget />
+
+                    <KudosSidebarWidget />
                 </div>
             </div>
 

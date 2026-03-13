@@ -50,7 +50,16 @@
       "Bash(npx prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-schema-datasource prisma/schema.prisma --script)",
       "Bash(npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script)",
       "Read(//tmp/**)",
-      "Bash(node scripts/apply-agent-migration.js)"
+      "Bash(node scripts/apply-agent-migration.js)",
+      "Bash(npx prisma migrate dev --name add-reimbursement-module)",
+      "Bash(curl -s http://localhost:3099/api/health)",
+      "Bash(curl -s http://localhost:3099/api/auth/csrf)",
+      "Bash(curl -v -s -c cookies.txt -X POST http://localhost:3099/api/auth/callback/credentials -H \"Content-Type: application/x-www-form-urlencoded\" -d \"csrfToken=f72c33c4bd9cb25a6be7eeb3d9f122c373b933721987e1c11c1f6fe215a21ce8&email=ashish@nexicorn.com&password=Admin123!\")",
+      "Bash(curl -v -s -c cookies.txt -b cookies.txt -X POST http://localhost:3099/api/auth/callback/credentials -H \"Content-Type: application/x-www-form-urlencoded\" -d \"csrfToken=ded5741b6834b46adfba318e2729a9d72286df95646a5a937ee5207cd5075513&email=ashish@nexicorn.com&password=Admin123!\")",
+      "Bash(node scripts/init-and-test-buckets.mjs)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Ashish Singh\\Desktop\\Employee directory\\app\\api\\reimbursements"
     ]
   }
 }

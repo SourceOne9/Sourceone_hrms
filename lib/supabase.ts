@@ -40,5 +40,6 @@ export const BUCKETS = {
     AVATARS: 'avatars',
     DOCUMENTS: 'documents',
     ASSETS: 'assets',
-    TRAINING: 'training'
+    TRAINING: 'training',
+    RECEIPTS: 'receipts',
 } as const

@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma"
 import { withAuth } from "@/lib/security"
 import { Module, Action, hasPermission } from "@/lib/permissions"
 import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
-import { NextResponse } from "next/server"
 
 /**
  * POST /api/reports/query
@@ -17,74 +16,148 @@ export const POST = withAuth({ module: Module.REPORTS, action: Action.VIEW }, as
             return apiError("entityType is required", ApiErrorCode.VALIDATION_ERROR, 400)
         }
 
+        if (!columns || !Array.isArray(columns) || columns.length === 0) {
+            return apiError("columns are required", ApiErrorCode.VALIDATION_ERROR, 400)
+        }
+
         let result: any[] = []
         let total = 0
 
-        const where: any = { organizationId: ctx.organizationId, deletedAt: null }
+        // Build base where clause — models without deletedAt won't use it
+        const baseWhere: any = { organizationId: ctx.organizationId }
 
-        // Apply dynamic filters
+        // Apply common filters
         if (filters && typeof filters === "object") {
-            Object.keys(filters).forEach(key => {
-                const value = filters[key]
-                if (value !== undefined && value !== null && value !== "") {
-                    // Simple equality for now, can be expanded to range/contains
-                    if (typeof value === "string" && (value.includes("-") || !isNaN(Date.parse(value)))) {
-                        // Potential date range or date
-                        // Placeholder for more complex filter logic
-                        where[key] = value
-                    } else {
-                        where[key] = value
-                    }
+            // Department filter — applies to Employee directly, or via employee relation
+            if (filters.departmentId) {
+                if (entityType === "EMPLOYEE") {
+                    baseWhere.departmentId = filters.departmentId
                 }
-            })
+                // For other entities, we filter via employee relation below
+            }
+
+            // Status filter (equality)
+            if (filters.status) {
+                baseWhere.status = filters.status
+            }
+
+            // Month filter for payroll
+            if (filters.month && entityType === "PAYROLL") {
+                baseWhere.month = filters.month
+            }
+
+            // Review period filter for performance
+            if (filters.reviewPeriod && entityType === "PERFORMANCE") {
+                baseWhere.reviewPeriod = filters.reviewPeriod
+            }
+
+            // Date range filters
+            if (filters.dateFrom || filters.dateTo) {
+                const dateField = entityType === "ATTENDANCE" ? "date" : entityType === "LEAVE" ? "startDate" : null
+                if (dateField) {
+                    baseWhere[dateField] = {}
+                    if (filters.dateFrom) baseWhere[dateField].gte = new Date(filters.dateFrom)
+                    if (filters.dateTo) baseWhere[dateField].lte = new Date(filters.dateTo + "T23:59:59.999Z")
+                }
+            }
         }
 
-        // Entity-specific query logic & Permission check
+        // Department filter for non-Employee entities via employee relation
+        if (filters?.departmentId && entityType !== "EMPLOYEE") {
+            baseWhere.employee = { departmentId: filters.departmentId }
+        }
+
+        // Soft-delete scope for Employee
+        if (entityType === "EMPLOYEE") {
+            baseWhere.deletedAt = null
+        }
+
+        // Validate sortBy — only allow non-nested fields
+        const safeSortBy = sortBy && !sortBy.includes(".") ? sortBy : undefined
+        const safeSortOrder = sortOrder === "asc" ? "asc" : "desc"
+
         switch (entityType) {
-            case "EMPLOYEE":
-                // All authorized roles can query basic employee data
-                [result, total] = await Promise.all([
+            case "EMPLOYEE": {
+                const select = buildSelect(columns, ["department", "manager"])
+                ;[result, total] = await Promise.all([
                     prisma.employee.findMany({
-                        where,
-                        select: buildSelect(columns),
-                        orderBy: sortBy ? { [sortBy]: sortOrder } : { createdAt: "desc" },
-                        take: limit
+                        where: baseWhere,
+                        select,
+                        orderBy: safeSortBy ? { [safeSortBy]: safeSortOrder } : { createdAt: "desc" },
+                        take: Math.min(limit, 500),
                     }),
-                    prisma.employee.count({ where })
+                    prisma.employee.count({ where: baseWhere }),
                 ])
                 break
+            }
 
-            case "PAYROLL":
-                // Strict check for Payroll
+            case "PAYROLL": {
                 if (!hasPermission(ctx.role, Module.PAYROLL, Action.VIEW)) {
                     return apiError("Insufficient permissions for Payroll reports", ApiErrorCode.FORBIDDEN, 403)
                 }
-                [result, total] = await Promise.all([
+                const select = buildSelect(columns, ["employee"])
+                ;[result, total] = await Promise.all([
                     prisma.payroll.findMany({
-                        where,
-                        select: buildSelect(columns, ["employee"]),
-                        orderBy: sortBy ? { [sortBy]: sortOrder } : { month: "desc" },
-                        take: limit
+                        where: baseWhere,
+                        select,
+                        orderBy: safeSortBy ? { [safeSortBy]: safeSortOrder } : { month: "desc" },
+                        take: Math.min(limit, 500),
                     }),
-                    prisma.payroll.count({ where })
+                    prisma.payroll.count({ where: baseWhere }),
                 ])
                 break
+            }
 
-            case "ATTENDANCE":
-                // HR and Admins can see attendance
+            case "ATTENDANCE": {
                 if (!hasPermission(ctx.role, Module.ATTENDANCE, Action.VIEW)) {
                     return apiError("Insufficient permissions for Attendance reports", ApiErrorCode.FORBIDDEN, 403)
                 }
-                [result, total] = await Promise.all([
+                const select = buildSelect(columns, ["employee"])
+                ;[result, total] = await Promise.all([
                     prisma.attendance.findMany({
-                        where,
-                        select: buildSelect(columns, ["employee"]),
-                        orderBy: sortBy ? { [sortBy]: sortOrder } : { date: "desc" },
-                        take: limit
+                        where: baseWhere,
+                        select,
+                        orderBy: safeSortBy ? { [safeSortBy]: safeSortOrder } : { date: "desc" },
+                        take: Math.min(limit, 500),
                     }),
-                    prisma.attendance.count({ where })
+                    prisma.attendance.count({ where: baseWhere }),
                 ])
                 break
+            }
+
+            case "LEAVE": {
+                if (!hasPermission(ctx.role, Module.LEAVES, Action.VIEW)) {
+                    return apiError("Insufficient permissions for Leave reports", ApiErrorCode.FORBIDDEN, 403)
+                }
+                const select = buildSelect(columns, ["employee"])
+                ;[result, total] = await Promise.all([
+                    prisma.leave.findMany({
+                        where: baseWhere,
+                        select,
+                        orderBy: safeSortBy ? { [safeSortBy]: safeSortOrder } : { startDate: "desc" },
+                        take: Math.min(limit, 500),
+                    }),
+                    prisma.leave.count({ where: baseWhere }),
+                ])
+                break
+            }
+
+            case "PERFORMANCE": {
+                if (!hasPermission(ctx.role, Module.PERFORMANCE, Action.VIEW)) {
+                    return apiError("Insufficient permissions for Performance reports", ApiErrorCode.FORBIDDEN, 403)
+                }
+                const select = buildSelect(columns, ["employee"])
+                ;[result, total] = await Promise.all([
+                    prisma.performanceReview.findMany({
+                        where: baseWhere,
+                        select,
+                        orderBy: safeSortBy ? { [safeSortBy]: safeSortOrder } : { reviewDate: "desc" },
+                        take: Math.min(limit, 500),
+                    }),
+                    prisma.performanceReview.count({ where: baseWhere }),
+                ])
+                break
+            }
 
             default:
                 return apiError(`Unsupported entity type: ${entityType}`, ApiErrorCode.VALIDATION_ERROR, 400)
@@ -92,11 +165,7 @@ export const POST = withAuth({ module: Module.REPORTS, action: Action.VIEW }, as
 
         return apiSuccess({
             data: result,
-            meta: {
-                total,
-                count: result.length,
-                entityType
-            }
+            meta: { total, count: result.length, entityType }
         })
 
     } catch (error) {
@@ -106,8 +175,8 @@ export const POST = withAuth({ module: Module.REPORTS, action: Action.VIEW }, as
 })
 
 /**
- * Builds a Prisma select object from an array of column names.
- * Supports basic relation nesting for "employee".
+ * Builds a Prisma select object from column names.
+ * Supports nested relations like "employee.firstName", "department.name", "manager.firstName".
  */
 function buildSelect(columns: string[], includes: string[] = []) {
     if (!columns || columns.length === 0) return undefined
@@ -123,20 +192,20 @@ function buildSelect(columns: string[], includes: string[] = []) {
         }
     })
 
-    // Ensure organizationId is not leaked unless requested (usually not needed)
-    // Add relation includes if needed for joins
+    // Ensure default relation includes if not already covered by columns
     includes.forEach(rel => {
         if (!select[rel]) {
-            // Default select for relations if not specified in columns
             if (rel === "employee") {
                 select[rel] = {
                     select: {
-                        firstName: true,
-                        lastName: true,
-                        employeeCode: true,
+                        firstName: true, lastName: true, employeeCode: true,
                         department: { select: { name: true } }
                     }
                 }
+            } else if (rel === "department") {
+                select[rel] = { select: { name: true } }
+            } else if (rel === "manager") {
+                select[rel] = { select: { firstName: true, lastName: true } }
             }
         }
     })

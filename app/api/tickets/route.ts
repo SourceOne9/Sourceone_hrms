@@ -4,7 +4,7 @@ import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import crypto from "crypto"
 import { ticketSchema, updateTicketSchema } from "@/lib/schemas"
 import { WorkflowEngine } from "@/lib/workflow-engine"
-import { Module, Action, hasPermission } from "@/lib/permissions"
+import { Module, Action, Roles, hasAdminScope } from "@/lib/permissions"
 
 // GET /api/tickets – List help desk tickets (scoped)
 export const GET = withAuth({ module: Module.TICKETS, action: Action.VIEW }, async (req, ctx) => {
@@ -16,16 +16,19 @@ export const GET = withAuth({ module: Module.TICKETS, action: Action.VIEW }, asy
         const where: Record<string, any> = { organizationId: ctx.organizationId }
         if (status) where.status = status
 
-        // Non-admins can only see their own tickets
-        if (!hasPermission(ctx.role, Module.TICKETS, Action.DELETE)) {
+        const isAdmin = hasAdminScope(ctx.role, Module.TICKETS)
+
+        if (isAdmin) {
+            // CEO/HR see all tickets in the org
+            if (employeeId) where.employeeId = employeeId
+        } else {
+            // TEAM_LEAD, PAYROLL, EMPLOYEE — only their own tickets
             const employee = await prisma.employee.findFirst({
                 where: { userId: ctx.userId, organizationId: ctx.organizationId },
                 select: { id: true }
             })
             if (employee) where.employeeId = employee.id
             else return apiError("No employee profile found", ApiErrorCode.BAD_REQUEST, 400)
-        } else if (employeeId) {
-            where.employeeId = employeeId
         }
 
         const tickets = await prisma.ticket.findMany({
@@ -35,14 +38,14 @@ export const GET = withAuth({ module: Module.TICKETS, action: Action.VIEW }, asy
             take: 200,
         })
 
-        return apiSuccess(tickets)
+        return apiSuccess(tickets, { isAdmin })
     } catch (error) {
         console.error("[TICKETS_GET]", error)
         return apiError("Internal Server Error", ApiErrorCode.INTERNAL_ERROR, 500)
     }
 })
 
-// POST /api/tickets – Create a ticket
+// POST /api/tickets – Create a ticket (always for the logged-in user)
 export const POST = withAuth({ module: Module.TICKETS, action: Action.CREATE }, async (req, ctx) => {
     try {
         const body = await req.json()
@@ -51,15 +54,12 @@ export const POST = withAuth({ module: Module.TICKETS, action: Action.CREATE }, 
             return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
-        let employeeId = parsed.data.employeeId
-        if (!hasPermission(ctx.role, Module.TICKETS, Action.DELETE) || !employeeId) {
-            const employee = await prisma.employee.findFirst({
-                where: { userId: ctx.userId, organizationId: ctx.organizationId },
-                select: { id: true }
-            })
-            if (!employee) return apiError("No employee profile found", ApiErrorCode.BAD_REQUEST, 400)
-            employeeId = employee.id
-        }
+        // Always create ticket for the logged-in employee
+        const employee = await prisma.employee.findFirst({
+            where: { userId: ctx.userId, organizationId: ctx.organizationId },
+            select: { id: true }
+        })
+        if (!employee) return apiError("No employee profile found", ApiErrorCode.BAD_REQUEST, 400)
 
         // Generate collision-resistant ticket code
         const shortId = crypto.randomUUID().slice(0, 8).toUpperCase()
@@ -73,7 +73,7 @@ export const POST = withAuth({ module: Module.TICKETS, action: Action.CREATE }, 
                 category: parsed.data.category,
                 priority: parsed.data.priority || "MEDIUM",
                 status: "OPEN",
-                employeeId: employeeId,
+                employeeId: employee.id,
                 organizationId: ctx.organizationId,
             },
             include: { employee: true },
@@ -83,7 +83,7 @@ export const POST = withAuth({ module: Module.TICKETS, action: Action.CREATE }, 
             where: { organizationId: ctx.organizationId, entityType: 'TICKET', status: 'PUBLISHED' }
         })
         if (template) {
-            await WorkflowEngine.initiateWorkflow(template.id, ticket.id, employeeId, ctx.organizationId)
+            await WorkflowEngine.initiateWorkflow(template.id, ticket.id, employee.id, ctx.organizationId)
         }
 
         return apiSuccess(ticket, undefined, 201)
@@ -102,11 +102,12 @@ export const PUT = withAuth({ module: Module.TICKETS, action: Action.UPDATE }, a
             return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
         }
 
-        // Verify ownership/permission
         const where: any = { id: parsed.data.id, organizationId: ctx.organizationId }
 
-        // Non-admin can only update their own tickets (e.g. closing them)
-        if (!hasPermission(ctx.role, Module.TICKETS, Action.DELETE)) {
+        const isAdmin = hasAdminScope(ctx.role, Module.TICKETS)
+
+        // Non-admin can only update their own tickets
+        if (!isAdmin) {
             const employee = await prisma.employee.findFirst({
                 where: { userId: ctx.userId, organizationId: ctx.organizationId }
             })

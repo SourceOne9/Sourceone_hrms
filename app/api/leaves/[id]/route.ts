@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { withAuth } from "@/lib/security"
 import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
-import { Module, Action, hasPermission } from "@/lib/permissions"
+import { Module, Action, hasPermission, Roles } from "@/lib/permissions"
 
 // GET /api/leaves/:id
 export const GET = withAuth({ module: Module.LEAVES, action: Action.VIEW }, async (_req, ctx) => {
@@ -10,15 +10,19 @@ export const GET = withAuth({ module: Module.LEAVES, action: Action.VIEW }, asyn
 
         const leave = await prisma.leave.findFirst({
             where: { id, employee: { organizationId: ctx.organizationId } },
-            include: { employee: true },
+            include: { employee: { select: { id: true, managerId: true, firstName: true, lastName: true, employeeCode: true, designation: true } } },
         })
 
         if (!leave) {
             return apiError("Leave not found", ApiErrorCode.NOT_FOUND, 404)
         }
 
-        // Non-admin: can only view own leaves (UPDATE permission = can view all for approval)
-        if (!hasPermission(ctx.role, Module.LEAVES, Action.UPDATE) && leave.employeeId !== ctx.employeeId) {
+        // Team Lead: can only view own + direct reports' leaves
+        if (ctx.role === Roles.TEAM_LEAD) {
+            if (leave.employeeId !== ctx.employeeId && leave.employee.managerId !== ctx.employeeId) {
+                return apiError("Forbidden", ApiErrorCode.FORBIDDEN, 403)
+            }
+        } else if (!hasPermission(ctx.role, Module.LEAVES, Action.UPDATE) && leave.employeeId !== ctx.employeeId) {
             return apiError("Forbidden", ApiErrorCode.FORBIDDEN, 403)
         }
 
@@ -35,9 +39,19 @@ export const PUT = withAuth({ module: Module.LEAVES, action: Action.UPDATE }, as
         const { id } = await ctx.params
         const body = await req.json()
 
-        const existing = await prisma.leave.findFirst({ where: { id, employee: { organizationId: ctx.organizationId } } })
+        const existing = await prisma.leave.findFirst({
+            where: { id, employee: { organizationId: ctx.organizationId } },
+            include: { employee: { select: { id: true, managerId: true } } },
+        })
         if (!existing) {
             return apiError("Leave not found", ApiErrorCode.NOT_FOUND, 404)
+        }
+
+        // Team Lead: can only approve/reject leaves from their direct reports
+        if (ctx.role === Roles.TEAM_LEAD) {
+            if (existing.employee.managerId !== ctx.employeeId) {
+                return apiError("You can only approve/reject leave requests from your direct reports", ApiErrorCode.FORBIDDEN, 403)
+            }
         }
 
         const leave = await prisma.leave.update({

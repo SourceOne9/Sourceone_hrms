@@ -40,6 +40,7 @@ export enum Module {
   SETTINGS = "SETTINGS",
   WORKFLOWS = "WORKFLOWS",
   AGENT_TRACKING = "AGENT_TRACKING",
+  REIMBURSEMENT = "REIMBURSEMENT",
 }
 
 // ── Actions ────────────────────────────────────────────────
@@ -74,9 +75,9 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.REPORTS]:       [...FULL_CRUD, EXPORT],
     [Module.WORKFLOWS]:     FULL_CRUD,
     [Module.AGENT_TRACKING]: FULL_CRUD,
-    // 2) View-only: attendance, feedback, payroll (all employees' data)
+    // 2) View-only: attendance, payroll (all employees' data)
     [Module.ATTENDANCE]:    [VIEW],
-    [Module.FEEDBACK]:      [VIEW],
+    [Module.FEEDBACK]:      [VIEW, CREATE],
     [Module.PAYROLL]:       [VIEW],
     // 3) View + approve: leaves, resignation
     [Module.LEAVES]:        [VIEW, UPDATE],
@@ -89,6 +90,7 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.TICKETS]:       [VIEW, UPDATE],
     [Module.RECRUITMENT]:   FULL_CRUD,
     [Module.SETTINGS]:      [VIEW, UPDATE],
+    [Module.REIMBURSEMENT]: [VIEW, CREATE],
   },
 
   HR: {
@@ -102,9 +104,9 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.REPORTS]:       [...FULL_CRUD, EXPORT],
     [Module.WORKFLOWS]:     FULL_CRUD,
     [Module.AGENT_TRACKING]: FULL_CRUD,
-    // 2) View-only: attendance, feedback, payroll (all employees' data)
+    // 2) View-only: attendance, payroll (all employees' data)
     [Module.ATTENDANCE]:    [VIEW],
-    [Module.FEEDBACK]:      [VIEW],
+    [Module.FEEDBACK]:      [VIEW, CREATE],
     [Module.PAYROLL]:       [VIEW],
     // 3) View + approve: leaves, resignation
     [Module.LEAVES]:        [VIEW, UPDATE],
@@ -117,6 +119,7 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.TICKETS]:       [VIEW, UPDATE],
     [Module.RECRUITMENT]:   FULL_CRUD,
     [Module.SETTINGS]:      [VIEW],
+    [Module.REIMBURSEMENT]: [VIEW, CREATE],
   },
 
   PAYROLL: {
@@ -140,6 +143,7 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.SETTINGS]:      [],
     [Module.WORKFLOWS]:     [],
     [Module.AGENT_TRACKING]: [],
+    [Module.REIMBURSEMENT]: [VIEW, CREATE, UPDATE],
   },
 
   TEAM_LEAD: {
@@ -149,7 +153,7 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.PERFORMANCE]:   [VIEW, CREATE, REVIEW],
     [Module.FEEDBACK]:      [VIEW],
     [Module.DASHBOARD]:     [VIEW],
-    [Module.REPORTS]:       [VIEW],
+    [Module.REPORTS]:       [],
     [Module.ATTENDANCE]:    [VIEW],
     [Module.LEAVES]:        [VIEW, UPDATE],
     [Module.TRAINING]:      [VIEW],
@@ -163,6 +167,7 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.SETTINGS]:      [],
     [Module.WORKFLOWS]:     [],
     [Module.AGENT_TRACKING]: [VIEW],
+    [Module.REIMBURSEMENT]: [VIEW, CREATE],
   },
 
   EMPLOYEE: {
@@ -186,6 +191,7 @@ export const PERMISSIONS: PermissionMatrix = {
     [Module.SETTINGS]:      [],
     [Module.WORKFLOWS]:     [],
     [Module.AGENT_TRACKING]: [VIEW],
+    [Module.REIMBURSEMENT]: [VIEW, CREATE],
   },
 }
 
@@ -225,7 +231,7 @@ export function hasAdminScope(role: string, module: Module): boolean {
     case Roles.HR:
       return true
     case Roles.PAYROLL:
-      return module === Module.PAYROLL || module === Module.ATTENDANCE || module === Module.LEAVES
+      return module === Module.PAYROLL || module === Module.ATTENDANCE || module === Module.LEAVES || module === Module.REIMBURSEMENT
     default:
       return false
   }
@@ -300,7 +306,7 @@ export function scopeEntityQuery(ctx: ScopeContext, module: Module): Record<stri
       return base
 
     case Roles.PAYROLL:
-      if (module === Module.PAYROLL || module === Module.ATTENDANCE || module === Module.LEAVES) {
+      if (module === Module.PAYROLL || module === Module.ATTENDANCE || module === Module.LEAVES || module === Module.REIMBURSEMENT) {
         return base
       }
       return { ...base, id: "__NONE__" }

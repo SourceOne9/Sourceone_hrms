@@ -72,6 +72,7 @@ const navGroups: NavGroup[] = [
     label: "Compensation",
     items: [
       { name: "Payroll", href: "/payroll", icon: ReaderIcon, module: Module.PAYROLL },
+      { name: "Reimbursement", href: "/reimbursement", icon: ArchiveIcon, module: Module.REIMBURSEMENT },
     ],
   },
   {

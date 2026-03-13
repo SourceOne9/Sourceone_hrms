@@ -32,7 +32,7 @@ export async function POST(req: Request) {
         }
 
         // Validate bucket name against allowed buckets
-        const allowedBuckets = ["avatars", "documents", "assets", "training"]
+        const allowedBuckets = ["avatars", "documents", "assets", "training", "receipts"]
         if (!allowedBuckets.includes(bucket)) {
             return NextResponse.json({ error: "Invalid bucket name" }, { status: 400 })
         }

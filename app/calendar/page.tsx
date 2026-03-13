@@ -88,7 +88,9 @@ const EventComponent = ({ event }: any) => {
         leave: "🏝️",
         holiday: "🎉",
         birthday: "🎂",
-        event: "📅"
+        event: "📅",
+        meeting: "📢",
+        deadline: "⏰",
     }
 
     return (
@@ -108,16 +110,39 @@ export default function CalendarPage() {
     const fetchEvents = React.useCallback(async () => {
         try {
             setLoading(true)
-            const res = await fetch('/api/calendar')
-            if (res.ok) {
-                const data = await res.json()
-                const formattedEvents = data.map((evt: any) => ({
+            // Fetch local org events (primary source)
+            const eventsRes = await fetch('/api/events')
+            let allEvents: any[] = []
+
+            if (eventsRes.ok) {
+                const eventsJson = await eventsRes.json()
+                const localEvents = (eventsJson.data || eventsJson || []).map((evt: any) => ({
                     ...evt,
                     start: new Date(evt.start),
                     end: new Date(evt.end),
+                    type: (evt.type || 'event').toLowerCase(),
                 }))
-                setEvents(formattedEvents)
+                allEvents = [...localEvents]
             }
+
+            // Optionally merge Google Calendar events
+            try {
+                const googleRes = await fetch('/api/calendar')
+                if (googleRes.ok) {
+                    const googleData = await googleRes.json()
+                    const googleEvents = (Array.isArray(googleData) ? googleData : []).map((evt: any) => ({
+                        ...evt,
+                        start: new Date(evt.start),
+                        end: new Date(evt.end),
+                        type: evt.type || 'event',
+                    }))
+                    allEvents = [...allEvents, ...googleEvents]
+                }
+            } catch {
+                // Google Calendar not configured — skip silently
+            }
+
+            setEvents(allEvents)
         } catch (error) {
             console.error("Failed to fetch events:", error)
         } finally {
@@ -131,9 +156,12 @@ export default function CalendarPage() {
 
     const eventStyleGetter = (event: any) => {
         let backgroundColor = 'var(--accent)';
-        if (event.type === 'leave') backgroundColor = 'var(--amber)';
-        if (event.type === 'holiday') backgroundColor = 'var(--green)';
-        if (event.type === 'birthday') backgroundColor = 'var(--pink)';
+        const t = (event.type || '').toLowerCase()
+        if (t === 'leave') backgroundColor = 'var(--amber)';
+        if (t === 'holiday') backgroundColor = 'var(--green)';
+        if (t === 'birthday') backgroundColor = 'var(--pink)';
+        if (t === 'deadline') backgroundColor = 'var(--danger)';
+        if (t === 'meeting') backgroundColor = 'var(--accent)';
 
         return {
             style: {
@@ -174,7 +202,7 @@ export default function CalendarPage() {
                             {upcomingEvents.length > 0 ? upcomingEvents.map((evt, i) => (
                                 <div key={i} className="group p-3 hover:bg-bg-2 rounded-2xl transition-all cursor-pointer border border-transparent hover:border-border">
                                     <div className="flex items-start gap-3">
-                                        <div className="text-xl pt-1">{evt.type === 'leave' ? '🏝️' : evt.type === 'holiday' ? '🎉' : '📅'}</div>
+                                        <div className="text-xl pt-1">{evt.type === 'leave' ? '🏝️' : evt.type === 'holiday' ? '🎉' : evt.type === 'meeting' ? '📢' : evt.type === 'deadline' ? '⏰' : '📅'}</div>
                                         <div>
                                             <div className="text-sm font-black group-hover:text-accent transition-colors leading-tight text-text-2">{evt.title}</div>
                                             <div className="text-[11px] text-text-3 font-bold mt-1 uppercase tracking-wider">{format(evt.start, 'MMM dd, yyyy')}</div>

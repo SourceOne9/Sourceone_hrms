@@ -68,6 +68,9 @@ model Organization {
   idleEvents             IdleEvent[]
   dailyActivityReports   DailyActivityReport[]
 
+  // Reimbursements
+  reimbursements         Reimbursement[]
+
   // Enterprise Identity (Week 9)
   scimSecret         String?      @unique
   userSessions       UserSession[]
@@ -184,6 +187,9 @@ model Employee {
   websiteUsageSummaries  WebsiteUsageSummary[]
   idleEvents             IdleEvent[]
   dailyActivityReports   DailyActivityReport[]
+
+  // Reimbursements
+  reimbursements         Reimbursement[]
 
   @@index([departmentId])
   @@index([userId])
@@ -1611,4 +1617,50 @@ model DailyActivityReport {
 
   @@unique([employeeId, date])
   @@index([organizationId, date])
+}
+
+// ─── Reimbursement Module ───
+
+enum ReimbursementCategory {
+  TRAVEL
+  MEALS
+  OFFICE_SUPPLIES
+  MEDICAL
+  TRAINING_EXPENSE
+  CONFERENCE
+  RELOCATION
+  OTHER
+}
+
+enum ReimbursementStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+model Reimbursement {
+  id             String                @id @default(cuid())
+  employeeId     String
+  organizationId String
+  category       ReimbursementCategory
+  amount         Float
+  description    String                @db.Text
+  receiptUrl     String?
+  expenseDate    DateTime
+  status         ReimbursementStatus   @default(PENDING)
+  approvedBy     String?
+  approvedAt     DateTime?
+  rejectionNote  String?
+  paidInMonth    String?               // Payroll month when reimbursement was disbursed
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  employee     Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([employeeId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([organizationId, status])
 }

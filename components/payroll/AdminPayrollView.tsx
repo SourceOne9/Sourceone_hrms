@@ -125,6 +125,8 @@ export function AdminPayrollView() {
     const [isPFModalOpen, setIsPFModalOpen] = React.useState(false)
     const [isImportOpen, setIsImportOpen] = React.useState(false)
     const [isPFImportOpen, setIsPFImportOpen] = React.useState(false)
+    const [approvedReimbursements, setApprovedReimbursements] = React.useState<{ id: string; amount: number; category: string; description: string }[]>([])
+    const [loadingReimb, setLoadingReimb] = React.useState(false)
 
     const form = useForm<PayrollFormData>({
         resolver: zodResolver(payrollSchema),
@@ -178,6 +180,31 @@ export function AdminPayrollView() {
     React.useEffect(() => {
         fetchAll()
     }, [fetchAll])
+
+    // Fetch approved reimbursements for selected employee
+    const selectedEmpId = form.watch("employeeId")
+    const fetchApprovedReimbursements = React.useCallback(async (empId: string) => {
+        if (!empId) { setApprovedReimbursements([]); return }
+        setLoadingReimb(true)
+        try {
+            const res = await fetch(`/api/reimbursements?status=APPROVED&employeeId=${empId}`)
+            if (res.ok) {
+                const data = await res.json()
+                const items = (data?.data || data || []).filter((r: any) => !r.paidInMonth)
+                setApprovedReimbursements(items)
+            }
+        } catch { /* ignore */ } finally { setLoadingReimb(false) }
+    }, [])
+
+    React.useEffect(() => {
+        if (isModalOpen && selectedEmpId) fetchApprovedReimbursements(selectedEmpId)
+        else setApprovedReimbursements([])
+    }, [selectedEmpId, isModalOpen, fetchApprovedReimbursements])
+
+    const pullReimbursementAmount = () => {
+        const total = approvedReimbursements.reduce((s, r) => s + r.amount, 0)
+        form.setValue("reimbursements", total)
+    }
 
     // Watch values to auto-calculate gross net salary estimation
     const basic = form.watch("basicSalary")
@@ -581,11 +608,23 @@ export function AdminPayrollView() {
                                 type="number"
                                 {...form.register("arrears", { valueAsNumber: true })}
                             />
-                            <Input
-                                label="Reimbursements"
-                                type="number"
-                                {...form.register("reimbursements", { valueAsNumber: true })}
-                            />
+                            <div className="flex flex-col gap-1.5">
+                                <Input
+                                    label="Reimbursements"
+                                    type="number"
+                                    {...form.register("reimbursements", { valueAsNumber: true })}
+                                />
+                                {approvedReimbursements.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={pullReimbursementAmount}
+                                        className="text-xs text-accent hover:underline text-left font-semibold"
+                                    >
+                                        Pull ₹{approvedReimbursements.reduce((s, r) => s + r.amount, 0).toLocaleString()} from {approvedReimbursements.length} approved request{approvedReimbursements.length > 1 ? "s" : ""}
+                                    </button>
+                                )}
+                                {loadingReimb && <span className="text-xs text-text-4">Checking approved reimbursements...</span>}
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">

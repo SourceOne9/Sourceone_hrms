@@ -15,6 +15,62 @@ import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
 import { cn } from "@/lib/utils"
 
+const MOTIVATIONAL_QUOTES = [
+    { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+    { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+    { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+    { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
+    { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+    { text: "Hard work beats talent when talent doesn't work hard.", author: "Tim Notke" },
+    { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+    { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+    { text: "Everything you've ever wanted is on the other side of fear.", author: "George Addair" },
+    { text: "Success usually comes to those who are too busy to be looking for it.", author: "Henry David Thoreau" },
+    { text: "Opportunities don't happen. You create them.", author: "Chris Grosser" },
+    { text: "The harder you work for something, the greater you'll feel when you achieve it.", author: "Anonymous" },
+    { text: "Dream bigger. Do bigger.", author: "Anonymous" },
+    { text: "Great things never come from comfort zones.", author: "Anonymous" },
+    { text: "Push yourself, because no one else is going to do it for you.", author: "Anonymous" },
+    { text: "Wake up with determination. Go to bed with satisfaction.", author: "Anonymous" },
+    { text: "Do something today that your future self will thank you for.", author: "Sean Patrick Flanery" },
+    { text: "Little things make big days.", author: "Anonymous" },
+    { text: "It's going to be hard, but hard does not mean impossible.", author: "Anonymous" },
+    { text: "The best time for new beginnings is now.", author: "Anonymous" },
+    { text: "Don't stop when you're tired. Stop when you're done.", author: "Anonymous" },
+    { text: "Your limitation — it's only your imagination.", author: "Anonymous" },
+    { text: "Strive for progress, not perfection.", author: "Anonymous" },
+    { text: "Work hard in silence, let your success be your noise.", author: "Frank Ocean" },
+    { text: "Stay focused and extra sparkly.", author: "Anonymous" },
+    { text: "A little progress each day adds up to big results.", author: "Satya Nani" },
+    { text: "What you do today can improve all your tomorrows.", author: "Ralph Marston" },
+    { text: "The only limit to our realization of tomorrow is our doubts of today.", author: "Franklin D. Roosevelt" },
+    { text: "Act as if what you do makes a difference. It does.", author: "William James" },
+    { text: "Quality is not an act, it is a habit.", author: "Aristotle" },
+    { text: "You are never too old to set another goal or to dream a new dream.", author: "C.S. Lewis" },
+]
+
+function DailyQuote() {
+    const quote = React.useMemo(() => {
+        const today = new Date()
+        const dayOfYear = Math.floor(
+            (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000
+        )
+        return MOTIVATIONAL_QUOTES[dayOfYear % MOTIVATIONAL_QUOTES.length]
+    }, [])
+
+    return (
+        <div className="relative z-10 hidden md:flex flex-col items-end justify-center text-right max-w-[380px] pl-6">
+            <div className="text-[40px] leading-none text-white/10 font-serif select-none">&ldquo;</div>
+            <p className="text-lg font-semibold text-white/80 leading-relaxed italic -mt-4">
+                {quote.text}
+            </p>
+            <span className="text-sm text-white/40 font-medium mt-3">
+                — {quote.author}
+            </span>
+        </div>
+    )
+}
+
 interface TeamMember {
     id: string
     name: string
@@ -101,14 +157,15 @@ export function TeamLeadDashboard() {
 
             <div className="relative z-10 space-y-8 animate-page-in">
                 {/* Hero Section */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gradient-to-r from-accent to-purple p-8 md:p-10 rounded-2xl text-white shadow-lg overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full translate-x-32 -translate-y-32 group-hover:scale-110 transition-transform duration-700" />
-                    <div className="relative z-10">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#111111] p-8 md:p-10 rounded-2xl text-white shadow-lg overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-[0.03] rounded-full translate-x-32 -translate-y-32 group-hover:scale-110 transition-transform duration-700" />
+                    <div className="absolute bottom-0 left-1/2 w-48 h-48 bg-white opacity-[0.02] rounded-full translate-y-24" />
+                    <div className="relative z-10 shrink-0">
                         <h1 className="text-[32px] md:text-[40px] font-black tracking-tight leading-tight">
                             Welcome back,<br />
-                            <span className="text-white/70">{user?.name?.split(" ")[0] || "Team Lead"}</span>
+                            <span className="text-white/50">{user?.name?.split(" ")[0] || "Team Lead"}</span>
                         </h1>
-                        <p className="text-md text-white/80 mt-4 max-w-[450px] font-medium leading-relaxed">
+                        <p className="text-md text-white/60 mt-4 max-w-[450px] font-medium leading-relaxed">
                             {team
                                 ? `Leading team "${team.name}" with ${team.memberCount} member${team.memberCount !== 1 ? "s" : ""}. Keep your team performing at their best!`
                                 : data?.stats?.attendanceCount
@@ -120,11 +177,12 @@ export function TeamLeadDashboard() {
                             <Link href="/profile" className="px-6 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl text-md font-bold transition-all border border-white/10">
                                 View Profile
                             </Link>
-                            <Link href="/calendar" className="px-6 py-2.5 bg-white text-accent rounded-xl text-md font-bold transition-all hover:shadow-lg">
+                            <Link href="/calendar" className="px-6 py-2.5 bg-white text-black rounded-xl text-md font-bold transition-all hover:shadow-lg">
                                 Calendar
                             </Link>
                         </div>
                     </div>
+                    <DailyQuote />
                 </div>
 
                 {/* Stat Grid */}

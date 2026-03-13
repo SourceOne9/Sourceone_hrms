@@ -69,7 +69,7 @@ export const eventSchema = z.object({
 export const announcementSchema = z.object({
     title: z.string().min(5, "Title must be at least 5 characters"),
     content: z.string().min(10, "Content must be at least 10 characters"),
-    author: z.string().min(1, "Author is required"),
+    author: z.string().optional(),
     category: z.enum(["EVENT", "POLICY", "MEETING", "SYSTEM", "GENERAL"]),
     priority: z.enum(["HIGH", "MEDIUM", "LOW"]).default("MEDIUM"),
     isPinned: z.boolean().default(false),

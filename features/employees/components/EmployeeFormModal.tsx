@@ -50,7 +50,7 @@ export const EmployeeFormModal = React.memo(function EmployeeFormModal({
     ]
 
     const roleOptions = [
-        { value: "EMPLOYEE", label: "Employee" },
+        { value: "EMPLOYEE", label: "Recruiter" },
         { value: "TEAM_LEAD", label: "Team Lead" },
         { value: "HR", label: "HR Manager" },
         { value: "PAYROLL", label: "Payroll Admin" },

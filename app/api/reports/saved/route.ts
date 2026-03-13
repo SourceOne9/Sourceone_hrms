@@ -46,3 +46,27 @@ export const POST = withAuth({ module: Module.REPORTS, action: Action.CREATE }, 
         return apiError("Failed to save report", ApiErrorCode.INTERNAL_ERROR, 500)
     }
 })
+
+// DELETE /api/reports/saved - Delete a saved report
+export const DELETE = withAuth({ module: Module.REPORTS, action: Action.DELETE }, async (req, ctx) => {
+    try {
+        const { searchParams } = new URL(req.url)
+        const id = searchParams.get("id")
+        if (!id) {
+            return apiError("Report ID is required", ApiErrorCode.BAD_REQUEST, 400)
+        }
+
+        const result = await prisma.savedReport.deleteMany({
+            where: { id, organizationId: ctx.organizationId }
+        })
+
+        if (result.count === 0) {
+            return apiError("Report not found", ApiErrorCode.NOT_FOUND, 404)
+        }
+
+        return apiSuccess({ message: "Report deleted" })
+    } catch (error) {
+        console.error("[SAVED_REPORT_DELETE]", error)
+        return apiError("Failed to delete report", ApiErrorCode.INTERNAL_ERROR, 500)
+    }
+})

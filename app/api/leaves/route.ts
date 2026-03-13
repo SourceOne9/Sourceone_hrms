@@ -3,7 +3,7 @@ import { withAuth } from "@/lib/security"
 import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
 import { leaveSchema, updateLeaveSchema } from "@/lib/schemas"
 import { WorkflowEngine } from "@/lib/workflow-engine"
-import { Module, Action, hasPermission } from "@/lib/permissions"
+import { Module, Action, hasPermission, Roles } from "@/lib/permissions"
 
 // Safe employee select — no salary, bank, Aadhaar, PAN etc.
 const SAFE_EMPLOYEE_SELECT = {
@@ -29,14 +29,21 @@ export const GET = withAuth({ module: Module.LEAVES, action: Action.VIEW }, asyn
         if (status) where.status = status
         if (employeeId) where.employeeId = employeeId
 
-        // Non-admin: only own leaves
-        if (!hasPermission(ctx.role, Module.LEAVES, Action.UPDATE)) {
-            const emp = await prisma.employee.findFirst({
-                where: { userId: ctx.userId, organizationId: ctx.organizationId },
-                select: { id: true },
-            })
-            if (!emp) return apiError("No employee profile linked", ApiErrorCode.BAD_REQUEST, 400)
-            where.employeeId = emp.id
+        // Scope by role:
+        // CEO/HR: see all org leaves
+        // Team Lead: see own + direct reports' leaves only
+        // Recruiter/Employee: see own leaves only
+        if (ctx.role === Roles.TEAM_LEAD) {
+            if (!ctx.employeeId) return apiError("No employee profile linked", ApiErrorCode.BAD_REQUEST, 400)
+            where.employee = {
+                OR: [
+                    { id: ctx.employeeId },
+                    { managerId: ctx.employeeId },
+                ],
+            }
+        } else if (!hasPermission(ctx.role, Module.LEAVES, Action.UPDATE)) {
+            if (!ctx.employeeId) return apiError("No employee profile linked", ApiErrorCode.BAD_REQUEST, 400)
+            where.employeeId = ctx.employeeId
         }
 
         const [leaves, total] = await prisma.$transaction([
@@ -130,6 +137,19 @@ export const PUT = withAuth({ module: Module.LEAVES, action: Action.UPDATE }, as
         const parsed = updateLeaveSchema.safeParse(body)
         if (!parsed.success) {
             return apiError("Validation Error", ApiErrorCode.VALIDATION_ERROR, 400, parsed.error.format())
+        }
+
+        // Team Lead: can only approve/reject leaves from their direct reports
+        if (ctx.role === Roles.TEAM_LEAD) {
+            if (!ctx.employeeId) return apiError("No employee profile linked", ApiErrorCode.BAD_REQUEST, 400)
+            const leave = await prisma.leave.findFirst({
+                where: { id: parsed.data.id, organizationId: ctx.organizationId },
+                include: { employee: { select: { id: true, managerId: true } } },
+            })
+            if (!leave) return apiError("Leave not found", ApiErrorCode.NOT_FOUND, 404)
+            if (leave.employee.managerId !== ctx.employeeId) {
+                return apiError("You can only approve/reject leave requests from your direct reports", ApiErrorCode.FORBIDDEN, 403)
+            }
         }
 
         // K13: Optimistic locking — only update if still PENDING

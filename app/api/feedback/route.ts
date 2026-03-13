@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { withAuth, orgFilter } from "@/lib/security"
 import { apiSuccess, apiError, ApiErrorCode } from "@/lib/api-response"
-import { Module, Action, hasPermission } from "@/lib/permissions"
+import { Module, Action, hasAdminScope } from "@/lib/permissions"
 import { feedbackSchema } from "@/lib/schemas"
 
 // GET /api/feedback – List feedback
@@ -15,8 +15,13 @@ export const GET = withAuth({ module: Module.FEEDBACK, action: Action.VIEW }, as
 
         if (period) where.period = period
 
-        // CEO/HR see all feedback, others see own given/received only
-        if (!hasPermission(ctx.role, Module.EMPLOYEES, Action.VIEW)) {
+        const isAdmin = hasAdminScope(ctx.role, Module.FEEDBACK)
+
+        if (isAdmin) {
+            // CEO/HR see all feedback in org
+            if (employeeId) where.toEmployeeId = employeeId
+        } else {
+            // Others see only feedback they sent or received
             if (!ctx.employeeId) {
                 return apiSuccess([])
             }
@@ -24,8 +29,6 @@ export const GET = withAuth({ module: Module.FEEDBACK, action: Action.VIEW }, as
                 { fromEmployeeId: ctx.employeeId },
                 { toEmployeeId: ctx.employeeId },
             ]
-        } else if (employeeId) {
-            where.toEmployeeId = employeeId
         }
 
         const feedback = await prisma.employeeFeedback.findMany({
@@ -37,14 +40,18 @@ export const GET = withAuth({ module: Module.FEEDBACK, action: Action.VIEW }, as
             orderBy: { createdAt: "desc" },
         })
 
-        // Redact sender info for anonymous feedback
-        const result = feedback.map(f => ({
-            ...f,
-            fromEmployee: f.isAnonymous ? null : f.fromEmployee,
-            fromEmployeeId: f.isAnonymous ? null : f.fromEmployeeId,
-        }))
+        // Redact sender info for anonymous feedback (except for the sender themselves and admins)
+        const result = feedback.map(f => {
+            const isSender = ctx.employeeId && f.fromEmployeeId === ctx.employeeId
+            const shouldRedact = f.isAnonymous && !isSender && !isAdmin
+            return {
+                ...f,
+                fromEmployee: shouldRedact ? null : f.fromEmployee,
+                fromEmployeeId: shouldRedact ? null : f.fromEmployeeId,
+            }
+        })
 
-        return apiSuccess(result)
+        return apiSuccess(result, { isAdmin })
     } catch (error) {
         return apiError("Failed to fetch feedback", ApiErrorCode.INTERNAL_ERROR, 500)
     }

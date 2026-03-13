@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { DrawingPinFilledIcon } from "@radix-ui/react-icons"
 import { GoogleCalendarWidget } from "./GoogleCalendarWidget"
+import { KudosSidebarWidget } from "./KudosSidebarWidget"
 import { Badge } from "@/components/ui/Badge"
 
 type Announcement = {
@@ -112,7 +113,7 @@ export function EmployeeAnnouncementsView() {
                 </div>
 
                 <div className="flex flex-col gap-[20px]">
-                    <div className="glass p-[22px] bg-gradient-to-br from-[#1c1c1e] to-[#2c2c2e] text-white">
+                    <div className="p-[22px] rounded-xl shadow-sm bg-gradient-to-br from-[#1c1c1e] to-[#2c2c2e] text-white">
                         <div className="text-md font-bold mb-[12px] flex items-center gap-2">
                             <span>📌</span> Pinned
                         </div>
@@ -128,6 +129,8 @@ export function EmployeeAnnouncementsView() {
                     </div>
 
                     <GoogleCalendarWidget />
+
+                    <KudosSidebarWidget />
                 </div>
             </div>
         </div>
