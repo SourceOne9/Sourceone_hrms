@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar } from "recharts"
 import { DashboardStatCard, DeptRow, HireRow } from "./DashboardComponents"
 import { tooltipStyle, axisStyle, chartColors } from "@/lib/chart-theme"
+import { DashboardAPI } from "@/features/dashboard/api/client"
+import { api } from "@/lib/api-client"
 
 export function AdminDashboard() {
     const [loading, setLoading] = React.useState(true)
@@ -25,24 +27,12 @@ export function AdminDashboard() {
     const fetchDashboardData = React.useCallback(async () => {
         try {
             if (isFirstLoad.current) setLoading(true)
-            const [dashRes, loginRes] = await Promise.all([
-                fetch("/api/dashboard", { cache: "no-store" }),
-                fetch("/api/dashboard/logins", { cache: "no-store" }),
+            const [dashData, loginStats] = await Promise.all([
+                DashboardAPI.getStats(),
+                DashboardAPI.getLogins(),
             ])
-            if (dashRes.ok) {
-                const dashJson = await dashRes.json()
-                setData(dashJson.data || (typeof dashJson === "object" && !Array.isArray(dashJson) ? dashJson : null))
-            } else {
-                const errorJson = await dashRes.json().catch(() => ({}))
-                console.error("Dashboard API error:", dashRes.status, errorJson.error?.message || dashRes.statusText)
-            }
-            if (loginRes.ok) {
-                const loginJson = await loginRes.json()
-                setLoginData(loginJson.data || (typeof loginJson === "object" && !Array.isArray(loginJson) ? loginJson : null))
-            } else {
-                const errorJson = await loginRes.json().catch(() => ({}))
-                console.error("Login API error:", loginRes.status, errorJson.error?.message || loginRes.statusText)
-            }
+            setData(dashData)
+            setLoginData(loginStats)
         } catch (error) {
             console.error("Dashboard fetch error:", error)
         } finally {
@@ -78,13 +68,8 @@ export function AdminDashboard() {
     const generateReport = async () => {
         setReportLoading(true)
         try {
-            const res = await fetch("/api/admin/analytics/burnout")
-            if (res.ok) {
-                const json = await res.json()
-                setReportData(json.report || "No data found")
-            } else {
-                setReportData("Error generating report.")
-            }
+            const { data: json } = await api.get<{ report?: string }>('/dashboard/burnout-analytics/')
+            setReportData(json.report || "No data found")
         } catch (error) {
             console.error(error)
             setReportData("Failed to generate report.")
@@ -178,19 +163,19 @@ export function AdminDashboard() {
                     ))
                 ) : (
                     <>
-                        <DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="last month" badge="7%" badgeType="up" icon={<span>👥</span>} />
-                        <DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="last month" badge="5%" badgeType="up" icon={<span>✅</span>} />
-                        <DashboardStatCard label="On Leave" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="last month" badge="4%" badgeType="up" icon={<span>🌴</span>} />
-                        <DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toLocaleString() || "0"} sub="last month" badge="Processed" badgeType="neutral" isMoney icon={<span>💵</span>} />
-                        <DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" badge="Live" badgeType="up" icon={<span>🔐</span>} />
-                        <DashboardStatCard label="Attrition Rate" value={(data?.stats?.attritionRate || 0).toFixed(1) + "%"} sub="last 30 days" badge={data?.stats?.attritionRate > 5 ? "Alert" : "Stable"} badgeType={data?.stats?.attritionRate > 5 ? "down" : "up"} icon={<span>📉</span>} />
+                        <div data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="last month" badge="7%" badgeType="up" icon={<span>👥</span>} /></div>
+                        <div data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="last month" badge="5%" badgeType="up" icon={<span>✅</span>} /></div>
+                        <div data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Leave" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="last month" badge="4%" badgeType="up" icon={<span>🌴</span>} /></div>
+                        <div data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toLocaleString() || "0"} sub="last month" badge="Processed" badgeType="neutral" isMoney icon={<span>💵</span>} /></div>
+                        <div data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" badge="Live" badgeType="up" icon={<span>🔐</span>} /></div>
+                        <div data-aos="fade-up" data-aos-delay="400"><DashboardStatCard label="Attrition Rate" value={(data?.stats?.attritionRate || 0).toFixed(1) + "%"} sub="last 30 days" badge={data?.stats?.attritionRate > 5 ? "Alert" : "Stable"} badgeType={data?.stats?.attritionRate > 5 ? "down" : "up"} icon={<span>📉</span>} /></div>
                     </>
                 )}
             </div>
 
             {/* Recent Logins */}
             {!loading && loginData?.recentLogins?.length > 0 && (
-                <Card>
+                <Card data-aos="fade-up" data-aos-delay="100">
                     <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
                             <CardTitle>Recent Employee Logins</CardTitle>
@@ -252,7 +237,7 @@ export function AdminDashboard() {
                 ) : (
                     <>
                         {/* Pie Chart */}
-                        <Card className="p-5 flex flex-col h-[340px]">
+                        <Card data-aos="zoom-in" data-aos-delay="0" className="p-5 flex flex-col h-[340px]">
                             <div className="text-sm font-bold text-text flex items-center justify-between mb-2">
                                 <span>Department Split</span>
                                 {selectedDept && (
@@ -291,7 +276,7 @@ export function AdminDashboard() {
                         </Card>
 
                         {/* Area Chart */}
-                        <Card className="p-5 flex flex-col h-[340px]">
+                        <Card data-aos="zoom-in" data-aos-delay="150" className="p-5 flex flex-col h-[340px]">
                             <div className="text-sm font-bold text-text flex items-center gap-2 mb-4">Hiring Trend</div>
                             <div className="flex-1 min-h-0 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
@@ -318,7 +303,7 @@ export function AdminDashboard() {
                         </Card>
 
                         {/* Bar Chart */}
-                        <Card className="p-5 flex flex-col h-[340px]">
+                        <Card data-aos="zoom-in" data-aos-delay="300" className="p-5 flex flex-col h-[340px]">
                             <div className="text-sm font-bold text-text flex items-center gap-2 mb-4">Salary Range</div>
                             <div className="flex-1 min-h-0 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
@@ -340,7 +325,7 @@ export function AdminDashboard() {
 
             {/* Department Overview + Recent Hires */}
             <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-4">
-                <Card>
+                <Card data-aos="fade-right" data-aos-delay="0">
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle>Department Overview</CardTitle>
@@ -368,7 +353,7 @@ export function AdminDashboard() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card data-aos="fade-left" data-aos-delay="150">
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle>Recent Hires</CardTitle>

@@ -4,8 +4,11 @@ import * as React from "react"
 import { DocCategory } from "@/types"
 import { Modal } from "@/components/ui/Modal"
 import { PlusIcon, FileTextIcon, DownloadIcon, TrashIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons"
-import { cn } from "@/lib/utils"
+import { cn, extractArray } from "@/lib/utils"
+import { DocumentAPI, Document } from "@/features/documents/api/client"
+import { EmployeeAPI } from "@/features/employees/api/client"
 import { toast } from "sonner"
+import { confirmDanger, confirmAction, showSuccess } from "@/lib/swal"
 import { PageHeader } from "@/components/ui/PageHeader"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
@@ -17,7 +20,7 @@ import { Spinner } from "@/components/ui/Spinner"
 
 // ─── Constants ──────────────────────────────────────────────
 
-const CATEGORY_LABELS: Record<DocCategory, string> = {
+const CATEGORY_LABELS: Record<string, string> = {
     POLICY: "Policy",
     CONTRACT: "Contract",
     PAYSLIP: "Payslip",
@@ -25,7 +28,7 @@ const CATEGORY_LABELS: Record<DocCategory, string> = {
     IDENTIFICATION: "ID Document",
 }
 
-const CATEGORY_COLORS: Record<DocCategory, string> = {
+const CATEGORY_COLORS: Record<string, string> = {
     POLICY: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
     CONTRACT: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20",
     PAYSLIP: "bg-green-50 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20",
@@ -33,7 +36,7 @@ const CATEGORY_COLORS: Record<DocCategory, string> = {
     IDENTIFICATION: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20",
 }
 
-const CATEGORY_ICONS: Record<DocCategory, string> = {
+const CATEGORY_ICONS: Record<string, string> = {
     POLICY: "📋",
     CONTRACT: "📝",
     PAYSLIP: "💵",
@@ -52,17 +55,7 @@ interface Employee {
     department?: { name: string; color: string }
 }
 
-interface Document {
-    id: string
-    title: string
-    category: DocCategory
-    url: string
-    uploadDate: string
-    size?: string | null
-    isPublic: boolean
-    employeeId?: string | null
-    employee?: Employee | null
-}
+// Document type imported from features/documents/api/client
 
 // ─── Component ──────────────────────────────────────────────
 
@@ -96,18 +89,12 @@ export default function DocumentManagement() {
     const fetchAll = React.useCallback(async () => {
         setLoadingDocs(true)
         try {
-            const [docsRes, empsRes] = await Promise.all([
-                fetch("/api/documents", { cache: "no-store" }),
-                fetch("/api/employees?limit=100", { cache: "no-store" }),
+            const [docData, empData] = await Promise.all([
+                DocumentAPI.list(),
+                EmployeeAPI.fetchEmployees(1, 100),
             ])
-            if (docsRes.ok) {
-                const docJson = await docsRes.json()
-                setDocuments(Array.isArray(docJson) ? docJson : docJson.data || [])
-            }
-            if (empsRes.ok) {
-                const empJson = await empsRes.json()
-                setEmployees(Array.isArray(empJson) ? empJson : empJson.data || [])
-            }
+            setDocuments(docData.results || extractArray(docData))
+            setEmployees(empData.results || [])
         } catch {
             toast.error("Failed to load data")
         } finally {
@@ -214,15 +201,7 @@ export default function DocumentManagement() {
                     size: form.size || null,
                     isPublic: true,
                 }
-                const res = await fetch("/api/documents", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                })
-                if (!res.ok) {
-                    const err = await res.json()
-                    throw new Error(err.error?.message || "Failed to save document metadata")
-                }
+                await DocumentAPI.create(payload)
                 toast.success("Policy uploaded for all employees", { id: "doc-upload" })
             } else {
                 const ids = Array.from(selectedEmpIds)
@@ -239,15 +218,7 @@ export default function DocumentManagement() {
                     isPublic: false,
                     employeeIds: ids,
                 }
-                const res = await fetch("/api/documents", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                })
-                if (!res.ok) {
-                    const err = await res.json()
-                    throw new Error(err.error?.message || "Failed to save document metadata")
-                }
+                await DocumentAPI.create(payload)
                 toast.success(`Document sent to ${ids.length} employee${ids.length > 1 ? "s" : ""}`, { id: "doc-upload" })
             }
 
@@ -280,14 +251,10 @@ export default function DocumentManagement() {
     }
 
     const handleDelete = async (docId: string) => {
-        if (!confirm("Delete this document?")) return
+        if (!await confirmDanger("Delete Document?", "This document will be permanently removed.")) return
         try {
-            const res = await fetch(`/api/documents/${docId}`, { method: "DELETE" })
-            if (!res.ok) {
-                const err = await res.json()
-                throw new Error(err.error?.message || "Failed to delete")
-            }
-            toast.success("Deleted")
+            await DocumentAPI.delete(docId)
+            showSuccess("Deleted", "Document removed successfully")
             fetchAll()
         } catch (error: any) {
             toast.error(error.message || "Failed to delete")

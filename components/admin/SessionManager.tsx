@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { SessionAPI } from "@/features/sessions/api/client"
 import { toast } from "sonner"
+import { confirmWarning, showSuccess } from "@/lib/swal"
 import { ReloadIcon, LockClosedIcon, PersonIcon, DesktopIcon, DiscIcon } from "@radix-ui/react-icons"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/Button"
@@ -9,17 +11,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
 import { Spinner } from "@/components/ui/Spinner"
 
-interface Session {
-    id: string
-    userName: string
-    email: string
-    avatar: string | null
-    ipAddress: string
-    userAgent: string
-    lastActive: string
-    isRevoked: boolean
-    isActive: boolean
-}
+type Session = import("@/features/sessions/api/client").UserSession
 
 export function SessionManager() {
     const [sessions, setSessions] = useState<Session[]>([])
@@ -28,11 +20,8 @@ export function SessionManager() {
 
     const fetchSessions = async () => {
         try {
-            const res = await fetch("/api/admin/sessions")
-            if (res.ok) {
-                const data = await res.json()
-                setSessions(data.data || (Array.isArray(data) ? data : []))
-            }
+            const data = await SessionAPI.list()
+            setSessions(data.results || (data as any).data || [])
         } catch (error) {
             toast.error("Failed to fetch sessions")
         } finally {
@@ -47,22 +36,15 @@ export function SessionManager() {
     }, [])
 
     const handleRevoke = async (id: string, name: string) => {
-        if (!window.confirm(`Are you sure you want to revoke the session for ${name}? User will be logged out immediately.`)) return
+        if (!await confirmWarning("Revoke Session?", `${name} will be logged out immediately.`)) return
 
         setRevoking(id)
         try {
-            const res = await fetch(`/api/admin/sessions/${id}/revoke`, {
-                method: "POST"
-            })
-
-            if (res.ok) {
-                toast.success(`Session for ${name} revoked`)
-                fetchSessions()
-            } else {
-                toast.error("Failed to revoke session")
-            }
-        } catch (error) {
-            toast.error("An error occurred")
+            await SessionAPI.terminate(id)
+            showSuccess("Session Revoked", `${name} has been logged out.`)
+            fetchSessions()
+        } catch (error: any) {
+            toast.error(error.message || "Failed to revoke session")
         } finally {
             setRevoking(null)
         }
@@ -125,12 +107,12 @@ export function SessionManager() {
                             <div className="flex items-center gap-4">
                                 <div className="text-right">
                                     <div className="text-xs font-bold text-text-2 uppercase tracking-tight">Last Active</div>
-                                    <div className="text-sm text-text-3">{format(new Date(session.lastActive), "MMM d, HH:mm")}</div>
+                                    <div className="text-sm text-text-3">{format(new Date(session.lastActive || session.lastActivity || session.createdAt), "MMM d, HH:mm")}</div>
                                 </div>
                                 <Button
                                     variant="danger"
                                     size="icon"
-                                    onClick={() => handleRevoke(session.id, session.userName)}
+                                    onClick={() => handleRevoke(session.id, session.userName || "User")}
                                     disabled={session.isRevoked || revoking === session.id}
                                     title="Revoke Session"
                                 >

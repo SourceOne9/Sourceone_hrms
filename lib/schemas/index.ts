@@ -15,6 +15,14 @@ export const employeeSchema = z.object({
     address: z.string().optional().nullable(),
     managerId: z.string().optional().nullable(),
     avatarUrl: z.string().url().optional().nullable(),
+}).superRefine((val, ctx) => {
+    if (val.role !== "CEO" && !val.managerId) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Manager is required for non-CEO employees",
+            path: ["managerId"],
+        })
+    }
 })
 
 export const leaveSchema = z.object({
@@ -119,8 +127,16 @@ export const performanceReviewSchema = z.object({
     reviewerId: z.string().optional().nullable(),
     reviewType: z.enum(["MANAGER", "SELF", "PEER"]).default("MANAGER"),
     reviewPeriod: z.string().optional().nullable(),
-    formType: z.enum(["DAILY", "MONTHLY"]).optional().nullable(),
+    formType: z.enum(["DAILY", "MONTHLY", "TEAM_REVIEW", "LEADER_MONTHLY"]).optional().nullable(),
     formData: z.record(z.string(), z.unknown()).optional().nullable(),
+})
+
+export const performanceTemplateSchema = z.object({
+    dailyMetrics:        z.array(z.string().min(1)).min(1),
+    dailyCompetencies:   z.array(z.string().min(1)).min(1),
+    monthlyKpis:         z.array(z.string().min(1)).min(1),
+    monthlyCompetencies: z.array(z.string().min(1)).min(1),
+    selfCompetencies:    z.array(z.string().min(1)).min(1),
 })
 
 export const teamSchema = z.object({
@@ -167,6 +183,21 @@ export const trainingSchema = z.object({
     dueDate: z.string().or(z.date()).optional().nullable(),
     videoUrl: z.string().url().optional().nullable(),
     participants: z.number().nonnegative().default(0),
+})
+
+export const functionalRoleSchema = z.object({
+    name: z.string().min(1, "Role name is required").max(100),
+    description: z.string().optional().nullable(),
+    level: z.coerce.number().int().min(0).max(10).default(0),
+    parentRoleId: z.string().optional().nullable(),
+    capabilities: z.array(z.object({
+        module: z.string().min(1),
+        actions: z.array(z.string().min(1)),
+    })).optional().default([]),
+})
+
+export const roleAssignSchema = z.object({
+    employeeIds: z.array(z.string().min(1)).min(1, "At least one employee ID is required"),
 })
 
 export const providentFundSchema = z.object({

@@ -11,8 +11,10 @@ import { KudosWidget } from "./KudosWidget"
 import { TimeTracker } from "./TimeTracker"
 import { OnboardingCompanion } from "./OnboardingCompanion"
 import { AgentActivityWidget } from "@/components/agent/AgentActivityWidget"
+import { TodoList } from "./TodoList"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { DashboardAPI } from "@/features/dashboard/api/client"
 
 const MOTIVATIONAL_QUOTES = [
     { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
@@ -78,14 +80,8 @@ export function EmployeeDashboard() {
     const fetchDashboardData = React.useCallback(async () => {
         try {
             if (isFirstLoad.current) setLoading(true)
-            const res = await fetch("/api/dashboard", { cache: "no-store" })
-            if (res.ok) {
-                const updatedData = await res.json()
-                setData(updatedData)
-            } else {
-                const errorJson = await res.json().catch(() => ({}))
-                console.error("Dashboard API error:", res.status, errorJson.error?.message || res.statusText)
-            }
+            const dashData = await DashboardAPI.getStats()
+            setData(dashData)
         } catch (error) {
             console.error("Dashboard fetch error:", error)
         } finally {
@@ -160,13 +156,13 @@ export function EmployeeDashboard() {
                         ))
                     ) : (
                         <>
-                            <DashboardStatCard label="Attendance" value={data?.stats?.attendanceCount || 0} sub="Days present this month" badge="Live" badgeType="up" icon={<ClockIcon className="w-5 h-5" />} />
-                            <DashboardStatCard label="Leave Balance" value={data?.stats?.leaveBalance || 0} sub="Available days" badge="Yearly" badgeType="neutral" icon={<CalendarIcon className="w-5 h-5" />} />
-                            <DashboardStatCard label="Pending Training" value={data?.stats?.pendingTrainingCount || 0} sub="Assigned modules"
+                            <div data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Attendance" value={data?.stats?.attendanceCount || 0} sub="Days present this month" badge="Live" badgeType="up" icon={<ClockIcon className="w-5 h-5" />} /></div>
+                            <div data-aos="fade-up" data-aos-delay="100"><DashboardStatCard label="Leaves Used" value={data?.stats?.leavesUsed || 0} sub="Approved leaves this year" badge="Yearly" badgeType="neutral" icon={<CalendarIcon className="w-5 h-5" />} /></div>
+                            <div data-aos="fade-up" data-aos-delay="200"><DashboardStatCard label="Pending Training" value={data?.stats?.pendingTrainingCount || 0} sub="Assigned modules"
                                 badge={data?.stats?.pendingTrainingCount > 0 ? "Priority" : "Done"}
                                 badgeType={data?.stats?.pendingTrainingCount > 0 ? "down" : "up"}
-                                icon={<BackpackIcon className="w-5 h-5" />} />
-                            <DashboardStatCard label="Review Status" value={data?.stats?.reviewStatus || "Upcoming"} sub="Next evaluation" badge="Q1" badgeType="neutral" icon={<span className="text-lg">📊</span>} />
+                                icon={<BackpackIcon className="w-5 h-5" />} /></div>
+                            <div data-aos="fade-up" data-aos-delay="300"><DashboardStatCard label="Review Status" value={data?.stats?.reviewStatus || "Upcoming"} sub="Next evaluation" badge="Q1" badgeType="neutral" icon={<span className="text-lg">📊</span>} /></div>
                         </>
                     )}
                 </div>
@@ -177,7 +173,7 @@ export function EmployeeDashboard() {
                         <OnboardingCompanion />
 
                         {/* Today's Schedule */}
-                        <Card variant="glass-premium" className="rounded-2xl">
+                        <Card data-aos="fade-up" data-aos-delay="100" variant="glass-premium" className="rounded-2xl">
                             <CardHeader>
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
@@ -211,6 +207,9 @@ export function EmployeeDashboard() {
                                 </div>
                             </CardContent>
                         </Card>
+
+                        {/* To-Do List */}
+                        <TodoList />
                     </div>
 
                     <div className="flex flex-col gap-6">
@@ -219,7 +218,7 @@ export function EmployeeDashboard() {
                         <KudosWidget />
 
                         {/* My Team + Quick Actions */}
-                        <Card variant="glass-premium" className="rounded-2xl">
+                        <Card data-aos="fade-left" data-aos-delay="200" variant="glass-premium" className="rounded-2xl">
                             <CardHeader>
                                 <CardTitle className="text-lg">My Team Status</CardTitle>
                             </CardHeader>
@@ -228,9 +227,9 @@ export function EmployeeDashboard() {
                                     <div className="space-y-4">
                                         {Array(3).fill(0).map((_, i) => <div key={i} className="h-12 w-full bg-bg-2 rounded-xl animate-pulse" />)}
                                     </div>
-                                ) : (
+                                ) : data?.teamStatus?.length > 0 ? (
                                     <div className="space-y-3">
-                                        {data?.teamStatus?.map((tm: any, i: number) => (
+                                        {data.teamStatus.map((tm: any, i: number) => (
                                             <div key={i} className="flex items-center justify-between p-3 hover:bg-bg/50 rounded-xl transition-colors group">
                                                 <div className="flex items-center gap-3">
                                                     <Avatar name={tm.name || tm.initials || "?"} size="default" />
@@ -246,19 +245,26 @@ export function EmployeeDashboard() {
                                             </div>
                                         ))}
                                     </div>
+                                ) : (
+                                    <div className="text-sm text-text-3 py-6 text-center bg-bg-2/30 rounded-xl border-2 border-dashed border-border font-medium">
+                                        No team members to display.
+                                    </div>
                                 )}
 
                                 <div className="mt-6 pt-5 border-t border-border">
                                     <h4 className="text-xs font-bold text-text-3 mb-3 uppercase tracking-wider">Quick Actions</h4>
                                     <div className="grid grid-cols-2 gap-2.5">
+                                        <Link href="/recruitment">
+                                            <Button variant="secondary" size="sm" className="w-full">Recruitment</Button>
+                                        </Link>
                                         <Link href="/leave">
                                             <Button variant="secondary" size="sm" className="w-full">Apply Leave</Button>
                                         </Link>
                                         <Link href="/help-desk">
                                             <Button variant="secondary" size="sm" className="w-full">Raise Ticket</Button>
                                         </Link>
-                                        <Link href="/resignation" className="col-span-2">
-                                            <Button variant="danger" size="sm" className="w-full">Resign / Exit Dashboard</Button>
+                                        <Link href="/reimbursement">
+                                            <Button variant="secondary" size="sm" className="w-full">Reimbursement</Button>
                                         </Link>
                                     </div>
                                 </div>

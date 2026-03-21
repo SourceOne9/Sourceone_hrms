@@ -11,9 +11,11 @@ import { CalendarIcon, ClockIcon, BackpackIcon, PersonIcon } from "@radix-ui/rea
 import { KudosWidget } from "./KudosWidget"
 import { TimeTracker } from "./TimeTracker"
 import { OnboardingCompanion } from "./OnboardingCompanion"
+import { TodoList } from "./TodoList"
 import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
 import { cn } from "@/lib/utils"
+import { DashboardAPI } from "@/features/dashboard/api/client"
 
 const MOTIVATIONAL_QUOTES = [
     { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
@@ -107,13 +109,8 @@ export function TeamLeadDashboard() {
     const fetchDashboardData = React.useCallback(async () => {
         try {
             if (isFirstLoad.current) setLoading(true)
-            const res = await fetch("/api/dashboard", { cache: "no-store" })
-            if (res.ok) {
-                const json = await res.json()
-                setData(json.data || json)
-            } else {
-                console.error("Dashboard API error:", res.status)
-            }
+            const dashData = await DashboardAPI.getStats()
+            setData(dashData as unknown as DashboardData)
         } catch (error) {
             console.error("Dashboard fetch error:", error)
         } finally {
@@ -300,6 +297,9 @@ export function TeamLeadDashboard() {
                                 </div>
                             </CardContent>
                         </Card>
+
+                        {/* To-Do List */}
+                        <TodoList />
                     </div>
 
                     <div className="flex flex-col gap-6">

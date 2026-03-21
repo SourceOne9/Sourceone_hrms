@@ -66,13 +66,23 @@ interface DailyReviewFormProps {
     employees: Employee[]
     onSubmit: (data: any) => Promise<void>
     onCancel: () => void
+    defaultActivityMetrics?: string[]
+    defaultBehavioralItems?: string[]
 }
 
-export function DailyReviewForm({ employees, onSubmit, onCancel }: DailyReviewFormProps) {
+export function DailyReviewForm({ employees, onSubmit, onCancel, defaultActivityMetrics, defaultBehavioralItems }: DailyReviewFormProps) {
     const [employeeId, setEmployeeId] = React.useState("")
     const [reviewDate, setReviewDate] = React.useState(format(new Date(), "yyyy-MM-dd"))
-    const [activityMetrics, setActivityMetrics] = React.useState<ActivityMetric[]>([...DEFAULT_ACTIVITY_METRICS])
-    const [behavioralRatings, setBehavioralRatings] = React.useState<BehavioralRating[]>([...DEFAULT_BEHAVIORAL_COMPETENCIES])
+    const [activityMetrics, setActivityMetrics] = React.useState<ActivityMetric[]>(() =>
+        defaultActivityMetrics
+            ? defaultActivityMetrics.map(metric => ({ metric, target: "", actual: "", notes: "" }))
+            : [...DEFAULT_ACTIVITY_METRICS]
+    )
+    const [behavioralRatings, setBehavioralRatings] = React.useState<BehavioralRating[]>(() =>
+        defaultBehavioralItems
+            ? defaultBehavioralItems.map(competency => ({ competency, rating: 0, comments: "" }))
+            : [...DEFAULT_BEHAVIORAL_COMPETENCIES]
+    )
     const [priorities, setPriorities] = React.useState(["", "", ""])
     const [blockers, setBlockers] = React.useState("")
     const [keyWins, setKeyWins] = React.useState("")

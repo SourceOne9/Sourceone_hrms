@@ -8,6 +8,7 @@ import { useForm, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
+import { confirmWarning, showSuccess } from "@/lib/swal"
 import { format } from "date-fns"
 import { PayrollConfigView } from "@/components/payroll/PayrollConfigView"
 
@@ -22,6 +23,9 @@ import { StatCard } from "@/components/ui/StatCard"
 import { PageHeader } from "@/components/ui/PageHeader"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { PayrollAPI } from "@/features/payroll/api/client"
+import { EmployeeAPI } from "@/features/employees/api/client"
+import { ReimbursementAPI } from "@/features/reimbursements/api/client"
 
 // ----------------------------------------------------------------------------
 // Zod Schema for Validation
@@ -160,16 +164,14 @@ export function AdminPayrollView() {
     const fetchAll = React.useCallback(async () => {
         try {
             setIsLoading(true)
-            const [payRes, pfRes, empRes] = await Promise.all([
-                fetch('/api/payroll'),
-                fetch('/api/pf'),
-                fetch('/api/employees?limit=100')
+            const [payData, pfData, empData] = await Promise.all([
+                PayrollAPI.list(),
+                PayrollAPI.listPF(),
+                EmployeeAPI.fetchEmployees(1, 100)
             ])
-            if (payRes.ok && pfRes.ok && empRes.ok) {
-                setRecords(extractArray<PayrollRecord>(await payRes.json()))
-                setPfRecords(extractArray<PFRecord>(await pfRes.json()))
-                setEmployees(extractArray<Employee>(await empRes.json()))
-            }
+            setRecords(payData.results as unknown as PayrollRecord[])
+            setPfRecords(pfData.results as unknown as PFRecord[])
+            setEmployees(empData.results as unknown as Employee[])
         } catch (error) {
             toast.error("Failed to load data")
         } finally {
@@ -187,12 +189,9 @@ export function AdminPayrollView() {
         if (!empId) { setApprovedReimbursements([]); return }
         setLoadingReimb(true)
         try {
-            const res = await fetch(`/api/reimbursements?status=APPROVED&employeeId=${empId}`)
-            if (res.ok) {
-                const data = await res.json()
-                const items = (data?.data || data || []).filter((r: any) => !r.paidInMonth)
-                setApprovedReimbursements(items)
-            }
+            const reimbData = await ReimbursementAPI.list('status=APPROVED&employeeId=' + empId)
+            const items = (reimbData.results || []).filter((r: any) => !r.paidInMonth)
+            setApprovedReimbursements(items as any)
         } catch { /* ignore */ } finally { setLoadingReimb(false) }
     }, [])
 
@@ -232,38 +231,22 @@ export function AdminPayrollView() {
 
     const onSubmit: SubmitHandler<PayrollFormData> = async (data) => {
         try {
-            const res = await fetch('/api/payroll/run', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            if (res.ok) {
-                toast.success("Payroll record calculated and created")
-                setIsModalOpen(false)
-                fetchAll()
-                form.reset()
-            } else {
-                toast.error("Failed to execute payroll run (Check active compliance config)")
-            }
+            await PayrollAPI.run(data)
+            toast.success("Payroll record calculated and created")
+            setIsModalOpen(false)
+            fetchAll()
+            form.reset()
         } catch (error) {
             toast.error("An error occurred")
         }
     }
 
     const handleFinalize = async (id: string) => {
-        if (!confirm("Are you sure? This will lock the payslip forever.")) return;
+        if (!await confirmWarning("Finalize Payroll?", "This will lock the payslip permanently. This action cannot be undone.")) return;
         try {
-            const res = await fetch(`/api/payroll/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'FINALIZE' })
-            })
-            if (res.ok) {
-                toast.success("Payroll finalized")
-                fetchAll()
-            } else {
-                toast.error("Failed to finalize")
-            }
+            await PayrollAPI.finalize(id)
+            showSuccess("Payroll Finalized", "The payslip has been locked permanently.")
+            fetchAll()
         } catch (e) {
             toast.error("Network error")
         }
@@ -275,19 +258,11 @@ export function AdminPayrollView() {
 
     const onPFSubmit: SubmitHandler<PFFormData> = async (data) => {
         try {
-            const res = await fetch('/api/pf', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            if (res.ok) {
-                toast.success("PF record created")
-                setIsPFModalOpen(false)
-                fetchAll()
-                pfForm.reset()
-            } else {
-                toast.error("Failed to create record")
-            }
+            await PayrollAPI.createPF(data)
+            toast.success("PF record created")
+            setIsPFModalOpen(false)
+            fetchAll()
+            pfForm.reset()
         } catch (error) {
             toast.error("An error occurred")
         }

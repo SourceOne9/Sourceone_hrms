@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { api } from "@/lib/api-client"
 import { useAuth } from "@/context/AuthContext"
 import { toast } from "sonner"
 import {
@@ -38,7 +39,7 @@ interface Profile {
     pfAccountNumber?: string; aadhaarNumber?: string; panNumber?: string
     fatherDob?: string; fatherBloodGroup?: string; fatherGender?: string; fatherNationality?: string
     emergencyContactName?: string; emergencyContactPhone?: string; emergencyContactRelation?: string
-    category?: string; costCenter?: string; division?: string; grade?: string; location?: string; previousEmployment?: string
+    category?: string; costCenter?: string; division?: string; grade?: string; location?: string; previousEmployment?: string; previousCtc?: number
     passportNumber?: string; passportExpiry?: string; visaNumber?: string; visaExpiry?: string
 }
 
@@ -128,7 +129,7 @@ const TABS = [
     { id: "personal", label: "Personal", icon: <PersonIcon className="w-4 h-4" />, editable: true },
     { id: "accounts", label: "Accounts & Statutory", icon: <IdCardIcon className="w-4 h-4" />, editable: true },
     { id: "family", label: "Family", icon: <HomeIcon className="w-4 h-4" />, editable: true },
-    { id: "employment", label: "Employment & Job", icon: <BackpackIcon className="w-4 h-4" />, editable: false },
+    { id: "employment", label: "Employment & Job", icon: <BackpackIcon className="w-4 h-4" />, editable: true },
     { id: "assets", label: "Assets", icon: <LaptopIcon className="w-4 h-4" />, editable: false },
 ]
 
@@ -143,9 +144,8 @@ export default function ProfilePage() {
     const [saving, setSaving] = React.useState(false)
 
     React.useEffect(() => {
-        fetch("/api/employee/profile")
-            .then(r => r.ok ? r.json() : Promise.reject())
-            .then(data => { setProfile(data); setFormData(data) })
+        api.get('/employees/profile/')
+            .then(({ data }) => { setProfile(data as any); setFormData(data as any) })
             .catch(() => { })
             .finally(() => setLoading(false))
     }, [])
@@ -157,13 +157,7 @@ export default function ProfilePage() {
     const handleSave = async () => {
         setSaving(true)
         try {
-            const res = await fetch("/api/employee/profile", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            })
-            if (!res.ok) throw new Error()
-            const updated = await res.json()
+            const { data: updated } = await api.put('/employees/profile/', formData) as any
             setProfile({ ...profile!, ...updated })
             setFormData({ ...profile!, ...updated })
             setEditing(false)
@@ -274,7 +268,7 @@ export default function ProfilePage() {
                         <TabFamily profile={profile} formData={formData} editing={editing} onChange={handleChange} />
                     )}
                     {activeTab === "employment" && (
-                        <TabEmployment profile={profile} />
+                        <TabEmployment profile={profile} formData={formData} editing={editing} onChange={handleChange} />
                     )}
                     {activeTab === "assets" && (
                         <TabAssets profile={profile} />
@@ -298,6 +292,12 @@ function TabPersonal({ profile, formData, editing, onChange }: { profile: Profil
                 <FormField label="Phone" name="phone" value={editing ? formData.phone : profile.phone} editing={editing} onChange={onChange} masked={!editing} placeholder="Enter phone number" />
                 <FormField label="Date of Joining" name="_doj" value={profile.dateOfJoining} editing={false} readOnly type="date" />
                 <FormField label="Location" name="location" value={editing ? formData.location : profile.location} editing={false} readOnly />
+            </FormSection>
+
+            <FormSection title="Emergency Contact">
+                <FormField label="Contact Name" name="emergencyContactName" value={editing ? formData.emergencyContactName : profile.emergencyContactName} editing={editing} onChange={onChange} placeholder="e.g. Rajesh Kumar" />
+                <FormField label="Contact Phone" name="emergencyContactPhone" value={editing ? formData.emergencyContactPhone : profile.emergencyContactPhone} editing={editing} onChange={onChange} placeholder="e.g. +91 98765 43210" />
+                <FormField label="Relation" name="emergencyContactRelation" value={editing ? formData.emergencyContactRelation : profile.emergencyContactRelation} editing={editing} onChange={onChange} placeholder="e.g. Father, Spouse" />
             </FormSection>
 
             <FormSection title="Personal Details">
@@ -445,9 +445,8 @@ function TabAccounts({ profile, formData, editing, onChange }: { profile: Profil
     const [docs, setDocs] = React.useState<Record<string, any>>({})
 
     React.useEffect(() => {
-        fetch("/api/employee/documents")
-            .then(r => r.ok ? r.json() : {})
-            .then(setDocs)
+        api.get('/documents/?scope=mine')
+            .then(({ data }) => setDocs(data as any))
             .catch(() => { })
     }, [])
 
@@ -456,7 +455,7 @@ function TabAccounts({ profile, formData, editing, onChange }: { profile: Profil
         fd.append("file", file)
         fd.append("docType", docType)
         try {
-            const res = await fetch("/api/employee/documents", { method: "POST", body: fd })
+            const res = await fetch("/api/upload", { method: "POST", body: fd })
             if (!res.ok) {
                 const err = await res.json()
                 toast.error(err.error || "Upload failed")
@@ -472,8 +471,7 @@ function TabAccounts({ profile, formData, editing, onChange }: { profile: Profil
 
     const handleDelete = async (docId: string) => {
         try {
-            const res = await fetch(`/api/employee/documents?id=${docId}`, { method: "DELETE" })
-            if (!res.ok) throw new Error()
+            await api.delete(`/documents/${docId}/`)
             setDocs(prev => {
                 const next = { ...prev }
                 for (const key of Object.keys(next)) {
@@ -553,7 +551,7 @@ function TabFamily({ profile, formData, editing, onChange }: { profile: Profile;
 /* ══════════════════════════════════════════════════════════════
    TAB 4: EMPLOYMENT & JOB (read-only)
    ══════════════════════════════════════════════════════════════ */
-function TabEmployment({ profile }: { profile: Profile }) {
+function TabEmployment({ profile, formData, editing, onChange }: { profile: Profile; formData: any; editing: boolean; onChange: (n: string, v: any) => void }) {
     return (
         <>
             <div className="rounded-xl bg-accent/5 border border-accent/15 p-5 mb-6">
@@ -582,8 +580,9 @@ function TabEmployment({ profile }: { profile: Profile }) {
                 )}
             </div>
 
-            <FormSection title="Previous Employment" columns={1}>
-                <p className="text-sm text-text">{profile.previousEmployment || "N/A"}</p>
+            <FormSection title="Previous Employment">
+                <FormField label="Previous Employer" name="previousEmployment" value={editing ? formData.previousEmployment : profile.previousEmployment} editing={editing} onChange={onChange} placeholder="e.g. Infosys Ltd" />
+                <FormField label="Previous CTC (Annual)" name="previousCtc" value={editing ? formData.previousCtc : (profile.previousCtc != null ? `₹${Number(profile.previousCtc).toLocaleString("en-IN")}` : null)} editing={editing} onChange={onChange} placeholder="e.g. 600000" />
             </FormSection>
         </>
     )

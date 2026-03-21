@@ -1,35 +1,47 @@
 "use client"
 import React, { useEffect, useState } from 'react'
-import { PlusIcon, InputIcon } from '@radix-ui/react-icons'
+import { PlusIcon, InputIcon, GearIcon } from '@radix-ui/react-icons'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { WorkflowTemplate } from '@prisma/client'
+import { api } from '@/lib/api-client'
 import { extractArray } from '@/lib/utils'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { ConfigPanel } from '@/components/ui/ConfigPanel'
 
-// Extended interface matches our Prisma return structure
+/**
+ * Local interface replacing @prisma/client WorkflowTemplate.
+ * Matches the Django WorkflowTemplate model shape.
+ */
+interface WorkflowTemplate {
+    id: string
+    name: string
+    description: string | null
+    entityType: string
+    status: string
+    organizationId: string
+    createdAt: string
+    updatedAt: string
+}
+
+// Extended interface matches our API return structure
 interface Template extends WorkflowTemplate {
     steps: any[]
 }
 
 export default function WorkflowsAdmin() {
     const [templates, setTemplates] = useState<Template[]>([])
+    const [configScreen, setConfigScreen] = useState<string | null>(null)
 
     const loadTemplates = async () => {
         try {
-            const res = await fetch('/api/workflows/templates')
-            if (res.ok) {
-                const json = await res.json()
-                setTemplates(extractArray<Template>(json))
-            } else {
-                toast.error('Failed to load workflow templates')
-            }
+            const { data } = await api.get<any>('/workflows/templates/')
+            setTemplates(extractArray<Template>(data))
         } catch (err) {
-            toast.error('Network error loading workflows')
+            toast.error('Failed to load workflow templates')
         }
     }
 
@@ -74,6 +86,15 @@ export default function WorkflowsAdmin() {
                                     <InputIcon className="h-4 w-4 text-accent" />
                                     <span>{tpl.steps.length} Step{tpl.steps.length !== 1 && 's'} Configured</span>
                                 </div>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    leftIcon={<GearIcon className="w-3.5 h-3.5" />}
+                                    onClick={() => setConfigScreen(`${tpl.entityType}_REQUEST`)}
+                                    className="mt-3 w-full text-text-2 hover:text-accent"
+                                >
+                                    Configure Fields
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>
@@ -92,6 +113,14 @@ export default function WorkflowsAdmin() {
                     </div>
                 )}
             </div>
+
+            {configScreen && (
+                <ConfigPanel
+                    isOpen
+                    onClose={() => setConfigScreen(null)}
+                    screenName={configScreen}
+                />
+            )}
         </div>
     )
 }

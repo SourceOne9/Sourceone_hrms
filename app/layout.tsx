@@ -3,7 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import "./globals.css";
 import { CommandPalette } from "@/components/CommandPalette";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { NextAuthProvider } from "@/components/NextAuthProvider";
+import { AOSProvider } from "@/components/AOSProvider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
@@ -38,8 +38,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NextAuthProvider>
-            <CommandPalette />
+          <CommandPalette />
+            <AOSProvider />
             <canvas id="bg-canvas" className="fixed inset-0 pointer-events-none z-0 opacity-25" />
             <div className="flex h-screen overflow-hidden w-full">
               <AppShell>
@@ -47,7 +47,6 @@ export default function RootLayout({
               </AppShell>
             </div>
             <Toaster position="top-right" theme="system" />
-          </NextAuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -3,44 +3,83 @@ import type { NextRequest } from "next/server"
 import { redis } from "@/lib/redis"
 
 // K11: Distributed fixed-window rate limiter (Redis-backed)
-const RATE_LIMIT_WINDOW = 60 // 60 seconds
-const RATE_LIMIT_MAX = 60    // max requests per window per IP
 
-async function isRateLimited(ip: string): Promise<boolean> {
+// Per-IP: 60 req / 60s (DoS protection)
+const IP_RATE_LIMIT_WINDOW = 60
+const IP_RATE_LIMIT_MAX = 60
+
+// Per-user: 1000 req / 3600s (matches Django's throttle: 1000/hour)
+const USER_RATE_LIMIT_WINDOW = 3600
+const USER_RATE_LIMIT_MAX = 1000
+
+async function isIpRateLimited(ip: string): Promise<boolean> {
     if (ip === "127.0.0.1" || ip === "::1" || ip.includes("localhost")) {
-        return false // Bypass rate limiting for localhost/load testing
+        return false
     }
 
-    const currentWindow = Math.floor(Date.now() / (RATE_LIMIT_WINDOW * 1000))
-    const key = `ratelimit:${ip}:${currentWindow}`
+    const currentWindow = Math.floor(Date.now() / (IP_RATE_LIMIT_WINDOW * 1000))
+    const key = `ratelimit:ip:${ip}:${currentWindow}`
 
     try {
         const count = await redis.incr(key)
         if (count === 1) {
-            await redis.expire(key, RATE_LIMIT_WINDOW + 10) // Add buffer to expiry
+            await redis.expire(key, IP_RATE_LIMIT_WINDOW + 10)
         }
-        return count > RATE_LIMIT_MAX
+        return count > IP_RATE_LIMIT_MAX
     } catch (e) {
-        // If Redis errors out, bypass rate limiting to prevent bringing down the app
         console.warn("[Rate Limiting Error]", e)
         return false
+    }
+}
+
+async function isUserRateLimited(userId: string): Promise<boolean> {
+    const currentWindow = Math.floor(Date.now() / (USER_RATE_LIMIT_WINDOW * 1000))
+    const key = `ratelimit:user:${userId}:${currentWindow}`
+
+    try {
+        const count = await redis.incr(key)
+        if (count === 1) {
+            await redis.expire(key, USER_RATE_LIMIT_WINDOW + 10)
+        }
+        return count > USER_RATE_LIMIT_MAX
+    } catch (e) {
+        console.warn("[User Rate Limiting Error]", e)
+        return false
+    }
+}
+
+/** Extract user ID from JWT without verification (for rate limiting only) */
+function extractUserIdFromJwt(authHeader: string | null): string | null {
+    if (!authHeader?.startsWith("Bearer ")) return null
+    try {
+        const token = authHeader.slice(7)
+        const parts = token.split(".")
+        if (parts.length !== 3) return null
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")))
+        return payload.user_id || payload.sub || null
+    } catch {
+        return null
     }
 }
 
 // Routes that don't require authentication
 const publicRoutes = [
     "/login",
+    "/signup",
     "/api/auth",
     "/api/health",
-    // seed-load-test removed — requires CRON_SECRET auth
     "/api/raw-health",
 ]
+
+function isPublicRoute(pathname: string): boolean {
+    return publicRoutes.some(route => pathname === route || pathname.startsWith(route + "/"))
+}
 
 // NOTE: Admin route enforcement removed — RBAC is handled at route level by withAuth()
 // All role/permission checks happen server-side in each API handler.
 
 function addSecurityHeaders(response: NextResponse) {
-    response.headers.set("X-Frame-Options", "DENY")
+    response.headers.set("X-Frame-Options", "SAMEORIGIN")
     response.headers.set("X-Content-Type-Options", "nosniff")
     response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
     response.headers.set("X-XSS-Protection", "1; mode=block")
@@ -55,38 +94,33 @@ function addSecurityHeaders(response: NextResponse) {
     return response
 }
 
-// Parse the NextAuth.js session token cookie to get role info.
-// The JWT is a JWE token — we decode the payload portion to read claims.
-// Full verification happens at the route level via auth().
-function getSessionFromCookie(req: NextRequest): { role?: string } | null {
-    // NextAuth v5 uses these cookie names
-    const cookieName =
-        process.env.NODE_ENV === "production"
-            ? "__Secure-authjs.session-token"
-            : "authjs.session-token"
-
-    const token = req.cookies.get(cookieName)?.value
-    if (!token) return null
-
-    // Token exists = user is authenticated (route-level auth() will fully verify)
-    // Try to extract role from the JWT payload (middle segment)
-    try {
-        const parts = token.split(".")
-        if (parts.length >= 2) {
-            // Standard JWT — decode the payload
-            const payload = JSON.parse(atob(parts[1]))
-            return { role: payload.role }
-        }
-    } catch {
-        // JWE token (encrypted) — we can't decode it here but we know user is logged in
-    }
-
-    // Token exists but we can't read role — treat as authenticated non-admin
-    return { role: undefined }
-}
+// Auth is handled client-side by AuthProvider (Django JWT in localStorage) and
+// server-side by getServerSession() in API routes (via withAuth).
+// Middleware handles: route protection (JWT presence check), rate limiting, security headers.
 
 export default async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl
+
+    // Skip auth check for public routes, static assets, and API routes
+    // (API routes are protected by withAuth() in each handler)
+    if (!isPublicRoute(pathname) && !pathname.startsWith("/api/") && !pathname.startsWith("/_next")) {
+        // Server-side route protection: check for JWT in Authorization header or cookie
+        const authHeader = req.headers.get("authorization")
+        const hasHeaderToken = authHeader?.startsWith("Bearer ")
+        const hasCookieToken = req.cookies.has("access_token")
+
+        if (!hasHeaderToken && !hasCookieToken) {
+            // Embedded mode: redirect to parent platform's login
+            const embeddedLoginUrl = process.env.NEXT_PUBLIC_EMBEDDED === "true"
+                ? process.env.NEXT_PUBLIC_PLATFORM_LOGIN_URL
+                : null
+            const loginUrl = embeddedLoginUrl
+                ? new URL(embeddedLoginUrl)
+                : new URL("/login", req.url)
+            loginUrl.searchParams.set("callbackUrl", pathname)
+            return addSecurityHeaders(NextResponse.redirect(loginUrl))
+        }
+    }
 
     // Always add security headers
     const response = NextResponse.next()
@@ -94,7 +128,9 @@ export default async function middleware(req: NextRequest) {
     // K11: Rate limiting for API routes
     if (pathname.startsWith("/api/")) {
         const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown"
-        if (await isRateLimited(ip)) {
+
+        // Per-IP rate limit (DoS protection)
+        if (await isIpRateLimited(ip)) {
             return addSecurityHeaders(
                 NextResponse.json(
                     { error: "Too many requests. Please slow down." },
@@ -102,41 +138,19 @@ export default async function middleware(req: NextRequest) {
                 )
             )
         }
-    }
 
-    // Allow public routes
-    if (publicRoutes.some((route) => pathname.startsWith(route))) {
-        return addSecurityHeaders(response)
-    }
-
-    // Allow static files and Next.js internals (with security headers)
-    if (
-        pathname.startsWith("/_next") ||
-        pathname.startsWith("/favicon") ||
-        pathname.includes(".")
-    ) {
-        return addSecurityHeaders(response)
-    }
-
-    // Check session cookie (Edge-compatible — no Node.js modules)
-    const session = getSessionFromCookie(req)
-
-    // Redirect unauthenticated users to login
-    if (!session) {
-        if (pathname.startsWith("/api/")) {
+        // Per-user rate limit (matches Django 1000/hr throttle)
+        const userId = extractUserIdFromJwt(req.headers.get("authorization"))
+        if (userId && await isUserRateLimited(userId)) {
             return addSecurityHeaders(
                 NextResponse.json(
-                    { error: "Unauthorized" },
-                    { status: 401 }
+                    { error: "Rate limit exceeded. Please try again later.", detail: "User throttle: 1000 requests per hour." },
+                    { status: 429, headers: { "Retry-After": "300" } }
                 )
             )
         }
-        const loginUrl = new URL("/login", req.url)
-        loginUrl.searchParams.set("callbackUrl", pathname)
-        return NextResponse.redirect(loginUrl)
     }
 
-    // All permission checks happen at route level via withAuth()
     return addSecurityHeaders(response)
 }
 

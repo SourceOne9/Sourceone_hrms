@@ -2,6 +2,8 @@
 
 import * as React from "react"
 import { extractArray, cn } from "@/lib/utils"
+import { EmployeeAPI } from "@/features/employees/api/client"
+import { TrainingAPI } from "@/features/training/api/client"
 import { toast } from "sonner"
 import { format } from "date-fns"
 import { PlusIcon, TrashIcon, Pencil2Icon } from "@radix-ui/react-icons"
@@ -17,6 +19,7 @@ import { Input } from "@/components/ui/Input"
 import { Select } from "@/components/ui/Select"
 import { Textarea } from "@/components/ui/Textarea"
 import { Card, CardContent } from "@/components/ui/Card"
+import { confirmDanger, confirmAction, showSuccess } from "@/lib/swal"
 
 const trainingSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -86,22 +89,16 @@ export function AdminTrainingView() {
 
     const fetchEmployees = React.useCallback(async () => {
         try {
-            const res = await fetch('/api/employees?limit=100')
-            if (res.ok) {
-                const json = await res.json()
-                setEmployees(Array.isArray(json) ? json : json.data || [])
-            }
+            const empData = await EmployeeAPI.fetchEmployees(1, 100)
+            setEmployees(empData.results || [])
         } catch { console.error("Failed to load employees") }
     }, [])
 
     const fetchTrainings = React.useCallback(async () => {
         try {
             setIsLoading(true)
-            const res = await fetch('/api/training')
-            if (res.ok) {
-                const data = await res.json()
-                setTrainings(extractArray<Training>(data))
-            }
+            const data = await TrainingAPI.list()
+            setTrainings(extractArray<Training>(data))
         } catch {
             toast.error("Failed to load trainings")
         } finally {
@@ -149,27 +146,19 @@ export function AdminTrainingView() {
 
     const onSubmit: any = async (data: any) => {
         try {
-            const method = editingId ? 'PUT' : 'POST'
-            const body = editingId ? { ...data, id: editingId } : data
-            const res = await fetch('/api/training', {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            })
-
-            if (res.ok) {
-                toast.success(editingId ? "Course updated" : "Course created")
-                setIsModalOpen(false)
-                setEditingId(null)
-                form.reset()
-                fetchTrainings()
+            if (editingId) {
+                await TrainingAPI.update(editingId, data)
             } else {
-                const err = await res.json()
-                toast.error(err.error || "Operation failed")
+                await TrainingAPI.create(data)
             }
-        } catch (error) {
+            toast.success(editingId ? "Course updated" : "Course created")
+            setIsModalOpen(false)
+            setEditingId(null)
+            form.reset()
+            fetchTrainings()
+        } catch (error: any) {
             console.error("Submit error:", error)
-            toast.error("An error occurred")
+            toast.error(error.message || "Operation failed")
         }
     }
 
@@ -179,17 +168,13 @@ export function AdminTrainingView() {
     }
 
     const deleteTraining = async (id: string) => {
-        if (!confirm("Are you sure? This will delete all enrollments too.")) return
+        if (!await confirmDanger("Delete Training?", "This will permanently delete the training and all enrollments.")) return
         try {
-            const res = await fetch(`/api/training?id=${id}`, { method: 'DELETE' })
-            if (res.ok) {
-                toast.success("Training deleted")
-                fetchTrainings()
-            } else {
-                toast.error("Deletion failed")
-            }
-        } catch {
-            toast.error("An error occurred")
+            await TrainingAPI.delete(id)
+            showSuccess("Training Deleted", "The training and all enrollments have been removed.")
+            fetchTrainings()
+        } catch (error: any) {
+            toast.error(error.message || "Deletion failed")
         }
     }
 

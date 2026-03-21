@@ -5,15 +5,17 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
 import { canAccessModule, Module } from "@/lib/permissions"
 import { exportToCSV, exportToPDF } from "@/lib/exportUtils"
-import { read, utils } from 'xlsx'
+import { BulkEmployeeImportModal } from "@/components/ui/BulkEmployeeImportModal"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
+import { confirmDanger, confirmAction, showSuccess } from "@/lib/swal"
 import { format } from "date-fns"
 import { EmployeeList } from "@/features/employees/components/EmployeeList"
 import { EmployeeFormModal } from "@/features/employees/components/EmployeeFormModal"
 import { EmployeeAPI } from "@/features/employees/api/client"
+import { DepartmentAPI } from "@/features/departments/api/client"
 import { TableEmployee, Department, EmployeeApiData } from "@/features/employees/types"
 import { Modal } from "@/components/ui/Modal"
 import { PageHeader } from "@/components/ui/PageHeader"
@@ -34,7 +36,16 @@ const employeeSchema = z.object({
     salary: z.number().min(0, "Salary must be positive"),
     status: z.enum(["ACTIVE", "ON_LEAVE", "RESIGNED", "TERMINATED"]),
     role: z.enum(["CEO", "HR", "PAYROLL", "TEAM_LEAD", "EMPLOYEE"]),
+    managerId: z.string().optional().nullable(),
     avatarUrl: z.string().optional().nullable(),
+}).superRefine((val, ctx) => {
+    if (val.role !== "CEO" && !val.managerId) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Manager is required for non-CEO employees",
+            path: ["managerId"],
+        })
+    }
 })
 
 type EmployeeFormData = z.infer<typeof employeeSchema>
@@ -55,6 +66,8 @@ const mapApiToTableData = (apiEmployees: EmployeeApiData[]): TableEmployee[] => 
             initials: getInitials(emp.firstName, emp.lastName),
             color: emp.department?.color || "from-[#007aff] to-[#5856d6]",
             avatarUrl: emp.avatarUrl || null,
+            manager: emp.manager ? `${emp.manager.firstName} ${emp.manager.lastName}` : null,
+            managerAvatarUrl: emp.manager?.avatarUrl || null,
             raw: emp,
         }
     })
@@ -82,15 +95,17 @@ function EmployeesContent() {
     const [credCard, setCredCard] = React.useState<{ username: string; password: string; name: string } | null>(null)
     const [isResettingCreds, setIsResettingCreds] = React.useState<string | null>(null)
 
+    const [managers, setManagers] = React.useState<{id: string, firstName: string, lastName: string, designation: string, department?: {name: string}}[]>([])
+
     const [isDeptModalOpen, setIsDeptModalOpen] = React.useState(false)
     const [newDeptName, setNewDeptName] = React.useState("")
     const [isDeptCreating, setIsDeptCreating] = React.useState(false)
 
-    const fileInputRef = React.useRef<HTMLInputElement>(null)
+    const [isBulkImportOpen, setIsBulkImportOpen] = React.useState(false)
 
     const form = useForm<EmployeeFormData>({
         resolver: zodResolver(employeeSchema),
-        defaultValues: { status: "ACTIVE", role: "EMPLOYEE", employeeCode: "", firstName: "", lastName: "", email: "", phone: "", designation: "", departmentId: "", dateOfJoining: new Date().toISOString().split('T')[0], salary: 0 }
+        defaultValues: { status: "ACTIVE", role: "EMPLOYEE", employeeCode: "", firstName: "", lastName: "", email: "", phone: "", designation: "", departmentId: "", dateOfJoining: new Date().toISOString().split('T')[0], salary: 0, managerId: "" }
     })
 
     const handleCreateDepartment = async (e: React.FormEvent) => {
@@ -100,24 +115,12 @@ function EmployeesContent() {
             setIsDeptCreating(true)
             const randomColors = ["from-[#ff9a9e] to-[#fecfef]", "from-[#a18cd1] to-[#fbc2eb]", "from-[#84fab0] to-[#8fd3f4]", "from-[#a6c0fe] to-[#f68084]", "from-[#fccb90] to-[#d57eeb]"]
             const color = randomColors[Math.floor(Math.random() * randomColors.length)]
-            const res = await fetch('/api/departments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newDeptName, color })
-            })
-            if (res.ok) {
-                const response = await res.json()
-                const newDept = response.data || response
-                setDepartments(prev => [...prev, newDept])
-                form.setValue('departmentId', newDept.id)
-                toast.success('Department created successfully')
-                setIsDeptModalOpen(false)
-                setNewDeptName("")
-            } else {
-                const errorData = await res.json()
-                const errorMessage = errorData.error?.message || errorData.error || 'Failed to create department'
-                toast.error(typeof errorMessage === 'string' ? errorMessage : 'Failed to create department')
-            }
+            const newDept = await DepartmentAPI.create({ name: newDeptName, color })
+            setDepartments(prev => [...prev, newDept])
+            form.setValue('departmentId', newDept.id)
+            toast.success('Department created successfully')
+            setIsDeptModalOpen(false)
+            setNewDeptName("")
         } catch (err: any) {
             toast.error(err.message || 'An error occurred')
         } finally {
@@ -126,16 +129,11 @@ function EmployeesContent() {
     }
 
     const handleDeleteDepartment = async (deptId: string, deptName: string) => {
-        if (!window.confirm(`Delete department "${deptName}"? Employees in this department must be reassigned first.`)) return
+        if (!await confirmDanger("Delete Department?", `"${deptName}" will be removed. Employees must be reassigned first.`)) return
         try {
-            const res = await fetch(`/api/departments/${deptId}`, { method: 'DELETE' })
-            if (res.ok) {
-                setDepartments(prev => prev.filter(d => d.id !== deptId))
-                toast.success(`Department "${deptName}" deleted`)
-            } else {
-                const errorData = await res.json()
-                toast.error(errorData.details || errorData.error || 'Failed to delete department')
-            }
+            await DepartmentAPI.delete(deptId)
+            showSuccess("Department Deleted", `"${deptName}" has been removed.`)
+            setDepartments(prev => prev.filter(d => d.id !== deptId))
         } catch (err: any) {
             toast.error(err.message || 'An error occurred')
         }
@@ -170,14 +168,16 @@ function EmployeesContent() {
     const fetchData = React.useCallback(async () => {
         try {
             setIsLoading(true)
-            const [empRes, deptRes] = await Promise.all([
+            const [empRes, deptRes, mgrRes] = await Promise.all([
                 EmployeeAPI.fetchEmployees(page, limit),
-                fetch('/api/departments').then(r => r.json())
+                DepartmentAPI.list(),
+                EmployeeAPI.fetchManagers(),
             ])
             setTotalRows(empRes.total)
             setPageCount(Math.ceil(empRes.total / limit))
-            setDepartments(deptRes.data || [])
-            setEmployees(mapApiToTableData(empRes.data))
+            setDepartments(deptRes)
+            setManagers(mgrRes || [])
+            setEmployees(mapApiToTableData(empRes.results))
         } catch (error) {
             toast.error("An error occurred while fetching data")
         } finally {
@@ -191,27 +191,27 @@ function EmployeesContent() {
 
     const openCreateModal = () => {
         setModalMode("CREATE")
-        form.reset({ status: "ACTIVE", role: "EMPLOYEE", employeeCode: `EMP-${Date.now().toString().slice(-4)}`, firstName: "", lastName: "", email: "", phone: "", designation: "", departmentId: departments[0]?.id || "", dateOfJoining: new Date().toISOString().split('T')[0], salary: 0 })
+        form.reset({ status: "ACTIVE", role: "EMPLOYEE", employeeCode: `EMP-${Date.now().toString().slice(-4)}`, firstName: "", lastName: "", email: "", phone: "", designation: "", departmentId: departments[0]?.id || "", dateOfJoining: new Date().toISOString().split('T')[0], salary: 0, managerId: "" })
         setIsModalOpen(true)
     }
 
     const openEditModal = (empRaw: EmployeeApiData) => {
         setModalMode("EDIT")
-        form.reset({ id: empRaw.id, employeeCode: empRaw.employeeCode, firstName: empRaw.firstName, lastName: empRaw.lastName, email: empRaw.email, phone: empRaw.phone || "", designation: empRaw.designation, departmentId: empRaw.departmentId, dateOfJoining: new Date(empRaw.dateOfJoining).toISOString().split('T')[0], salary: empRaw.salary, status: empRaw.status as any, role: (empRaw as any).user?.role || "EMPLOYEE" })
+        form.reset({ id: empRaw.id, employeeCode: empRaw.employeeCode, firstName: empRaw.firstName, lastName: empRaw.lastName, email: empRaw.email, phone: empRaw.phone || "", designation: empRaw.designation, departmentId: empRaw.departmentId, dateOfJoining: new Date(empRaw.dateOfJoining).toISOString().split('T')[0], salary: empRaw.salary, status: empRaw.status as any, role: (empRaw as any).user?.role || "EMPLOYEE", managerId: empRaw.managerId || "" })
         setIsModalOpen(true)
     }
 
     const openViewModal = (empRaw: EmployeeApiData) => {
         setModalMode("VIEW")
-        form.reset({ employeeCode: empRaw.employeeCode, firstName: empRaw.firstName, lastName: empRaw.lastName, email: empRaw.email, phone: empRaw.phone || "", designation: empRaw.designation, departmentId: empRaw.departmentId, dateOfJoining: new Date(empRaw.dateOfJoining).toISOString().split('T')[0], salary: empRaw.salary, status: empRaw.status as any, role: (empRaw as any).user?.role || "EMPLOYEE" })
+        form.reset({ employeeCode: empRaw.employeeCode, firstName: empRaw.firstName, lastName: empRaw.lastName, email: empRaw.email, phone: empRaw.phone || "", designation: empRaw.designation, departmentId: empRaw.departmentId, dateOfJoining: new Date(empRaw.dateOfJoining).toISOString().split('T')[0], salary: empRaw.salary, status: empRaw.status as any, role: (empRaw as any).user?.role || "EMPLOYEE", managerId: empRaw.managerId || "" })
         setIsModalOpen(true)
     }
 
     const handleDelete = async (id: string, name: string) => {
-        if (!window.confirm(`Are you sure you want to delete ${name}?`)) return
+        if (!await confirmDanger("Delete Employee?", `${name} will be permanently removed.`)) return
         try {
             await EmployeeAPI.deleteEmployee(id)
-            toast.success('Employee deleted successfully')
+            showSuccess("Employee Deleted", `${name} has been permanently removed.`)
             fetchData()
         } catch {
             toast.error('An error occurred')
@@ -219,11 +219,12 @@ function EmployeesContent() {
     }
 
     const handleResetCredentials = async (emp: EmployeeApiData) => {
-        if (!window.confirm(`Reset login credentials for ${emp.firstName} ${emp.lastName}?`)) return
+        if (!await confirmAction("Reset Credentials?", `New login credentials will be generated for ${emp.firstName} ${emp.lastName}.`)) return
         setIsResettingCreds(emp.id)
         try {
             const data = await EmployeeAPI.resetCredentials(emp.id)
-            setCredCard({ username: data.username, password: data.tempPassword, name: `${emp.firstName} ${emp.lastName}` })
+            showSuccess("Credentials Reset", `New credentials generated for ${emp.firstName} ${emp.lastName}.`)
+            setCredCard({ username: data.email, password: data.tempPassword, name: `${emp.firstName} ${emp.lastName}` })
         } catch {
             toast.error('An error occurred')
         } finally {
@@ -234,11 +235,11 @@ function EmployeesContent() {
     const onSubmit = async (data: EmployeeFormData) => {
         try {
             const isEdit = modalMode === "EDIT"
-            const result = await EmployeeAPI.upsertEmployee(isEdit, data.id, data)
+            const result = await EmployeeAPI.upsertEmployee(isEdit, data.id, data) as EmployeeApiData & { tempPassword?: string }
             setIsModalOpen(false)
             fetchData()
             if (!isEdit && result.tempPassword) {
-                setCredCard({ username: result.employeeCode, password: result.tempPassword, name: `${result.firstName} ${result.lastName}` })
+                setCredCard({ username: result.employeeCode || result.email, password: result.tempPassword, name: `${result.firstName} ${result.lastName}` })
             } else {
                 toast.success(`Employee ${isEdit ? 'updated' : 'created'} successfully`)
             }
@@ -247,47 +248,6 @@ function EmployeesContent() {
         }
     }
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-        try {
-            const data = await file.arrayBuffer()
-            const workbook = read(data, { type: 'array' })
-            const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-            const jsonData = utils.sheet_to_json(worksheet) as any[]
-            if (jsonData.length === 0) return toast.error("File is empty")
-            toast.loading("Importing employees...", { id: "import" })
-            let successCount = 0
-            for (const row of jsonData) {
-                const deptName = String(row['Department'] || row['dept'] || '').toLowerCase()
-                const dept = departments.find(d => d.name.toLowerCase() === deptName)
-                const nameParts = String(row['Name'] || row['name'] || '').split(' ')
-                let isoDate = new Date().toISOString().split('T')[0]
-                const rawDate = row['Start Date'] || row['Date Of Joining'] || row['startDate'] || row['start']
-                if (rawDate) { try { isoDate = new Date(rawDate).toISOString().split('T')[0] } catch (e) { } }
-                const empData = {
-                    employeeCode: row['Employee Code'] || row['employeeCode'] || `EMP-${Date.now().toString().slice(-4)}${Math.floor(Math.random() * 100)}`,
-                    firstName: row['First Name'] || row['firstName'] || nameParts[0] || 'Unknown',
-                    lastName: row['Last Name'] || row['lastName'] || nameParts.slice(1).join(' ') || 'User',
-                    email: row['Email'] || row['email'] || `user${Math.floor(Math.random() * 1000)}@example.com`,
-                    phone: String(row['Phone'] || row['phone'] || ''),
-                    designation: row['Role'] || row['role'] || row['Position'] || row['designation'] || 'Employee',
-                    departmentId: dept ? dept.id : (departments[0]?.id || ""),
-                    dateOfJoining: isoDate,
-                    salary: parseFloat(row['Salary'] || row['salary']) || 0,
-                    status: "ACTIVE",
-                }
-                const res = await fetch('/api/employees', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(empData) })
-                if (res.ok) successCount++
-            }
-            toast.success(`Successfully imported ${successCount} employees`, { id: "import" })
-            fetchData()
-        } catch {
-            toast.error("Failed to import file", { id: "import" })
-        } finally {
-            if (fileInputRef.current) fileInputRef.current.value = ''
-        }
-    }
 
     if (authLoading || !canAccessModule(user?.role ?? '', Module.EMPLOYEES)) return null
 
@@ -298,7 +258,6 @@ function EmployeesContent() {
                 description="Manage and organize your employee records"
             />
 
-            <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".xlsx, .xls, .csv" />
 
             <EmployeeList
                 employees={employees}
@@ -317,7 +276,7 @@ function EmployeesContent() {
                 onOpenViewModal={openViewModal}
                 onResetCredentials={handleResetCredentials}
                 onDelete={handleDelete}
-                onImportClick={() => fileInputRef.current?.click()}
+                onImportClick={() => setIsBulkImportOpen(true)}
                 onExportCSV={() => exportToCSV(employees.map(({ color, initials, raw, ...rest }) => rest), 'employees_list')}
                 onExportPDF={() => exportToPDF(['Name', 'Email', 'Department', 'Role', 'Status', 'Start Date'], employees.map(e => [e.name, e.email, e.dept, e.role, e.status, e.start]), 'employees_list', 'Employee Directory Report')}
                 isResettingCreds={isResettingCreds}
@@ -329,9 +288,20 @@ function EmployeesContent() {
                 modalMode={modalMode}
                 form={form}
                 departments={departments}
+                managers={managers}
                 onSubmit={onSubmit}
                 handleAvatarUpload={handleEmployeeAvatarUpload}
                 onOpenDeptModal={() => setIsDeptModalOpen(true)}
+            />
+
+            <BulkEmployeeImportModal
+                isOpen={isBulkImportOpen}
+                onClose={() => setIsBulkImportOpen(false)}
+                departments={departments}
+                onSuccess={() => {
+                    setIsBulkImportOpen(false)
+                    fetchData()
+                }}
             />
 
             <Modal isOpen={isDeptModalOpen} onClose={() => setIsDeptModalOpen(false)} title="Manage Departments">
