@@ -4,6 +4,56 @@ All notable changes to EMS Pro are documented here.
 
 ---
 
+## [5.3.0] - 2026-03-23
+
+### Added
+
+- **Source One Performance Module** — Full Django-backed performance management system with 6 sub-modules: Review Cycles, Monthly Reviews, Appraisals (annual + six-monthly), Eligibility Checks, PIPs (60-day + 90-day), and Digital Signatures (employee/manager/HR)
+- **Django `apps.performance`** — New Django app with 4 models: `ReviewCycle`, `MonthlyReview`, `Appraisal`, `PIP`. Registered in `config/settings/base.py`, `config/urls.py`, and `config/db_router.py` (`tenant_scoped_apps`)
+- **9 Next.js Proxy Routes** — All performance endpoints proxied via `proxyToDjango()` in `app/api/performance/`:
+  - `cycles/` (GET/POST) — Review cycle management
+  - `monthly/` (GET/POST) and `monthly/[id]/` (GET/PUT) — Monthly review CRUD
+  - `monthly/[id]/sign/` (POST) — Digital signature collection (employee, manager, HR)
+  - `appraisals/` (GET/POST) and `appraisals/[id]/` (GET/PUT) — Annual/six-monthly appraisals
+  - `eligibility/` (GET) — Active employee eligibility for reviews
+  - `pip/` (GET/POST) and `pip/[id]/` (GET/PUT) — Performance improvement plans
+- **14 Django REST Endpoints** — Full CRUD with RBAC via `HasPermission`, tenant-scoped queries, `is_tenant_admin` bypass
+- **Performance Proxy Unit Tests** — 36 tests in `__tests__/api/performance-sourceone.test.ts` covering all 9 proxy routes, error propagation (500, 422), and method handling
+- **Performance Load Test Script** — `scripts/load_test_performance.js` with 13 endpoints, Django JWT auth, concurrent workers, P50/P95/P99 percentile reporting, and pass/fail gates (96.9% success rate on live server)
+
+### Changed
+
+- **Performance route group** — `/api/performance` now includes Source One sub-routes alongside legacy daily/monthly review endpoints
+- **Django DB Router** — `performance` added to `tenant_scoped_apps` in `TenantDatabaseRouter`
+
+---
+
+## [5.2.0] - 2026-03-21
+
+### Added
+
+- **Playwright E2E Test Suite** — 57 tests across 7 spec files covering auth, employees CRUD, teams CRUD, leave/attendance, payroll/announcements, admin panels (assets, documents, training, integrations, performance), and full navigation smoke tests for all 18 routes
+- **Playwright Configuration** — `playwright.config.ts` with single-worker sequential execution, chromium project, screenshot-on-failure, and trace-on-retry
+- **Login Helper** — `tests/e2e/helpers/auth.ts` with `login()` and `uniqueId()` utilities
+- **Circuit Breaker Reset** — `resetCircuitBreaker()` export in `lib/django-proxy.ts` for test isolation
+
+### Changed
+
+- **Modal Widths** — Broadened all modal/popup forms across the app: `Modal.tsx` default → `max-w-2xl`, `Dialog.tsx` size tiers bumped (sm→lg, default→2xl, lg→3xl, xl→5xl), plus `TeamFormModal`, `TeamDetailModal`, `TeamReviewForm` individually widened
+- **Django Proxy Tests** — Rewrote `__tests__/lib/django-proxy.test.ts` (17 tests) with `resetCircuitBreaker()` in `beforeEach`, POST-specific tests for non-retry scenarios, and 3 new tests (retry success, POST no-retry, circuit breaker OPEN)
+
+### Fixed
+
+- **Login Authentication** — Rotated credentials after GitGuardian secret detection incident; password updated via Django shell
+- **Secret Leak Prevention** — Added `.claude/settings.local.json` to `.gitignore`, ran `git rm --cached` to stop tracking it
+
+### Security
+
+- Resolved GitGuardian incident #29052649 (credential exposure in 22 commits)
+- Rotated exposed password, added `.gitignore` entries for sensitive files
+
+---
+
 ## [5.1.0] - 2026-03-17
 
 ### Added — HiringNow Django Integration (9 Sprints)
