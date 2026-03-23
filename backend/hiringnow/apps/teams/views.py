@@ -15,6 +15,7 @@ from apps.teams.serializers import (
     TeamUpdateSerializer,
     TeamMemberSerializer,
 )
+from apps.teams.services import sync_all_teams
 
 
 # -- Team List / Create -------------------------------------------------------
@@ -33,10 +34,13 @@ class TeamListCreateView(APIView):
     def get(self, request):
         queryset = Team.objects.select_related('department', 'lead').order_by('name')
 
-        # Non-admin users can only see teams they belong to
+        # Non-admin users see teams they lead OR belong to
         user = request.user
         if not getattr(user, 'is_tenant_admin', False):
-            queryset = queryset.filter(members__employee__user=user)
+            from django.db.models import Q
+            queryset = queryset.filter(
+                Q(members__employee__user=user) | Q(lead__user=user)
+            ).distinct()
 
         # -- Filters
         department_id = request.query_params.get('department_id')
@@ -105,7 +109,10 @@ class TeamDetailView(APIView):
         serializer.is_valid(raise_exception=True)
 
         for field, value in serializer.validated_data.items():
+            # lead_id and department_id are already the Django FK column names,
+            # so setattr works directly for these.
             setattr(team, field, value)
+
         team.save()
 
         return Response(TeamSerializer(team).data)
@@ -114,6 +121,74 @@ class TeamDetailView(APIView):
         team = self._get_team(pk)
         team.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# -- Team Members --------------------------------------------------------------
+
+class TeamMemberView(APIView):
+    """
+    POST   /teams/{id}/members/  -- add a member to the team
+    DELETE /teams/{id}/members/  -- remove a member from the team
+    """
+
+    def get_permissions(self):
+        return [IsAuthenticated(), HasPermission('teams.manage')]
+
+    def _get_team(self, pk):
+        return get_object_or_404(Team, pk=pk)
+
+    def post(self, request, pk):
+        team = self._get_team(pk)
+        employee_id = request.data.get('employee_id')
+        if not employee_id:
+            return Response(
+                {'error': 'employee_id is required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        employee = get_object_or_404(Employee, pk=employee_id)
+        member, created = TeamMember.objects.get_or_create(
+            team=team,
+            employee=employee,
+            defaults={'role': request.data.get('role', '')},
+        )
+        if not created:
+            return Response(
+                {'error': 'Employee is already a member of this team'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(
+            TeamMemberSerializer(member).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    def delete(self, request, pk):
+        team = self._get_team(pk)
+        employee_id = request.query_params.get('employee_id')
+        if not employee_id:
+            return Response(
+                {'error': 'employee_id query param is required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        member = get_object_or_404(TeamMember, team=team, employee_id=employee_id)
+        member.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# -- Sync Teams from Hierarchy -------------------------------------------------
+
+class SyncTeamsFromHierarchyView(APIView):
+    """
+    POST /teams/sync-from-hierarchy/
+    Auto-create teams from the employee reporting_to hierarchy.
+    Each manager with direct reports gets a Team; reports become members.
+    """
+
+    def get_permissions(self):
+        return [IsAuthenticated(), HasPermission('teams.manage')]
+
+    def post(self, request):
+        summary = sync_all_teams()
+        return Response(summary)
 
 
 # -- Org Chart -----------------------------------------------------------------

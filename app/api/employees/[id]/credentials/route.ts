@@ -1,8 +1,8 @@
 /**
  * /api/employees/[id]/credentials — Credential reset handler.
  *
- * Django's UserUpdateSerializer doesn't accept password changes.
- * Workaround: Delete old User → Create new User with new password → Re-link to Employee.
+ * Uses Django's admin password reset endpoint to set a new password.
+ * If the employee has no linked user, creates one and links it.
  */
 import { NextResponse } from "next/server"
 
@@ -69,37 +69,63 @@ export async function POST(
         }
 
         const tempPassword = generateTempPassword()
-        const oldUserId = employee.user
+        const rawUser = employee.user
+        let userId = typeof rawUser === "object" && rawUser !== null ? rawUser.id : rawUser
 
-        // Step 2: Delete old user (if exists) so email becomes available
-        let deleteSucceeded = false
-        if (oldUserId) {
+        // Step 2: If no linked user, find existing user by email
+        if (!userId) {
             try {
-                const delRes = await fetch(`${base}/api/v1/users/${oldUserId}/`, {
-                    method: "DELETE",
+                const searchRes = await fetch(`${base}/api/v1/users/`, {
                     headers,
                     signal: AbortSignal.timeout(15_000),
                 })
-                deleteSucceeded = delRes.ok || delRes.status === 404
-                if (!deleteSucceeded) {
-                    const delErr = await delRes.json().catch(() => ({}))
-                    console.error(`DELETE user ${oldUserId} failed (${delRes.status}):`, JSON.stringify(delErr))
+                if (searchRes.ok) {
+                    const searchJson = await searchRes.json()
+                    const users = Array.isArray(searchJson) ? searchJson
+                        : searchJson.data?.results || searchJson.results
+                        || (Array.isArray(searchJson.data) ? searchJson.data : [])
+                    const match = users.find((u: Record<string, unknown>) =>
+                        (u.email as string)?.toLowerCase() === email.toLowerCase()
+                    )
+                    if (match?.id) userId = match.id as string
                 }
-            } catch (e) {
-                console.error(`DELETE user ${oldUserId} network error:`, e)
-            }
-
-            // If delete failed, we can't create a new user with the same email
-            if (!deleteSucceeded) {
-                return NextResponse.json(
-                    { error: { detail: "Could not remove old user account. Please try again." } },
-                    { status: 500 }
-                )
-            }
+            } catch { /* proceed to create */ }
         }
 
-        // Step 3: Create new user with the temp password
-        let newUserId: string | null = null
+        // Step 3: If user exists, reset password via admin endpoint
+        if (userId) {
+            const resetRes = await fetch(`${base}/api/v1/users/${userId}/reset-password/`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({ password: tempPassword }),
+                signal: AbortSignal.timeout(15_000),
+            })
+
+            if (resetRes.ok) {
+                // Ensure employee is linked to this user
+                if (!rawUser) {
+                    await fetch(`${base}/api/v1/employees/${id}/`, {
+                        method: "PUT",
+                        headers,
+                        body: JSON.stringify({ user: userId }),
+                        signal: AbortSignal.timeout(10_000),
+                    }).catch(() => {})
+                }
+
+                return NextResponse.json({
+                    data: { employeeId: id, email, tempPassword, userCreated: false },
+                })
+            }
+
+            const resetErr = await resetRes.json().catch(() => ({}))
+            console.error(`[creds] Password reset failed (${resetRes.status}):`, JSON.stringify(resetErr))
+            return NextResponse.json(
+                { error: { detail: resetErr.detail || "Failed to reset password" } },
+                { status: resetRes.status }
+            )
+        }
+
+        // Step 4: No user exists — create a new one
         const createRes = await fetch(`${base}/api/v1/users/`, {
             method: "POST",
             headers,
@@ -113,44 +139,32 @@ export async function POST(
             signal: AbortSignal.timeout(15_000),
         })
 
-        if (createRes.ok) {
-            const createJson = await createRes.json()
-            const userData = createJson.data || createJson
-            newUserId = (userData.id as string) || null
-        } else {
+        if (!createRes.ok) {
             const errJson = await createRes.json().catch(() => ({}))
             const detail = JSON.stringify(errJson)
-            console.error(`CREATE user for ${email} failed:`, detail)
+            console.error(`[creds] CREATE user for ${email} failed:`, detail)
             return NextResponse.json(
                 { error: { detail: `Failed to create user account. ${detail.includes("already exists") ? "A user with this email already exists." : "Please try again."}` } },
                 { status: 500 }
             )
         }
 
-        // Step 4: Link new user to employee
+        const createJson = await createRes.json()
+        const userData = createJson.data || createJson
+        const newUserId = (userData.id as string) || null
+
+        // Link new user to employee
         if (newUserId) {
-            try {
-                const linkRes = await fetch(`${base}/api/v1/employees/${id}/`, {
-                    method: "PUT",
-                    headers,
-                    body: JSON.stringify({ user: newUserId }),
-                    signal: AbortSignal.timeout(15_000),
-                })
-                if (!linkRes.ok) {
-                    console.error(`Link user ${newUserId} to employee ${id} failed`)
-                }
-            } catch {
-                console.error(`Link user network error`)
-            }
+            await fetch(`${base}/api/v1/employees/${id}/`, {
+                method: "PUT",
+                headers,
+                body: JSON.stringify({ user: newUserId }),
+                signal: AbortSignal.timeout(10_000),
+            }).catch(() => {})
         }
 
         return NextResponse.json({
-            data: {
-                employeeId: id,
-                email,
-                tempPassword,
-                userCreated: !!newUserId,
-            },
+            data: { employeeId: id, email, tempPassword, userCreated: true },
         })
     } catch (err) {
         console.error("Credentials route error:", err)

@@ -9,12 +9,14 @@ from rest_framework.views import APIView
 
 from apps.rbac.permissions import HasPermission
 from apps.employees.models import Employee, EmploymentType
+from apps.teams.services import sync_employee_team
 from apps.employees.serializers import (
     EmployeeSerializer,
     EmployeeCreateSerializer,
     EmployeeUpdateSerializer,
     EmployeeMinimalSerializer,
     EmploymentTypeSerializer,
+    EmployeeProfileFlatSerializer,
 )
 
 
@@ -40,7 +42,7 @@ class EmployeeListCreateView(APIView):
     def get(self, request):
         employees = Employee.objects.select_related(
             'employment_type', 'reporting_to', 'user', 'department_ref',
-        )
+        ).prefetch_related('profile', 'address_info', 'banking')
 
         # ── Soft-delete filter: exclude archived unless explicitly requested
         include_archived = request.query_params.get('include_archived', '').lower() == 'true'
@@ -70,7 +72,8 @@ class EmployeeListCreateView(APIView):
         # ── Pagination
         try:
             page = max(int(request.query_params.get('page', 1)), 1)
-            limit = min(int(request.query_params.get('limit', 50)), 100)
+            per_page = request.query_params.get('per_page') or request.query_params.get('limit', '50')
+            limit = min(int(per_page), 500)
         except (TypeError, ValueError):
             page, limit = 1, 50
 
@@ -105,8 +108,14 @@ class EmployeeListCreateView(APIView):
                     first_name=employee.first_name,
                     last_name=employee.last_name,
                 )
+                user.must_change_password = True
+                user.save(update_fields=['must_change_password'])
                 employee.user = user
                 employee.save(update_fields=['user'])
+
+        # Auto-create/update team if employee has a manager
+        if employee.reporting_to:
+            sync_employee_team(employee)
 
         data = EmployeeSerializer(employee).data
         if temp_password:
@@ -140,23 +149,29 @@ class EmployeeDetailView(APIView):
         serializer = EmployeeUpdateSerializer(employee, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         updated = serializer.save()
+
+        # Auto-create/update team if reporting_to changed
+        if 'reporting_to' in request.data and updated.reporting_to:
+            sync_employee_team(updated)
+
         return Response(EmployeeSerializer(updated).data)
 
     def delete(self, request, employee_id):
-        """Soft-delete: set deleted_at, mark archived, set status ARCHIVED."""
+        """Hard-delete: remove employee and linked user from the database."""
         employee = self.get_employee(employee_id)
 
         with transaction.atomic():
-            employee.deleted_at = timezone.now()
-            employee.is_archived = True
-            employee.status = Employee.Status.ARCHIVED
-            employee.save(update_fields=['deleted_at', 'is_archived', 'status'])
-
             # Unassign as manager for any direct reports
             Employee.objects.filter(
                 reporting_to=employee,
-                deleted_at__isnull=True,
             ).update(reporting_to=None)
+
+            linked_user = employee.user
+            employee.delete()
+
+            # Also remove the linked Django user account
+            if linked_user:
+                linked_user.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -203,3 +218,43 @@ class ManagerListView(APIView):
             deleted_at__isnull=True,
         ).order_by('first_name', 'last_name')
         return Response(EmployeeMinimalSerializer(managers, many=True).data)
+
+
+# ── My Profile (current user) ────────────────────────────────────────
+
+class EmployeeMyProfileView(APIView):
+    """GET/PUT /employees/profile/ — current user's own employee profile."""
+
+    permission_classes = [IsAuthenticated]
+
+    def _get_employee(self, user):
+        try:
+            return Employee.objects.select_related(
+                'employment_type', 'reporting_to', 'department_ref',
+            ).prefetch_related('profile', 'address_info', 'banking').get(
+                user=user, deleted_at__isnull=True,
+            )
+        except Employee.DoesNotExist:
+            return None
+
+    def get(self, request):
+        employee = self._get_employee(request.user)
+        if not employee:
+            return Response(
+                {'detail': 'No employee profile linked to this account.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(EmployeeProfileFlatSerializer(employee).data)
+
+    def put(self, request):
+        employee = self._get_employee(request.user)
+        if not employee:
+            return Response(
+                {'detail': 'No employee profile linked to this account.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = EmployeeProfileFlatSerializer(employee, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        updated = serializer.save()
+        return Response(EmployeeProfileFlatSerializer(updated).data)

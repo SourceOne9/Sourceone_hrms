@@ -13,7 +13,7 @@ import { EmptyState } from "@/components/ui/EmptyState"
 import { Spinner } from "@/components/ui/Spinner"
 import { TeamFormModal } from "@/components/teams/TeamFormModal"
 import { TeamDetailModal } from "@/components/teams/TeamDetailModal"
-import { PlusIcon, Pencil1Icon, TrashIcon, PersonIcon } from "@radix-ui/react-icons"
+import { PlusIcon, Pencil1Icon, TrashIcon, PersonIcon, UpdateIcon } from "@radix-ui/react-icons"
 import { TeamAPI } from "@/features/teams/api/client"
 import { confirmDanger, showSuccess } from "@/lib/swal"
 
@@ -31,6 +31,39 @@ interface Team {
     _count: { members: number }
 }
 
+/** Normalize Django team response into the shape the UI expects */
+function normalizeTeam(raw: any): Team {
+    const leadIsObject = raw.lead && typeof raw.lead === "object"
+    const leadId = leadIsObject ? raw.lead.id : (raw.leadId || raw.lead || "")
+    const leadNameStr: string = raw.leadName || ""
+    const [leadFirst = "", ...leadRest] = leadNameStr.split(/\s+/)
+    const lead = leadIsObject
+        ? raw.lead
+        : { id: leadId, firstName: leadFirst, lastName: leadRest.join(" "), avatarUrl: null, designation: "" }
+
+    const membersCount = raw._count?.members ?? raw.membersCount ?? raw.members?.length ?? 0
+
+    const members: TeamMember[] = (raw.members || []).map((m: any) => {
+        if (m.employee && typeof m.employee === "object") return m
+        const empNameStr: string = m.employeeName || ""
+        const [fn = "", ...ln] = empNameStr.split(/\s+/)
+        return {
+            ...m,
+            employee: { id: m.employee || m.id, firstName: fn, lastName: ln.join(" "), avatarUrl: null, designation: m.role || "" },
+        }
+    })
+
+    return {
+        id: raw.id,
+        name: raw.name,
+        description: raw.description,
+        leadId,
+        lead,
+        members,
+        _count: { members: membersCount },
+    }
+}
+
 export default function TeamsPage() {
     const { user, isLoading } = useAuth()
     const router = useRouter()
@@ -40,6 +73,8 @@ export default function TeamsPage() {
     const [editingTeam, setEditingTeam] = React.useState<Team | null>(null)
     const [detailTeam, setDetailTeam] = React.useState<Team | null>(null)
     const [deleting, setDeleting] = React.useState<string | null>(null)
+    const [syncing, setSyncing] = React.useState(false)
+    const syncAttempted = React.useRef(false)
 
     const role = user?.role ?? ""
     const canCreate = hasPermission(role, Module.TEAMS, Action.CREATE)
@@ -53,14 +88,42 @@ export default function TeamsPage() {
         }
     }, [user, isLoading, router, role])
 
+    const handleSync = React.useCallback(async () => {
+        setSyncing(true)
+        try {
+            const result = await TeamAPI.syncFromHierarchy()
+            if (result.teamsCreated > 0 || result.membersAdded > 0) {
+                showSuccess("Teams Synced", `${result.teamsCreated} team(s) created, ${result.membersAdded} member(s) added.`)
+            }
+        } catch { /* empty */ }
+        finally { setSyncing(false) }
+    }, [])
+
     const fetchTeams = React.useCallback(async () => {
         try {
             const data = await TeamAPI.list()
             const arr = data.results || data
-            setTeams(Array.isArray(arr) ? arr as Team[] : [])
+            const list = Array.isArray(arr) ? arr : []
+            const normalized = list.map(normalizeTeam)
+            setTeams(normalized)
+
+            // Auto-sync from hierarchy on first load if no teams exist
+            if (normalized.length === 0 && !syncAttempted.current && canCreate) {
+                syncAttempted.current = true
+                setSyncing(true)
+                try {
+                    await TeamAPI.syncFromHierarchy()
+                    // Re-fetch after sync
+                    const data2 = await TeamAPI.list()
+                    const arr2 = data2.results || data2
+                    const list2 = Array.isArray(arr2) ? arr2 : []
+                    setTeams(list2.map(normalizeTeam))
+                } catch { /* empty */ }
+                finally { setSyncing(false) }
+            }
         } catch { /* empty */ }
         finally { setLoading(false) }
-    }, [])
+    }, [canCreate])
 
     React.useEffect(() => { fetchTeams() }, [fetchTeams])
 
@@ -95,9 +158,19 @@ export default function TeamsPage() {
                 title="Teams"
                 description="Manage teams and their members"
                 actions={canCreate ? (
-                    <Button leftIcon={<PlusIcon />} onClick={() => { setEditingTeam(null); setFormOpen(true) }}>
-                        Create Team
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="secondary"
+                            leftIcon={<UpdateIcon />}
+                            loading={syncing}
+                            onClick={async () => { await handleSync(); fetchTeams() }}
+                        >
+                            Sync from Org Chart
+                        </Button>
+                        <Button leftIcon={<PlusIcon />} onClick={() => { setEditingTeam(null); setFormOpen(true) }}>
+                            Create Team
+                        </Button>
+                    </div>
                 ) : undefined}
             />
 
@@ -118,7 +191,14 @@ export default function TeamsPage() {
                         <Card
                             key={team.id}
                             className="p-5 hover:shadow-md transition-shadow cursor-pointer group"
-                            onClick={() => setDetailTeam(team)}
+                            onClick={async () => {
+                                try {
+                                    const full = await TeamAPI.get(team.id)
+                                    setDetailTeam(normalizeTeam(full))
+                                } catch {
+                                    setDetailTeam(team)
+                                }
+                            }}
                         >
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex-1 min-w-0">

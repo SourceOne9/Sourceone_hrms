@@ -9,6 +9,7 @@
  */
 import { NextResponse } from "next/server"
 import { salaryStore } from "@/lib/salary-store"
+import { toSnakeCase } from "@/lib/transform"
 
 function getDjangoBase(): string {
     return (
@@ -37,13 +38,16 @@ function generateTempPassword(): string {
 
 export async function POST(req: Request) {
     try {
-        const body = await req.json()
+        const rawBody = await req.json()
+        // Convert camelCase keys from frontend to snake_case for Django
+        const body = toSnakeCase(rawBody) as Record<string, unknown>
         const base = getDjangoBase()
         const headers = forwardHeaders(req)
 
-        const email = body.email
-        const firstName = body.first_name || ""
-        const lastName = body.last_name || ""
+
+        const email = (body.email || rawBody.email) as string
+        const firstName = (body.first_name || "") as string
+        const lastName = (body.last_name || "") as string
 
         if (!email) {
             return NextResponse.json(
@@ -79,12 +83,16 @@ export async function POST(req: Request) {
             // User creation network error — continue without user link
         }
 
-        // Extract salary before sending to Django (no salary field on model)
-        const salary = Number(body.salary) || 0
+        const salary = Number(body.salary || rawBody.salary) || 0
 
         // Step 2: Create Employee record, linked to User if created
         const employeePayload = { ...body }
-        delete employeePayload.salary // Django doesn't have salary field
+        // Remove fields Django Employee serializer doesn't accept
+        delete employeePayload.role
+        delete employeePayload.avatar_url
+        // Django uses lowercase status choices (active, pre_joining, etc.)
+        // New employees should default to Django's model default (pre_joining)
+        delete employeePayload.status
         if (userId) {
             employeePayload.user = userId
         }
@@ -97,9 +105,14 @@ export async function POST(req: Request) {
         })
 
         if (!empRes.ok) {
-            const errJson = await empRes.json().catch(() => ({}))
+            const errText = await empRes.text().catch(() => "")
+            let errJson: Record<string, unknown> = {}
+            try { errJson = JSON.parse(errText) } catch { /* not JSON */ }
+            const errObj = errJson.error as Record<string, unknown> | undefined
+            const detail = errObj?.detail || errJson.detail || errText || "Employee creation failed on Django"
+            console.error(`[create-employee] Django ${empRes.status}: ${errText.slice(0, 500)}`)
             return NextResponse.json(
-                { error: errJson.error || errJson },
+                { error: { detail } },
                 { status: empRes.status }
             )
         }

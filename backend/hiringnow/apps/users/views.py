@@ -116,3 +116,22 @@ class UserDetailView(APIView):
             )
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# POST /users/{id}/reset-password/ — admin resets another user's password
+class AdminResetPasswordView(APIView):
+
+    def get_permissions(self):
+        return [IsAuthenticated(), HasPermission('users.manage')]
+
+    def post(self, request, user_id):
+        password = request.data.get('password')
+        if not password or len(password) < 8:
+            return Response(
+                {'detail': 'Password must be at least 8 characters.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user = get_object_or_404(User, pk=user_id)
+        user.set_password(password)
+        user.save(update_fields=['password'])
+        return Response({'detail': 'Password reset successfully.'})

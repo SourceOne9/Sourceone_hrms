@@ -23,6 +23,8 @@ class RegisterView(APIView):
         result = serializer.save()
         user = result["user"]
         tenant = result["tenant"]
+        # Refresh user from DB so employee_profile reverse relation is available
+        user.refresh_from_db()
         token_serializer = CustomTokenObtainPairSerializer()
         tokens = token_serializer.get_token(user)
         refresh = tokens
@@ -68,6 +70,52 @@ class MeView(APIView):
         serializer.is_valid(raise_exception=True)
         updated_user = serializer.save()
         return Response(UserMeSerializer(updated_user, context={'request': request}).data)
+
+class TenantTokenRefreshView(TokenRefreshView):
+    """Refresh that extracts tenant from the refresh token before processing."""
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        from rest_framework_simplejwt.tokens import UntypedToken
+        from apps.tenants.models import Tenant
+        from config.tenant_context import set_current_tenant
+        raw_refresh = request.data.get('refresh', '')
+        if raw_refresh:
+            try:
+                token = UntypedToken(raw_refresh)
+                tenant_slug = token.get('tenant_slug')
+                if tenant_slug:
+                    tenant = Tenant.objects.using('default').filter(slug=tenant_slug).first()
+                    if tenant:
+                        set_current_tenant(tenant)
+                        request.tenant = tenant
+            except Exception:
+                pass  # let the parent view handle invalid tokens
+        return super().post(request, *args, **kwargs)
+
+
+class TenantTokenBlacklistView(TokenBlacklistView):
+    """Logout that extracts tenant from the refresh token before blacklisting."""
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        from rest_framework_simplejwt.tokens import UntypedToken
+        from apps.tenants.models import Tenant
+        from config.tenant_context import set_current_tenant
+        raw_refresh = request.data.get('refresh', '')
+        if raw_refresh:
+            try:
+                token = UntypedToken(raw_refresh)
+                tenant_slug = token.get('tenant_slug')
+                if tenant_slug:
+                    tenant = Tenant.objects.using('default').filter(slug=tenant_slug).first()
+                    if tenant:
+                        set_current_tenant(tenant)
+                        request.tenant = tenant
+            except Exception:
+                pass
+        return super().post(request, *args, **kwargs)
+
 
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]

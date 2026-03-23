@@ -225,8 +225,8 @@ function EmployeesContent() {
             const data = await EmployeeAPI.resetCredentials(emp.id)
             showSuccess("Credentials Reset", `New credentials generated for ${emp.firstName} ${emp.lastName}.`)
             setCredCard({ username: data.email, password: data.tempPassword, name: `${emp.firstName} ${emp.lastName}` })
-        } catch {
-            toast.error('An error occurred')
+        } catch (err: any) {
+            toast.error(err?.message || 'Failed to reset credentials')
         } finally {
             setIsResettingCreds(null)
         }
