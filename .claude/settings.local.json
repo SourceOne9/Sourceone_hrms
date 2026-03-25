@@ -402,7 +402,8 @@
       "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login/ -H \"Content-Type: application/json\" -d \"{\"\"email\"\":\"\"ashish.singh@msourceone.com\"\",\"\"password\"\":\"\"admin123\"\"}\")",
       "Bash(curl -s http://127.0.0.1:8000/api/v1/employees/profile/ -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0MjY2NzM4LCJpYXQiOjE3NzQyNjU4MzgsImp0aSI6IjAzZDNjNzM5NmY1YTQ2MDQ5YzU4NmNlZmIyYjc5NDNhIiwidXNlcl9pZCI6ImFiZWExZGE3LWE2MTQtNDBhYi05ZjdjLWI2M2YwMDk0ZWRhNCIsInRlbmFudF9pZCI6IjhmMmQzZmQ2LTY2NTMtNGVlMy05NjhiLTk0ODhiNGFlZDI0MiIsInRlbmFudF9zbHVnIjoiaHJtc2NvcnAiLCJtdXN0X2NoYW5nZV9wYXNzd29yZCI6ZmFsc2UsImVtcGxveWVlX2lkIjoiMTJiZTg2ZmQtNTNhYS00OTJhLTkyZmEtMjJiZmIyOTk4MWIzIn0.JJe1MfMTYw5bUcEbQ7nYIkceyfXgNncEp1IG3RO4exo\" -H \"X-Tenant-Slug: hrmscorp\")",
       "Bash(curl -s http://127.0.0.1:8000/api/v1/employees/profile/ -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0MjY2NzM4LCJpYXQiOjE3NzQyNjU4MzgsImp0aSI6IjAzZDNjNzM5NmY1YTQ2MDQ5YzU4NmNlZmIyYjc5NDNhIiwidXNlcl9pZCI6ImFiZWExZGE3LWE2MTQtNDBhYi05ZjdjLWI2M2YwMDk0ZWRhNCIsInRlbmFudF9pZCI6IjhmMmQzZmQ2LTY2NTMtNGVlMy05NjhiLTk0ODhiNGFlZDI0MiIsInRlbmFudF9zbHVnIjoiaHJtc2NvcnAiLCJtdXN0X2NoYW5nZV9wYXNzd29yZCI6ZmFsc2UsImVtcGxveWVlX2lkIjoiMTJiZTg2ZmQtNTNhYS00OTJhLTkyZmEtMjJiZmIyOTk4MWIzIn0.JJe1MfMTYw5bUcEbQ7nYIkceyfXgNncEp1IG3RO4exo' -H 'X-Tenant-Slug: hrmscorp')",
-      "Bash(find 'c:/Users/Ashish Singh/Desktop/Employee directory/components' -name TeamFormModal* -o -name TeamDetailModal*)"
+      "Bash(find 'c:/Users/Ashish Singh/Desktop/Employee directory/components' -name TeamFormModal* -o -name TeamDetailModal*)",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/health/)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Ashish Singh\\Desktop\\Employee directory\\app\\api\\reimbursements",
