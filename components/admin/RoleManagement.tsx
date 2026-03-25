@@ -62,7 +62,22 @@ export function RoleManagement() {
     const fetchRoles = React.useCallback(async () => {
         try {
             const data = await RoleAPI.list()
-            setRoles(extractArray<FunctionalRole>(data))
+            const raw = (data as any)?.results || extractArray<any>(data)
+            setRoles(raw.map((r: any) => ({
+                id: r.id,
+                name: r.name || r.slug || "",
+                description: r.description || null,
+                level: r.level ?? 0,
+                parentRoleId: r.parentRoleId || null,
+                isActive: r.isActive ?? r.is_active ?? true,
+                parentRole: r.parentRole || null,
+                capabilities: r.capabilities || r.permissionCodenames?.map((c: string) => {
+                    const [mod, action] = (c || "").split(".")
+                    return { id: c, module: mod?.toUpperCase() || "", actions: [action?.toUpperCase() || ""] }
+                }) || [],
+                _count: r._count || { employees: r.userCount || 0, childRoles: 0 },
+                permissionCount: r.permissionCount || 0,
+            })))
         } catch {
             toast.error("Failed to load roles")
         } finally {
@@ -73,7 +88,7 @@ export function RoleManagement() {
     const fetchEmployees = React.useCallback(async () => {
         try {
             const data = await EmployeeAPI.fetchEmployees(1, 500)
-            setEmployees(extractArray<EmployeeOption>(data))
+            setEmployees((data as any)?.results || extractArray<EmployeeOption>(data))
         } catch { /* non-critical */ }
     }, [])
 
@@ -155,13 +170,21 @@ export function RoleManagement() {
                                 )}
 
                                 <div className="flex flex-wrap gap-1.5">
-                                    {role.capabilities.slice(0, 4).map((cap) => (
-                                        <Badge key={cap.id} variant="default" size="sm">
-                                            {cap.module} ({cap.actions.length})
-                                        </Badge>
-                                    ))}
-                                    {role.capabilities.length > 4 && (
-                                        <Badge variant="neutral" size="sm">+{role.capabilities.length - 4} more</Badge>
+                                    {role.capabilities.length > 0 ? (
+                                        <>
+                                            {role.capabilities.slice(0, 4).map((cap, i) => (
+                                                <Badge key={cap.id || i} variant="default" size="sm">
+                                                    {cap.module} ({cap.actions?.length || 1})
+                                                </Badge>
+                                            ))}
+                                            {role.capabilities.length > 4 && (
+                                                <Badge variant="neutral" size="sm">+{role.capabilities.length - 4} more</Badge>
+                                            )}
+                                        </>
+                                    ) : (role as any).permissionCount > 0 ? (
+                                        <Badge variant="default" size="sm">{(role as any).permissionCount} permissions</Badge>
+                                    ) : (
+                                        <span className="text-xs text-text-4 italic">No capabilities defined</span>
                                     )}
                                 </div>
 
@@ -372,11 +395,28 @@ function RoleFormDialog({
             setDescription(role.description || "")
             setLevel(role.level)
             setParentRoleId(role.parentRoleId || "")
-            const caps: Record<string, Set<string>> = {}
-            for (const cap of role.capabilities) {
-                caps[cap.module] = new Set(cap.actions)
-            }
-            setCapabilities(caps)
+            // Load permissions from Django for existing role
+            api.get<any>(`/rbac/roles/${role.id}/permissions/`).then(({ data: permData }) => {
+                const perms: any[] = permData?.results || permData || []
+                const caps: Record<string, Set<string>> = {}
+                for (const p of perms) {
+                    const codename = p.codename || p.permissionCodename || p
+                    if (typeof codename === 'string' && codename.includes('.')) {
+                        const [mod, action] = codename.split('.')
+                        const moduleKey = mod.toUpperCase()
+                        if (!caps[moduleKey]) caps[moduleKey] = new Set()
+                        caps[moduleKey].add(action.toUpperCase())
+                    }
+                }
+                setCapabilities(caps)
+            }).catch(() => {
+                // Fallback to local capabilities if API fails
+                const caps: Record<string, Set<string>> = {}
+                for (const cap of role.capabilities) {
+                    caps[cap.module] = new Set(cap.actions)
+                }
+                setCapabilities(caps)
+            })
         } else {
             setName("")
             setDescription("")
@@ -600,10 +640,10 @@ function AssignDialog({
             const toRemove = [...assigned].filter((id) => !selected.has(id))
 
             if (toAdd.length > 0) {
-                await api.post("/roles/" + role.id + "/assign/", { employeeIds: toAdd })
+                await api.post("/rbac/roles/" + role.id + "/permissions/", { employeeIds: toAdd })
             }
             if (toRemove.length > 0) {
-                await apiClient("/roles/" + role.id + "/assign/", {
+                await apiClient("/rbac/roles/" + role.id + "/permissions/", {
                     method: "DELETE",
                     body: JSON.stringify({ employeeIds: toRemove }),
                 })

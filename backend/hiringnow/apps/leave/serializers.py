@@ -8,8 +8,10 @@ class LeaveSerializer(serializers.ModelSerializer):
     """Read serializer — includes all fields plus computed employee name."""
 
     employee_name = serializers.SerializerMethodField()
+    actioned_by_name = serializers.SerializerMethodField()
     type_display = serializers.CharField(source='get_type_display', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    workflow_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Leave
@@ -24,6 +26,9 @@ class LeaveSerializer(serializers.ModelSerializer):
             'status_display',
             'employee',
             'employee_name',
+            'actioned_by',
+            'actioned_by_name',
+            'workflow_status',
             'created_at',
             'updated_at',
         ]
@@ -31,6 +36,23 @@ class LeaveSerializer(serializers.ModelSerializer):
 
     def get_employee_name(self, obj):
         return f"{obj.employee.first_name} {obj.employee.last_name}"
+
+    def get_actioned_by_name(self, obj):
+        if obj.actioned_by:
+            return f"{obj.actioned_by.first_name} {obj.actioned_by.last_name}"
+        return None
+
+    def get_workflow_status(self, obj):
+        from apps.workflows.services import get_workflow_status
+        instance = get_workflow_status('LEAVE', str(obj.id))
+        if instance:
+            return {
+                'instance_id': str(instance.id),
+                'status': instance.status,
+                'current_step': instance.current_step,
+                'total_steps': instance.template.steps.count(),
+            }
+        return None
 
 
 class LeaveCreateSerializer(serializers.Serializer):

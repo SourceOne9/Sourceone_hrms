@@ -403,7 +403,20 @@
       "Bash(curl -s http://127.0.0.1:8000/api/v1/employees/profile/ -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0MjY2NzM4LCJpYXQiOjE3NzQyNjU4MzgsImp0aSI6IjAzZDNjNzM5NmY1YTQ2MDQ5YzU4NmNlZmIyYjc5NDNhIiwidXNlcl9pZCI6ImFiZWExZGE3LWE2MTQtNDBhYi05ZjdjLWI2M2YwMDk0ZWRhNCIsInRlbmFudF9pZCI6IjhmMmQzZmQ2LTY2NTMtNGVlMy05NjhiLTk0ODhiNGFlZDI0MiIsInRlbmFudF9zbHVnIjoiaHJtc2NvcnAiLCJtdXN0X2NoYW5nZV9wYXNzd29yZCI6ZmFsc2UsImVtcGxveWVlX2lkIjoiMTJiZTg2ZmQtNTNhYS00OTJhLTkyZmEtMjJiZmIyOTk4MWIzIn0.JJe1MfMTYw5bUcEbQ7nYIkceyfXgNncEp1IG3RO4exo\" -H \"X-Tenant-Slug: hrmscorp\")",
       "Bash(curl -s http://127.0.0.1:8000/api/v1/employees/profile/ -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0MjY2NzM4LCJpYXQiOjE3NzQyNjU4MzgsImp0aSI6IjAzZDNjNzM5NmY1YTQ2MDQ5YzU4NmNlZmIyYjc5NDNhIiwidXNlcl9pZCI6ImFiZWExZGE3LWE2MTQtNDBhYi05ZjdjLWI2M2YwMDk0ZWRhNCIsInRlbmFudF9pZCI6IjhmMmQzZmQ2LTY2NTMtNGVlMy05NjhiLTk0ODhiNGFlZDI0MiIsInRlbmFudF9zbHVnIjoiaHJtc2NvcnAiLCJtdXN0X2NoYW5nZV9wYXNzd29yZCI6ZmFsc2UsImVtcGxveWVlX2lkIjoiMTJiZTg2ZmQtNTNhYS00OTJhLTkyZmEtMjJiZmIyOTk4MWIzIn0.JJe1MfMTYw5bUcEbQ7nYIkceyfXgNncEp1IG3RO4exo' -H 'X-Tenant-Slug: hrmscorp')",
       "Bash(find 'c:/Users/Ashish Singh/Desktop/Employee directory/components' -name TeamFormModal* -o -name TeamDetailModal*)",
-      "Bash(curl -s http://127.0.0.1:8000/api/v1/health/)"
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/health/)",
+      "Read(//c/Users/Ashish/ Singh/Desktop/Employee/ directory/backend/hiringnow/apps/training/**)",
+      "Bash(grep -r feedback 'c:/Users/Ashish Singh/Desktop/Employee directory/app/\\(admin\\)' --include=*.tsx --include=*.ts -l)",
+      "Bash(grep -r feedback 'c:\\\\Users\\\\Ashish Singh\\\\Desktop\\\\Employee directory\\\\prisma' --include=*.prisma -A 5)",
+      "Bash(grep -rn proxyToDjango 'c:\\\\Users\\\\Ashish Singh\\\\Desktop\\\\Employee directory\\\\lib' --include=*.ts)",
+      "Read(//c/Users/**)",
+      "Bash(grep -E \"\\\\.\\(ts|js|py\\)$\")",
+      "Bash(grep -n \"Module.LEAVES\\\\|Action\" \"c:/Users/Ashish Singh/Desktop/Employee directory/app/leave/page.tsx\" \"c:/Users/Ashish Singh/Desktop/Employee directory/app/api/leaves/\"*)",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/leaves/ -H 'X-Tenant-Slug: hrmscorp')",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/kudos/ -H 'X-Tenant-Slug: hrmscorp' -H 'Authorization: Bearer test')",
+      "Bash(curl -sv http://127.0.0.1:8000/api/v1/kudos/ -H \"X-Tenant-Slug: hrmscorp\")",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/events/ -H 'X-Tenant-Slug: hrmscorp')",
+      "Bash(taskkill //F //IM python.exe)",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/admin/agent/dashboard/ -H 'X-Tenant-Slug: hrmscorp')"
     ],
     "additionalDirectories": [
       "c:\\Users\\Ashish Singh\\Desktop\\Employee directory\\app\\api\\reimbursements",
