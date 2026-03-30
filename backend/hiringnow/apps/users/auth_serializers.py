@@ -21,7 +21,11 @@ def _provision_tenant_background(tenant, validated_data, password):
     db_name = tenant.db_name
     try:
         _update_provisioning(tenant, "creating_database", 10)
-        create_tenant_database(db_name)
+        try:
+            create_tenant_database(db_name)
+        except Exception as db_err:
+            if "already exists" not in str(db_err):
+                raise  # Re-raise if it is not a "already exists" error
         _update_provisioning(tenant, "configuring", 20)
         if db_name not in django_settings.DATABASES:
             default = django_settings.DATABASES["default"].copy()
@@ -31,18 +35,20 @@ def _provision_tenant_background(tenant, validated_data, password):
         call_command("migrate", "--database", db_name, "--run-syncdb", verbosity=0)
         _update_provisioning(tenant, "creating_admin", 60)
         set_current_tenant(tenant)
-        user = User.objects.db_manager(db_name).create_user(
-            email=validated_data["email"], password=password,
-            first_name=validated_data.get("first_name", ""),
-            last_name=validated_data.get("last_name", ""),
-            is_tenant_admin=True,
-        )
-        _update_provisioning(tenant, "creating_profile", 70)
-        from apps.employees.models import Employee
-        Employee.objects.create(user=user, first_name=user.first_name or tenant.name,
-            last_name=user.last_name, email=user.email, designation="Admin",
-            status=Employee.Status.ACTIVE)
-        _update_provisioning(tenant, "seeding_rbac", 80)
+        from django.db import transaction as db_tx
+        with db_tx.atomic(using=db_name):
+            user = User.objects.db_manager(db_name).create_user(
+                email=validated_data["email"], password=password,
+                first_name=validated_data.get("first_name", ""),
+                last_name=validated_data.get("last_name", ""),
+                is_tenant_admin=True,
+            )
+            _update_provisioning(tenant, "creating_profile", 70)
+            from apps.employees.models import Employee
+            Employee.objects.using(db_name).create(user=user,
+                first_name=user.first_name or tenant.name,
+                last_name=user.last_name, email=user.email,
+                designation="Admin", status=Employee.Status.ACTIVE)
         try:
             call_command("seed_rbac", "--database", db_name, verbosity=0)
         except Exception:

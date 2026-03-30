@@ -164,14 +164,17 @@ export function AdminDashboard() {
                         </div>
                     ))
                 ) : (
-                    <>
-                        <div data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
-                        <div data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
-                        <div data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
-                        <div data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
-                        <div data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
-                        <div data-aos="fade-up" data-aos-delay="400"><DashboardStatCard label="Attrition Rate" value={(data?.stats?.attritionRate || 0).toFixed(1) + "%"} sub="overall attrition" badge={data?.stats?.attritionRate > 5 ? "Alert" : undefined} badgeType={data?.stats?.attritionRate > 5 ? "down" : undefined} icon={<span>📉</span>} /></div>
-                    </>
+                    [{id:"total",label:"Total Employees",value:data?.stats?.totalEmployees?.toString()||"0",sub:"across all departments",icon:"👥",delay:"0"},
+                     {id:"active",label:"Active Employees",value:data?.stats?.activeEmployees?.toString()||"0",sub:"currently working",icon:"✅",delay:"80"},
+                     {id:"notice",label:"On Notice",value:data?.stats?.onLeaveEmployees?.toString()||"0",sub:"serving notice period",icon:"🌴",delay:"160"},
+                     {id:"payroll",label:"Monthly Payroll",value:data?.stats?.monthlyPayroll?.toString()||"0",sub:`avg ₹${Math.round(data?.avgSalary||0).toLocaleString("en-IN")}/emp`,icon:"💵",delay:"240",isMoney:true},
+                     {id:"today",label:"Active Today",value:loginData?.activeTodayCount?.toString()||"0",sub:"logged in today",icon:"🔐",delay:"320"},
+                     {id:"attrition",label:"Attrition Rate",value:(data?.stats?.attritionRate||0).toFixed(1)+"%",sub:"overall attrition",icon:"📉",delay:"400",badge:data?.stats?.attritionRate>5?"Alert":undefined,badgeType:data?.stats?.attritionRate>5?"down":undefined},
+                    ].map(card => (
+                        <div key={card.id} data-aos="fade-up" data-aos-delay={card.delay}>
+                            <DashboardStatCard label={card.label} value={card.value} sub={card.sub} icon={<span>{card.icon}</span>} isMoney={card.isMoney} badge={card.badge} badgeType={card.badgeType as any} />
+                        </div>
+                    ))
                 )}
             </div>
 

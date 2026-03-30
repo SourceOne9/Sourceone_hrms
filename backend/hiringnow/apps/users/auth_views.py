@@ -86,19 +86,24 @@ class ProvisioningStatusView(APIView):
         if step == "completed":
             from .models import User
             from config.tenant_context import set_current_tenant
+            from django.db import transaction
             set_current_tenant(tenant)
-            user = User.objects.filter(is_tenant_admin=True).first()
-            if user:
-                token_serializer = CustomTokenObtainPairSerializer()
-                tokens = token_serializer.get_token(user)
-                data["access"] = str(tokens.access_token)
-                data["refresh"] = str(tokens)
-                data["user"] = {
-                    "id": str(user.id),
-                    "email": user.email,
-                    "tenant_id": str(tenant.id),
-                    "tenant_slug": tenant.slug,
-                }
+            try:
+                with transaction.atomic():
+                    user = User.objects.select_related("employee_profile").filter(is_tenant_admin=True).first()
+                    if user:
+                        token_serializer = CustomTokenObtainPairSerializer()
+                        tokens = token_serializer.get_token(user)
+                        data["access"] = str(tokens.access_token)
+                        data["refresh"] = str(tokens)
+                        data["user"] = {
+                            "id": str(user.id),
+                            "email": user.email,
+                            "tenant_id": str(tenant.id),
+                            "tenant_slug": tenant.slug,
+                        }
+            except Exception as token_err:
+                data["error"] = f"Token generation failed: {token_err}"
 
         resp = Response(data)
         # Set auth cookies if tokens are present

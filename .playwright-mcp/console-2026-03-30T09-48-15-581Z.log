@@ -1,0 +1,215 @@
+[     345ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[     444ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <RedirectBoundary>
+      <RedirectErrorBoundary router={{...}}>
+        <InnerLayoutRouter url="/signup" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+          <SegmentViewNode type="page" pagePath="signup/pag...">
+            <SegmentTrieNode>
+            <ClientPageRoot Component={function SignupPage} serverProvidedParams={{...}}>
+              <SignupPage params={Promise} searchParams={Promise}>
+                <SignupWizard>
+                  <div className="fixed inse...">
+                    <SignupBackground>
+                      <div aria-hidden="true" className="fixed inse...">
+                        <div>
+                        <div>
+                        <motion.div className="absolute r..." style={{width:"2.8...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "2.8634275176820068px"
+-                             width: "2.57044px"
++                             height: "1.8415445861478756px"
+-                             height: "2.61349px"
++                             left: "98.81989363485427%"
+-                             left: "99.04%"
++                             top: "63.61378526000745%"
+-                             top: "54.7247%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                        <motion.div className="absolute r..." style={{width:"1.3...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "1.327171355085354px"
+-                             width: "2.08794px"
++                             height: "1.2348351521916259px"
+-                             height: "2.97031px"
++                             left: "10.910500201871331%"
+-                             left: "31.5942%"
++                             top: "57.48689931877657%"
+-                             top: "25.2979%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                        <motion.div className="absolute r..." style={{width:"1.9...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "1.9036793643688064px"
+-                             width: "2.70896px"
++                             height: "1.6496270353926086px"
+-                             height: "2.06732px"
++                             left: "33.67432985576706%"
+-                             left: "98.2442%"
++                             top: "79.40056659027898%"
+-                             top: "42.3838%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                        <motion.div className="absolute r..." style={{width:"1.6...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "1.645352100041109px"
+-                             width: "2.95195px"
++                             height: "1.2632666467666718px"
+-                             height: "1.22395px"
++                             left: "82.8829649343983%"
+-                             left: "20.2125%"
++                             top: "51.570371819714666%"
+-                             top: "45.3221%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                        <motion.div className="absolute r..." style={{width:"1.1...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "1.1289953520458196px"
+-                             width: "2.08425px"
++                             height: "2.516176310866503px"
+-                             height: "1.11859px"
++                             left: "95.21776746001642%"
+-                             left: "49.5518%"
++                             top: "87.27355533134774%"
+-                             top: "12.0377%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                        <motion.div className="absolute r..." style={{width:"1.9...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "1.904750399512837px"
+-                             width: "2.85611px"
++                             height: "2.1420178400067336px"
+-                             height: "1.25827px"
++                             left: "9.278166358387342%"
+-                             left: "44.6306%"
++                             top: "55.19038475001614%"
+-                             top: "97.7693%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                        <motion.div className="absolute r..." style={{width:"1.0...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "1.0462995821174044px"
+-                             width: "2.33142px"
++                             height: "1.2588087282228961px"
+-                             height: "1.63673px"
++                             left: "36.13181427135055%"
+-                             left: "63.1544%"
++                             top: "81.54872234827386%"
+-                             top: "90.1342%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                        <motion.div className="absolute r..." style={{width:"1.1...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "1.1456699520465632px"
+-                             width: "2.75119px"
++                             height: "1.2622403498991839px"
+-                             height: "2.6872px"
++                             left: "26.157826735832302%"
+-                             left: "27.5293%"
++                             top: "76.60357213349602%"
+-                             top: "63.2065%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                        <motion.div className="absolute r..." style={{width:"2.9...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "2.9876642677390866px"
+-                             width: "1.20782px"
++                             height: "2.1573236286062096px"
+-                             height: "1.2445px"
++                             left: "76.70159334438242%"
+-                             left: "82.8397%"
++                             top: "42.358841473609175%"
+-                             top: "41.5516%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                        <motion.div className="absolute r..." style={{width:"1.4...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "1.4931703790257835px"
+-                             width: "1.959px"
++                             height: "1.900309379255047px"
+-                             height: "1.7748px"
++                             left: "21.81484786444695%"
+-                             left: "63.3298%"
++                             top: "83.4794752805773%"
+-                             top: "69.5333%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                        <motion.div className="absolute r..." style={{width:"1.1...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "1.1615440019523617px"
+-                             width: "2.849px"
++                             height: "2.5308921238894784px"
+-                             height: "1.67633px"
++                             left: "54.24240434473007%"
+-                             left: "86.4001%"
++                             top: "61.109700214241094%"
+-                             top: "44.3549%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                        <motion.div className="absolute r..." style={{width:"2.5...", ...}} animate={{y:[...], ...}} ...>
+                          <div
+                            className="absolute rounded-full bg-slate-300 dark:bg-slate-500"
+                            style={{
++                             width: "2.5216558199420884px"
+-                             width: "2.98806px"
++                             height: "1.7476895614406953px"
+-                             height: "2.28301px"
++                             left: "88.64679606614295%"
+-                             left: "32.2573%"
++                             top: "1.1082232062575081%"
+-                             top: "91.6057%"
+                            }}
+                            ref={function useMotionRef.useCallback}
+                          >
+                    ...
+          ...
+        ...
+ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[     476ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[    1899ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/roles/capabilities/:0
+[    1900ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/features/:0
+[    1906ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/permissions/:0

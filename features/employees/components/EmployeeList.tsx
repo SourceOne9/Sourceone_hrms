@@ -203,7 +203,7 @@ export const EmployeeList = React.memo(function EmployeeList({
                     <Button variant="secondary" size="sm" onClick={onImportClick} leftIcon={<DownloadIcon className="w-3.5 h-3.5 rotate-180" />}>
                         Import
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={onRelinkUsers} loading={isRelinkingUsers}>
+                    <Button variant="secondary" size="sm" onClick={onRelinkUsers} loading={isRelinkingUsers} className="hidden sm:inline-flex">
                         Repair Logins
                     </Button>
                     <Button variant="secondary" size="sm" onClick={onExportCSV} leftIcon={<DownloadIcon className="w-3.5 h-3.5" />}>
@@ -213,7 +213,7 @@ export const EmployeeList = React.memo(function EmployeeList({
                         PDF
                     </Button>
                     <Button onClick={onOpenCreateModal} leftIcon={<PlusIcon className="w-4 h-4" />}>
-                        Add Employee
+                        <span className="hidden sm:inline">Add Employee</span><span className="sm:hidden">Add</span>
                     </Button>
                 </>
             }

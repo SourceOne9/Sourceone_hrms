@@ -1,0 +1,179 @@
+[     509ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[     577ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[    2108ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/roles/capabilities/:0
+[    2113ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/permissions/:0
+[    2118ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[    2126ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/features/:0
+[    5182ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[    5185ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[    5190ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[    5199ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[    5216ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    5216ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    5217ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    5218ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    5219ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    5219ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    6481ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[    6482ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[    6504ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[    6506ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[   35259ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[   35263ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[   35264ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[   35269ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[   61969ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[   65192ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[   65194ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[   65204ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[   65208ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[   95401ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[   95402ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[   95811ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[   95817ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  122137ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  125200ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  125202ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  125210ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  125211ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  155230ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  155239ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  155267ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  155268ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  182979ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  185205ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  185210ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  185215ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  185220ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  215310ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  215321ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  215327ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  215334ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  241993ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  245196ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  245199ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  245219ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  245222ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  275240ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  275256ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  275258ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  275267ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  301987ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  305319ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  305322ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  306127ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  306128ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (403)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272

@@ -501,7 +501,12 @@
       "Bash(taskkill //F //FI \"IMAGENAME eq python.exe\" //FI \"WINDOWTITLE eq *runserver*\")",
       "Bash(pkill -f \"manage.py runserver\")",
       "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/register/ -H \"Content-Type: application/json\" -d \"{\"\"tenant_name\"\":\"\"CurlTest\"\",\"\"tenant_slug\"\":\"\"curl-test-99\"\",\"\"email\"\":\"\"admin@curltest99.com\"\",\"\"password\"\":\"\"CurlP@ss1\"\",\"\"first_name\"\":\"\"Curl\"\",\"\"last_name\"\":\"\"Test\"\"}\" --max-time 60 -w \"\\\\nHTTP:%{http_code} TIME:%{time_total}s\")",
-      "Bash(curl -s http://127.0.0.1:8000/api/v1/auth/register/status/async-360937/ --max-time 5)"
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/auth/register/status/async-360937/ --max-time 5)",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/auth/register/status/async-360937/ --max-time 10)",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/auth/register/status/final-test-42/ --max-time 5)",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/auth/register/status/livetest77/ --max-time 5)",
+      "mcp__plugin_playwright_playwright__browser_type",
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/auth/register/status/livetest88/ --max-time 5)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Ashish Singh\\Desktop\\Employee directory\\app\\api\\reimbursements",

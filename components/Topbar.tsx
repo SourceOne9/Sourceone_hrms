@@ -21,7 +21,7 @@ export function Topbar() {
   const router = useRouter()
 
   return (
-    <div className="h-topbar bg-glass-bg backdrop-blur-xl border-b border-border flex items-center px-7 gap-4 shrink-0 z-40 sticky top-0 transition-colors duration-300">
+    <div className="h-topbar bg-glass-bg backdrop-blur-xl border-b border-border flex items-center px-3 sm:px-7 gap-2 sm:gap-4 shrink-0 z-40 sticky top-0 transition-colors duration-300">
       {/* Search */}
       <SearchAutocomplete />
 

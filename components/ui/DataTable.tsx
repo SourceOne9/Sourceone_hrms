@@ -106,8 +106,8 @@ export function DataTable<TData, TValue>({
     return (
         <div className="space-y-4">
             {/* Toolbar */}
-            <div className="flex items-center gap-3 flex-wrap">
-                <div className="relative flex-1 max-w-[340px]">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
+                <div className="relative w-full sm:flex-1 sm:max-w-[340px]">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-4">
                         <MagnifyingGlassIcon className="w-4 h-4" />
                     </span>
@@ -144,7 +144,7 @@ export function DataTable<TData, TValue>({
                 ))}
 
                 {actions && (
-                    <div className="flex items-center gap-2 ml-auto">
+                    <div className="flex items-center gap-2 flex-wrap sm:ml-auto">
                         {actions}
                     </div>
                 )}

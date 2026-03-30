@@ -1,0 +1,905 @@
+[     562ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[     829ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[    8669ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    8671ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    8676ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    8678ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    8683ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    8685ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    8693ms] [ERROR] Each child in a list should have a unique "key" prop.%s%s See https://react.dev/link/warning-keys for more information. 
+
+Check the render method of `AdminDashboard`.  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[   88205ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   88395ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   95963ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   95964ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   95965ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   95965ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   95966ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   95966ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(100) or minHeight(100) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   95968ms] [ERROR] Each child in a list should have a unique "key" prop.%s%s See https://react.dev/link/warning-keys for more information. 
+
+Check the render method of `AdminDashboard`.  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  269696ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  273318ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  273322ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  273329ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  273335ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  303404ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  303410ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  303499ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  303501ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  329676ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  333370ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  333373ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  333384ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  333386ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  363358ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  363365ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  363376ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  363377ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  389739ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  393311ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  393315ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  393317ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  393323ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  423368ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  423375ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  423455ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  423457ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  449684ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  453331ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  453334ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  453338ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  453342ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  483368ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  483370ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  483378ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  483380ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  509708ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  513507ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  513510ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  513519ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  513522ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  543377ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  543381ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  543385ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  543387ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  569709ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  573407ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  573408ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  573416ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  573416ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  603348ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  603349ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  603359ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  603361ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  629676ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  633352ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  633354ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  633361ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  633364ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  663368ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  663373ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  663387ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  663390ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  689712ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  693366ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  693372ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  693376ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  693380ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:803:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  695198ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  695202ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  695216ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  695218ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  725148ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  725151ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  725172ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  725173ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  749701ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  755093ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  755096ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  755118ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  755123ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  785133ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  785137ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  785207ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  785209ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  809738ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  815123ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  815127ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  815130ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  815135ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  845193ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  845195ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  845203ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  845204ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  869724ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  875141ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  875142ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  875149ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  875150ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  905158ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  905161ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  905276ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  905277ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  929843ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  935139ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  935140ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  935286ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  935288ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  965145ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  965148ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  965169ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  965172ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  989721ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  995155ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  995156ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  995160ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  995166ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1025147ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1025148ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1025151ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1025154ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1050275ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1055199ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1055200ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1055209ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1055210ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1085257ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1085262ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1085264ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1085268ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1109719ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1115137ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1115143ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1115145ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1115146ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1145185ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1145189ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1145192ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1145196ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1169714ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1175161ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1175163ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1175172ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1175173ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1205158ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1205160ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1205166ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1205167ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1229727ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1235134ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1235135ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1235138ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1235141ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1265246ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1265252ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1265257ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1265258ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1289848ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1295144ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1295149ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1295186ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1295190ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1325165ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1325166ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1325171ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1325180ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1349733ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1355139ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1355145ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1355148ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1355151ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1385239ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1385242ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1385266ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1385267ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1409712ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1415134ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1415137ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1415149ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1415150ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1445193ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1445201ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1445205ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1445211ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1469718ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1475172ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1475175ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1475208ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1475211ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1505189ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1505196ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1505210ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1505212ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1513696ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Expected '</', got 'ident'
+  166 |                 ) : ([
+  167 |                         <div key="total" data-aos="fade-up" data-aos-delay="0"><Dashboard...
+> 168 |                         <div key="active" data-aos="fade-up" data-aos-delay="80"><Dashboa...
+      |                              ^^^
+  169 |                         <div key="notice" data-aos="fade-up" data-aos-delay="160"><Dashbo...
+  170 |                         <div key="payroll" data-aos="fade-up" data-aos-delay="240"><Dashb...
+  171 |                         <div key="today" data-aos="fade-up" data-aos-delay="320"><Dashboa...
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1513858ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Expected '</', got 'ident'
+  166 |                 ) : ([
+  167 |                         <div key="total" data-aos="fade-up" data-aos-delay="0"><Dashboard...
+> 168 |                         <div key="active" data-aos="fade-up" data-aos-delay="80"><Dashboa...
+      |                              ^^^
+  169 |                         <div key="notice" data-aos="fade-up" data-aos-delay="160"><Dashbo...
+  170 |                         <div key="payroll" data-aos="fade-up" data-aos-delay="240"><Dashb...
+  171 |                         <div key="today" data-aos="fade-up" data-aos-delay="320"><Dashboa...
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1529039ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Expected '</', got 'ident'
+  166 |                 ) : ([
+  167 |                         <div key="total" data-aos="fade-up" data-aos-delay="0"><Dashboard...
+> 168 |                         <div key="active" data-aos="fade-up" data-aos-delay="80"><Dashboa...
+      |                              ^^^
+  169 |                         <div key="notice" data-aos="fade-up" data-aos-delay="160"><Dashbo...
+  170 |                         <div key="payroll" data-aos="fade-up" data-aos-delay="240"><Dashb...
+  171 |                         <div key="today" data-aos="fade-up" data-aos-delay="320"><Dashboa...
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1529716ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1535117ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1535121ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1535130ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1535134ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1551127ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[ 1552043ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1552045ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1552100ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1552107ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1582109ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1582110ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1582118ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1582135ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1589726ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1612052ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1612055ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1612061ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1612064ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1642049ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1642051ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1642085ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1642086ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1649769ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1672033ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1672037ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1672087ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1672090ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1702111ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1702117ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1702122ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1702130ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1709722ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1732128ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1732134ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1732138ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1732140ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1741252ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1741257ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1741287ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1741297ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1769834ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1771227ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1771231ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1771234ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1771237ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1801213ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1801218ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1801227ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1801227ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1829766ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1831228ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1831231ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1831236ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1831238ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1861233ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1861237ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1861241ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1861242ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1889774ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1891262ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1891263ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1891298ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1891300ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1921253ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1921259ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1921274ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1921279ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1949805ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 1951219ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1951223ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1951240ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1951247ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1981210ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 1981211ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1981217ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 1981218ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 2009817ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[ 2011198ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[ 2011199ms] [ERROR] Dashboard logins fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 2011243ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[ 2011244ms] [ERROR] Dashboard stats fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js?id=%255Bproject%255D%252Fcomponents%252Fdashboard%252FAdminDashboard.tsx+%255Bapp-client%255D+%2528ecmascript%2529:62:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 2013340ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[ 2014465ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/teams/org-chart/:0
+[ 2014475ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/time-tracker/status/:0
+[ 2014477ms] [ERROR] TimeTracker status fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.status (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:2853:26) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 2014478ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/kudos/:0
+[ 2014482ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/employees/profile/:0
+[ 2014489ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/leaves/?per_page=100:0
+[ 2014517ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/agent/daily-report/?date=2026-03-30:0
+[ 2015826ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/attendance/?per_page=100:0
+[ 2015845ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/teams/org-chart/:0
+[ 2015865ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/kudos/:0
+[ 2015877ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/teams/:0
+[ 2015885ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/time-tracker/status/:0
+[ 2015886ms] [ERROR] TimeTracker status fetch failed: Error: Server returned non-JSON response (404)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async Object.status (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:2853:26) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
