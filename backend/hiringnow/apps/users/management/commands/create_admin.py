@@ -5,11 +5,26 @@ Usage:
     python manage.py create_admin --tenant-slug acme
     python manage.py create_admin --tenant-slug acme --email admin@acme.com --password Secret123!
 """
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.hashers import make_password
 
+import copy
 from apps.tenants.models import Tenant
 from config.tenant_context import set_current_tenant, clear_current_tenant
+
+
+def ensure_tenant_db(tenant):
+    """Dynamically register a tenant database connection if not already present."""
+    db_name = tenant.db_name
+    if db_name not in settings.DATABASES:
+        default_db = copy.deepcopy(settings.DATABASES["default"])
+        default_db["NAME"] = db_name
+        settings.DATABASES[db_name] = default_db
+    # Force Django to create the connection wrapper
+    from django.db import connections
+    if db_name not in connections.databases:
+        connections.databases[db_name] = settings.DATABASES[db_name]
 
 
 class Command(BaseCommand):
@@ -18,7 +33,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--tenant-slug", required=True, help="Slug of the tenant")
         parser.add_argument("--email", default="superadmin@emspro.com")
-        parser.add_argument("--password", default="Super@dmin2026!")
+        parser.add_argument("--password", required=True, help="Admin password (required, no default for security)")
         parser.add_argument("--name", default="Super Admin")
 
     def handle(self, *args, **options):
@@ -29,8 +44,9 @@ class Command(BaseCommand):
 
         tenant = Tenant.objects.using("default").filter(slug=slug).first()
         if not tenant:
-            raise CommandError(f"Tenant with slug '{slug}' not found.")
+            raise CommandError(f"Tenant with slug ''{slug}''' not found.")
 
+        ensure_tenant_db(tenant)
         set_current_tenant(tenant)
         db = tenant.db_name
 

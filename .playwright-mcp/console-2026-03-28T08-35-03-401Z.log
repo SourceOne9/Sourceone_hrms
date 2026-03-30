@@ -1,0 +1,80 @@
+[     109ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/:0
+[     369ms] Error: ./components/dashboard/AdminDashboard.tsx:174:14
+Parsing ecmascript source code failed
+  172 |                         <div key="stat-5" data-aos="fade-up" data-aos-delay="400"><DashboardStatCard label="Attrition Rate" value={(data?.stats?.attritionRate || 0).toFixed(1) + "%"} sub="overall attrition" badge={data?.stats?.attritionRate > 5 ? "Alert" : undefined} badgeType={data?.stats?.attritionRate > 5 ? "down" : undefined} icon={<span>📉</span>} /></div>
+  173 |                 </>)
+> 174 |             </div>
+      |              ^^^^^
+  175 |
+  176 |             {/* Recent Logins */}
+  177 |             {!loading && loginData?.recentLogins?.length > 0 && (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./components/dashboard/AdminDashboard.tsx:174:14)
+    at Object.getCompilationErrors (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\hot-reloader-turbopack.js:1008:59)
+    at DevBundlerService.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\lib\dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:706:42)
+    at DevServer.findPageComponents (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:676:43)
+    at async DevServer.renderErrorToResponseImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\base-server.js:1733:26)
+[     384ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:174:14
+Parsing ecmascript source code failed
+  172 |                         <div key="stat-5" data-aos="fade-up" data-aos-delay="400"><DashboardStatCard label="Attrition Rate" value={(data?.stats?.attritionRate || 0).toFixed(1) + "%"} sub="overall attrition" badge={data?.stats?.attritionRate > 5 ? "Alert" : undefined} badgeType={data?.stats?.attritionRate > 5 ? "down" : undefined} icon={<span>📉</span>} /></div>
+  173 |                 </>)
+> 174 |             </div>
+      |              ^^^^^
+  175 |
+  176 |             {/* Recent Logins */}
+  177 |             {!loading && loginData?.recentLogins?.length > 0 && (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[     457ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:174:14
+Parsing ecmascript source code failed
+  172 |                         <div key="stat-5" data-aos="fade-up" data-aos-delay="400"><DashboardStatCard label="Attrition Rate" value={(data?.stats?.attritionRate || 0).toFixed(1) + "%"} sub="overall attrition" badge={data?.stats?.attritionRate > 5 ? "Alert" : undefined} badgeType={data?.stats?.attritionRate > 5 ? "down" : undefined} icon={<span>📉</span>} /></div>
+  173 |                 </>)
+> 174 |             </div>
+      |              ^^^^^
+  175 |
+  176 |             {/* Recent Logins */}
+  177 |             {!loading && loginData?.recentLogins?.length > 0 && (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[   10481ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/:0
+[   10483ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/:0
+[   10743ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   11248ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://127.0.0.1:8000/api/v1/auth/me/:0
+[   11739ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0

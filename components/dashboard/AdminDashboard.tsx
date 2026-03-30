@@ -28,11 +28,11 @@ export function AdminDashboard() {
         try {
             if (isFirstLoad.current) setLoading(true)
             const [dashData, loginStats] = await Promise.all([
-                DashboardAPI.getStats(),
-                DashboardAPI.getLogins(),
+                DashboardAPI.getStats().catch((err) => { console.error("Dashboard stats fetch failed:", err); return null }),
+                DashboardAPI.getLogins().catch((err) => { console.error("Dashboard logins fetch failed:", err); return null }),
             ])
-            setData(dashData)
-            setLoginData(loginStats)
+            if (dashData) setData(dashData)
+            if (loginStats) setLoginData(loginStats)
         } catch (error) {
             console.error("Dashboard fetch error:", error)
         } finally {
@@ -53,6 +53,8 @@ export function AdminDashboard() {
                 if (interval) clearInterval(interval)
                 interval = null
             } else {
+                if (interval) clearInterval(interval)
+                interval = null
                 fetchDashboardData()
                 startPolling()
             }
@@ -246,7 +248,7 @@ export function AdminDashboard() {
                             </div>
                             <div className="flex-1 min-h-0 flex flex-col items-center justify-center relative">
                                 <div className="h-[160px] w-full relative">
-                                    <ResponsiveContainer width="100%" height="100%">
+                                    <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
                                         <PieChart>
                                             <Pie data={deptData} cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5} dataKey="value" stroke="none" cursor="pointer"
                                                 onClick={(data) => setSelectedDept(data.name === selectedDept ? null : data.name)}>
@@ -279,7 +281,7 @@ export function AdminDashboard() {
                         <Card data-aos="zoom-in" data-aos-delay="150" className="p-5 flex flex-col h-[340px]">
                             <div className="text-sm font-bold text-text flex items-center gap-2 mb-4">Hiring Trend</div>
                             <div className="flex-1 min-h-0 w-full">
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
                                     <AreaChart data={hiringData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}
                                         onClick={(e: any) => { if (e?.activePayload?.[0]) setSelectedMonth(e.activePayload[0].payload.month) }} style={{ cursor: "pointer" }}>
                                         <defs>
@@ -305,7 +307,7 @@ export function AdminDashboard() {
                         <Card data-aos="zoom-in" data-aos-delay="300" className="p-5 flex flex-col h-[340px]">
                             <div className="text-sm font-bold text-text flex items-center gap-2 mb-4">Salary Range</div>
                             <div className="flex-1 min-h-0 w-full">
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
                                     <BarChart data={salaryData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                                         <XAxis dataKey="range" {...axisStyle} tick={{ fontSize: 9, fill: "var(--text3)" }} dy={10} />
                                         <Tooltip cursor={{ fill: "var(--bg2)", opacity: 0.4 }} contentStyle={tooltipStyle.contentStyle} labelStyle={{ display: "none" }} itemStyle={tooltipStyle.itemStyle}

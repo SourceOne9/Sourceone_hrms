@@ -8,8 +8,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.rbac.permissions import HasPermission
-from apps.employees.models import Employee, EmploymentType
+from apps.employees.models import Employee, EmployeeEducation, EmploymentType
 from apps.teams.services import sync_employee_team
+from apps.users.models import User
 from apps.employees.serializers import (
     EmployeeSerializer,
     EmployeeCreateSerializer,
@@ -113,6 +114,13 @@ class EmployeeListCreateView(APIView):
                 employee.user = user
                 employee.save(update_fields=['user'])
 
+                # Assign default RBAC role (viewer; signal upgrades to team_lead if manager)
+                try:
+                    from apps.rbac.services import auto_assign_default_role
+                    auto_assign_default_role(user)
+                except Exception:
+                    pass
+
         # Auto-create/update team if employee has a manager
         if employee.reporting_to:
             sync_employee_team(employee)
@@ -204,6 +212,59 @@ class EmployeeCredentialsView(APIView):
         })
 
 
+class EmployeeRelinkUsersView(APIView):
+    """POST /employees/relink-users/ — link orphan employees to users by email."""
+
+    def get_permissions(self):
+        return [IsAuthenticated(), HasPermission('employees.manage')]
+
+    def post(self, request):
+        relinked = []
+        skipped = []
+
+        employees = Employee.objects.filter(
+            user__isnull=True,
+            deleted_at__isnull=True,
+        ).exclude(email='')
+
+        for employee in employees:
+            user = User.objects.filter(email__iexact=employee.email).first()
+            if not user:
+                skipped.append({
+                    'employee_id': str(employee.id),
+                    'email': employee.email,
+                    'reason': 'No matching user found',
+                })
+                continue
+
+            existing_employee = Employee.objects.filter(
+                user=user,
+                deleted_at__isnull=True,
+            ).exclude(pk=employee.pk).first()
+            if existing_employee:
+                skipped.append({
+                    'employee_id': str(employee.id),
+                    'email': employee.email,
+                    'reason': f'User already linked to employee {existing_employee.employee_code or existing_employee.id}',
+                })
+                continue
+
+            employee.user = user
+            employee.save(update_fields=['user', 'updated_at'])
+            relinked.append({
+                'employee_id': str(employee.id),
+                'user_id': str(user.id),
+                'email': employee.email,
+            })
+
+        return Response({
+            'relinked_count': len(relinked),
+            'skipped_count': len(skipped),
+            'relinked': relinked,
+            'skipped': skipped,
+        })
+
+
 # ── Manager List ─────────────────────────────────────────────────────
 
 class ManagerListView(APIView):
@@ -231,7 +292,7 @@ class EmployeeMyProfileView(APIView):
         try:
             return Employee.objects.select_related(
                 'employment_type', 'reporting_to', 'department_ref',
-            ).prefetch_related('profile', 'address_info', 'banking').get(
+            ).prefetch_related('profile', 'address_info', 'banking', 'assets').get(
                 user=user, deleted_at__isnull=True,
             )
         except Employee.DoesNotExist:
@@ -258,3 +319,124 @@ class EmployeeMyProfileView(APIView):
         serializer.is_valid(raise_exception=True)
         updated = serializer.save()
         return Response(EmployeeProfileFlatSerializer(updated).data)
+
+
+# -- Onboarding Submission -----------------------------------------------
+
+class EmployeeOnboardingView(APIView):
+    """
+    GET  /employees/onboarding/ -- get onboarding status + prefilled data
+    POST /employees/onboarding/ -- submit onboarding data and mark complete
+    """
+    permission_classes = [IsAuthenticated]
+
+    def _get_employee(self, user):
+        try:
+            return Employee.objects.select_related(
+                'employment_type', 'reporting_to', 'department_ref',
+            ).prefetch_related('profile', 'address_info', 'banking', 'educations').get(
+                user=user, deleted_at__isnull=True,
+            )
+        except Employee.DoesNotExist:
+            return None
+
+    def get(self, request):
+        employee = self._get_employee(request.user)
+        if not employee:
+            return Response(
+                {'detail': 'No employee profile linked to this account.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        data = EmployeeProfileFlatSerializer(employee).data
+        data['onboarding_status'] = employee.onboarding_status
+        return Response(data)
+
+    def post(self, request):
+        employee = self._get_employee(request.user)
+        if not employee:
+            return Response(
+                {'detail': 'No employee profile linked to this account.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        payload = request.data
+        with transaction.atomic():
+            # 1. Update core employee fields
+            for field in ('phone',):
+                if field in payload:
+                    setattr(employee, field, payload[field])
+
+            # 2. Update EmployeeProfile
+            from apps.employees.models import EmployeeProfile as EmpProfile
+            profile_fields = {
+                'date_of_birth', 'gender', 'blood_group', 'nationality',
+                'marital_status', 'religion', 'caste', 'father_name',
+                'mother_name', 'spouse_name',
+                'emergency_contact_name', 'emergency_contact_phone',
+                'emergency_contact_relation',
+                'passport_number', 'passport_expiry',
+                'previous_company', 'previous_designation',
+                'previous_experience_years', 'total_experience_years',
+            }
+            profile_data = {k: v for k, v in payload.items() if k in profile_fields and v not in (None, '')}
+            if profile_data:
+                EmpProfile.objects.update_or_create(
+                    employee=employee, defaults=profile_data,
+                )
+
+            # 3. Update EmployeeAddress
+            from apps.employees.models import EmployeeAddress
+            address_fields = {
+                'contact_address', 'contact_city', 'contact_state', 'contact_pincode',
+                'contact_country',
+                'permanent_address', 'permanent_city', 'permanent_state', 'permanent_pincode',
+                'permanent_country',
+            }
+            address_data = {k: v for k, v in payload.items() if k in address_fields and v not in (None, '')}
+            if address_data:
+                EmployeeAddress.objects.update_or_create(
+                    employee=employee, defaults=address_data,
+                )
+
+            # 4. Update EmployeeBanking
+            from apps.employees.models import EmployeeBanking
+            banking_fields = {
+                'bank_name', 'bank_account_number', 'bank_branch', 'ifsc_code',
+                'pf_account_number', 'aadhaar_number', 'pan_number',
+            }
+            banking_data = {k: v for k, v in payload.items() if k in banking_fields and v not in (None, '')}
+            if banking_data:
+                EmployeeBanking.objects.update_or_create(
+                    employee=employee, defaults=banking_data,
+                )
+
+            # 5. Save education records
+            educations = payload.get('educations', [])
+            if isinstance(educations, list):
+                # Replace all: delete old, create new
+                employee.educations.all().delete()
+                for edu in educations:
+                    if edu.get('degree') and edu.get('institution'):
+                        EmployeeEducation.objects.create(
+                            employee=employee,
+                            degree=edu['degree'],
+                            institution=edu['institution'],
+                            field_of_study=edu.get('field_of_study', ''),
+                            start_year=edu.get('start_year'),
+                            end_year=edu.get('end_year'),
+                            grade=edu.get('grade', ''),
+                        )
+
+            # 6. Mark onboarding complete
+            employee.onboarding_status = Employee.OnboardingStatus.COMPLETED
+            employee.onboarding_completed_at = timezone.now()
+            if employee.status == Employee.Status.PRE_JOINING:
+                employee.status = Employee.Status.ACTIVE
+                employee.joined_at = timezone.now()
+            employee.save()
+
+        employee.refresh_from_db()
+        return Response({
+            'detail': 'Onboarding completed successfully.',
+            'onboarding_status': employee.onboarding_status,
+        })

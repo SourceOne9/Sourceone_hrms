@@ -205,7 +205,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'login': '5/min',
-        'register': '3/hour',
+        'register': '10/hour',
         'general': '1000/hour',
     },
 }

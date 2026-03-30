@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase"
-import { getServerSession } from "@/lib/auth-server"
+import { withAuth, type AuthContext } from "@/lib/security"
+import { Module, Action } from "@/lib/permissions"
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
 const ALLOWED_MIME_TYPES = [
@@ -16,13 +17,8 @@ const ALLOWED_MIME_TYPES = [
     "text/csv",
 ]
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request, _context: AuthContext) {
     try {
-        const session = await getServerSession()
-        if (!session) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
         const formData = await req.formData()
         const file = formData.get("file") as File
         const bucket = formData.get("bucket") as string
@@ -53,6 +49,33 @@ export async function POST(req: Request) {
             )
         }
 
+
+    // Enterprise security: validate file content matches declared MIME type via magic bytes
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const MAGIC_SIGNATURES: Record<string, number[][]> = {
+        "image/jpeg": [[0xFF, 0xD8, 0xFF]],
+        "image/png": [[0x89, 0x50, 0x4E, 0x47]],
+        "image/gif": [[0x47, 0x49, 0x46, 0x38]],
+        "image/webp": [[0x52, 0x49, 0x46, 0x46]], // RIFF header
+        "application/pdf": [[0x25, 0x50, 0x44, 0x46]], // %PDF
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [[0x50, 0x4B, 0x03, 0x04]], // PK (ZIP)
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [[0x50, 0x4B, 0x03, 0x04]], // PK (ZIP)
+        "application/msword": [[0xD0, 0xCF, 0x11, 0xE0]], // OLE2
+        "application/vnd.ms-excel": [[0xD0, 0xCF, 0x11, 0xE0], [0x50, 0x4B, 0x03, 0x04]], // OLE2 or ZIP
+    }
+
+    const expectedSigs = MAGIC_SIGNATURES[file.type]
+    if (expectedSigs && buffer.length >= 4) {
+        const matchesAny = expectedSigs.some((sig) =>
+            sig.every((byte, i) => buffer[i] === byte)
+        )
+        if (!matchesAny) {
+            return NextResponse.json(
+                { error: "File content does not match declared type. Possible file spoofing detected." },
+                { status: 422 }
+            )
+        }
+    }
         // Create a unique filename using crypto-safe random
         const fileExt = file.name.split(".").pop()?.toLowerCase() || "bin"
         const fileName = `${crypto.randomUUID()}.${fileExt}`
@@ -94,3 +117,5 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }
+
+export const POST = withAuth({ module: Module.DOCUMENTS, action: Action.CREATE }, handlePOST)

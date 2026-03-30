@@ -26,6 +26,25 @@ from .auth_serializers import (
     ChangePasswordSerializer,
 )
 
+import os as _os
+
+# -- httpOnly cookie helpers ------------------------------------------------
+_ACCESS_MAX_AGE = 15 * 60
+_REFRESH_MAX_AGE = 7 * 24 * 60 * 60
+_COOKIE_SAMESITE = 'Lax'
+
+def _set_auth_cookies(response, access_token, refresh_token=None):
+    secure = _os.environ.get('COOKIE_SECURE', 'true').lower() != 'false'
+    response.set_cookie('access_token', access_token, max_age=_ACCESS_MAX_AGE, httponly=True, secure=secure, samesite=_COOKIE_SAMESITE, path='/')
+    if refresh_token:
+        response.set_cookie('refresh_token', refresh_token, max_age=_REFRESH_MAX_AGE, httponly=True, secure=secure, samesite=_COOKIE_SAMESITE, path='/api/v1/auth/')
+    return response
+
+def _clear_auth_cookies(response):
+    response.delete_cookie('access_token', path='/')
+    response.delete_cookie('refresh_token', path='/api/v1/auth/')
+    return response
+
 class RegisterView(APIView):
     permission_classes = [AllowAny]
     throttle_classes = [RegisterRateThrottle]
@@ -34,27 +53,58 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = serializer.save()
-        user = result["user"]
         tenant = result["tenant"]
-        # Refresh user from DB so employee_profile reverse relation is available
-        user.refresh_from_db()
-        token_serializer = CustomTokenObtainPairSerializer()
-        tokens = token_serializer.get_token(user)
-        refresh = tokens
-        access = refresh.access_token
+        # Async: tenant row created instantly, DB provisioning runs in background
         return Response(
             {
-                "access": str(access),
-                "refresh": str(refresh),
-                "user": {
+                "status": "provisioning",
+                "tenant_id": str(tenant.id),
+                "tenant_slug": tenant.slug,
+            },
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+
+class ProvisioningStatusView(APIView):
+    """Poll this endpoint to check tenant provisioning progress."""
+    permission_classes = [AllowAny]
+    throttle_classes = []  # No throttle on status checks
+
+    def get(self, request, tenant_slug):
+        from apps.tenants.models import Tenant
+        tenant = Tenant.objects.using("default").filter(slug=tenant_slug).first()
+        if not tenant:
+            return Response({"error": "Tenant not found"}, status=status.HTTP_404_NOT_FOUND)
+        provisioning = tenant.settings.get("provisioning", {})
+        step = provisioning.get("step", "unknown")
+        progress = provisioning.get("progress", 0)
+        error = provisioning.get("error")
+
+        data = {"step": step, "progress": progress, "error": error}
+
+        # If completed, also return JWT tokens so the frontend can auto-login
+        if step == "completed":
+            from .models import User
+            from config.tenant_context import set_current_tenant
+            set_current_tenant(tenant)
+            user = User.objects.filter(is_tenant_admin=True).first()
+            if user:
+                token_serializer = CustomTokenObtainPairSerializer()
+                tokens = token_serializer.get_token(user)
+                data["access"] = str(tokens.access_token)
+                data["refresh"] = str(tokens)
+                data["user"] = {
                     "id": str(user.id),
                     "email": user.email,
                     "tenant_id": str(tenant.id),
                     "tenant_slug": tenant.slug,
-                },
-            },
-            status=status.HTTP_201_CREATED,
-        )
+                }
+
+        resp = Response(data)
+        # Set auth cookies if tokens are present
+        if "access" in data:
+            resp = _set_auth_cookies(resp, data["access"], data.get("refresh"))
+        return resp
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -69,7 +119,9 @@ class LoginView(APIView):
         email = request.data.get('email')
         if email:
             User.objects.filter(email=email).update(last_login_at=timezone.now())
-        return Response(serializer.validated_data)
+        data = serializer.validated_data
+        response = Response(data)
+        return _set_auth_cookies(response, data["access"], data["refresh"])
 
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -93,7 +145,9 @@ class TenantTokenRefreshView(TokenRefreshView):
         from rest_framework_simplejwt.tokens import UntypedToken
         from apps.tenants.models import Tenant
         from config.tenant_context import set_current_tenant
-        raw_refresh = request.data.get('refresh', '')
+        raw_refresh = request.data.get('refresh', '') or request.COOKIES.get('refresh_token', '')
+        if raw_refresh and not request.data.get('refresh'):
+            request._full_data = {**request.data, 'refresh': raw_refresh}
         if raw_refresh:
             try:
                 token = UntypedToken(raw_refresh)
@@ -105,7 +159,10 @@ class TenantTokenRefreshView(TokenRefreshView):
                         request.tenant = tenant
             except Exception as e:
                 logger.warning("Failed to extract tenant for refresh: %s", str(e))
-        return super().post(request, *args, **kwargs)
+        result = super().post(request, *args, **kwargs)
+        if result.status_code == 200 and result.data.get('access'):
+            _set_auth_cookies(result, result.data['access'], result.data.get('refresh'))
+        return result
 
 
 class TenantTokenBlacklistView(TokenBlacklistView):
@@ -117,7 +174,9 @@ class TenantTokenBlacklistView(TokenBlacklistView):
         from rest_framework_simplejwt.tokens import UntypedToken
         from apps.tenants.models import Tenant
         from config.tenant_context import set_current_tenant
-        raw_refresh = request.data.get('refresh', '')
+        raw_refresh = request.data.get('refresh', '') or request.COOKIES.get('refresh_token', '')
+        if raw_refresh and not request.data.get('refresh'):
+            request._full_data = {**request.data, 'refresh': raw_refresh}
         if raw_refresh:
             try:
                 token = UntypedToken(raw_refresh)
@@ -129,7 +188,9 @@ class TenantTokenBlacklistView(TokenBlacklistView):
                         request.tenant = tenant
             except Exception as e:
                 logger.warning("Failed to extract tenant for blacklist: %s", str(e))
-        return super().post(request, *args, **kwargs)
+        result = super().post(request, *args, **kwargs)
+        _clear_auth_cookies(result)
+        return result
 
 
 class ChangePasswordView(APIView):
@@ -153,4 +214,5 @@ class ChangePasswordView(APIView):
                 token.blacklist()
             except Exception:
                 pass  # token already invalid or blacklist not configured — non-fatal
-        return Response({'detail': 'Password changed successfully. Please log in again.'}, status=status.HTTP_200_OK)
+        response = Response({'detail': 'Password changed successfully. Please log in again.'}, status=status.HTTP_200_OK)
+        return _clear_auth_cookies(response)

@@ -2,7 +2,7 @@
 
 ## Overview
 
-EMS Pro is a multi-tenant HRMS with a **Next.js 16 / React 19 / TailwindCSS 3.4** frontend and a **Django 5.1 + Django REST Framework** backend (`backend/`) using DB-per-tenant PostgreSQL isolation, SimpleJWT authentication, and dynamic RBAC. The system has 7 roles, 18 modules (63 permission codenames), 130+ API routes, 83 database models (69 Prisma + 14 Django-only), AI-assisted workflows, a multi-step approval workflow engine, and a desktop agent telemetry/reporting pipeline. 13 of 18 modules are fully migrated to Django; 5 remain partial (Payroll, Feedback, Reports, Settings, Dashboard).
+EMS Pro is a multi-tenant HRMS with a **Next.js 16 / React 19 / TailwindCSS 3.4** frontend and a **Django 6.0 + Django REST Framework** backend (`backend/`) using DB-per-tenant PostgreSQL isolation, SimpleJWT authentication, and dynamic RBAC. The system has 7 roles, 18 modules (63 permission codenames), 142 API route handlers, 85+ database models, AI-assisted workflows, a multi-step approval workflow engine, and a desktop agent telemetry/reporting pipeline. 18 of 18 modules are fully migrated to Django (100% complete).
 
 ---
 
@@ -42,7 +42,7 @@ graph TB
     end
 
     subgraph External Services
-        Gemini["Gemini 2.5 Flash"]
+        Gemini["Gemini 2.0 Flash"]
         Resend["Resend Email"]
     end
 
@@ -77,7 +77,7 @@ graph TB
 
 ## API Layer
 
-The repository currently contains 130+ route handlers.
+The repository currently contains 142 route handlers.
 
 ### Main route groups
 
@@ -184,7 +184,7 @@ Actions:
 
 ## Database
 
-The current Prisma schema has **69 models** and **46 enums**. Django adds 14 additional models not in Prisma (8 agent, 4 performance, 2 team), for a total of **83 models**.
+The Django backend now hosts 30 domain apps with their own models (72+ Django models). Combined with remaining Prisma models (retained for legacy/local-only use), the total model count exceeds **85 models** across both systems.
 
 ### Core HR models
 
@@ -194,6 +194,8 @@ The current Prisma schema has **69 models** and **46 enums**. Django adds 14 add
 - `EmployeeProfile`
 - `EmployeeAddress`
 - `EmployeeBanking`
+- `EmployeeEducation`
+- `EmploymentType`
 - `Department`
 - `Team`
 - `TeamMember`
@@ -203,15 +205,26 @@ The current Prisma schema has **69 models** and **46 enums**. Django adds 14 add
 - `Attendance`
 - `TimeSession`
 - `BreakEntry`
+- `Shift`
+- `ShiftAssignment`
+- `AttendancePolicy`
+- `Holiday`
+- `AttendanceRegularization`
 - `Leave`
 - `Payroll`
 - `ProvidentFund`
+- `PayrollComplianceConfig`
+- `TaxSlab`
+- `PayrollAudit`
 - `Training`
+- `TrainingEnrollment`
 - `Asset`
 - `Document`
 - `Ticket`
 - `Resignation`
+- `Reimbursement`
 - `CalendarEvent`
+- `EmployeeFeedback`
 
 ### Workflow and reporting
 
@@ -232,13 +245,29 @@ The current Prisma schema has **69 models** and **46 enums**. Django adds 14 add
 - `Appraisal` — Annual and six-monthly appraisals linked to review cycles
 - `PIP` — Performance improvement plans (60-day, 90-day)
 
+### RBAC and Roles (Django)
+
+- `Role` — System roles with slug identifiers
+- `RolePermission` — Permission-role mappings (63 codenames)
+- `UserRole` — User-role M2M assignments
+- `FunctionalRole` — Functional roles (Manager, Lead, etc.)
+- `RoleCapability` — Capabilities per functional role
+- `EmployeeFunctionalRole` — Functional role assignments
+
+### Tenants (Django — Registry DB)
+
+- `Tenant` — Tenant/company record with DB name and slug
+- `Permission` — Permission registry (63 codenames)
+- `FeatureFlag` — Feature flag catalog (14 flags)
+- `TenantFeature` — Per-tenant feature flag overrides
+
 ### AI and monitoring
 
 - `PerformanceMetrics`
 - `WeeklyScores`
 - `AgentExecutionLogs`
-- `Notifications`
-- `AdminAlerts`
+- `Notification`
+- `AdminAlert`
 
 ### Agent tracking (Django)
 
@@ -354,7 +383,7 @@ The new backend follows the HiringNow platform architecture:
 | `apps.rbac` | Dynamic roles, permissions, UserRole. `seed_rbac` command: 7 roles, 63 codenames, 18 modules | Extended |
 | `apps.employees` | Employee CRUD + sub-profiles (Profile, Address, Banking) | Extended |
 | `apps.departments` | Department CRUD with employee count guards | New |
-| `apps.dashboard` | Stats API (department split, status counts, salary, logins) | New |
+| `apps.dashboard` | Stats API (department split, status counts, salary, logins) | Done |
 | `apps.features` | Feature flags per tenant. `seed_features` command: 14 module flags | Extended |
 | `apps.audit` | AuditLog model + REST API. Receives events from Next.js `auditLog()` | New |
 | `apps.performance` | Source One performance module: ReviewCycle, MonthlyReview, Appraisal, PIP. 14 endpoints with RBAC + digital signatures + 3-tier row-level scoping | New |
@@ -368,6 +397,13 @@ The new backend follows the HiringNow platform architecture:
 | --- | --- |
 | `python manage.py seed_rbac --tenant-slug <slug>` | Seed 63 permission codenames + 7 roles in tenant DB |
 | `python manage.py seed_features` | Seed 14 module feature flags in registry DB |
+| `python manage.py create_admin` | Create admin user |
+| `python manage.py seed_agent_data` | Seed agent test data |
+| `python manage.py cleanup_load_test` | Clean up load test data |
+| `python manage.py export_snapshot` | Export employee data snapshot |
+| `python manage.py import_snapshot` | Import employee data snapshot |
+| `python manage.py sla_worker` | SLA worker background job |
+| `python manage.py migrate_from_prisma` | Migrate data from Prisma ORM |
 
 ### API Endpoints (Django)
 
@@ -383,6 +419,8 @@ The new backend follows the HiringNow platform architecture:
 | `/api/v1/employees/{id}/` | GET/PUT/DELETE | Detail / Update / Soft-delete |
 | `/api/v1/employees/{id}/credentials/` | POST | Reset password, return temp_password |
 | `/api/v1/employees/managers/` | GET | Active employees for manager dropdown |
+| `/api/v1/employees/onboarding/` | GET/POST | Employee onboarding status and completion |
+| `/api/v1/employees/relink-users/` | POST | Relink user accounts to employees |
 | `/api/v1/departments/` | GET/POST | List / Create department |
 | `/api/v1/departments/{id}/` | GET/DELETE | Detail / Delete (guarded) |
 | `/api/v1/dashboard/` | GET | Dashboard aggregated stats |
@@ -414,6 +452,7 @@ The new backend follows the HiringNow platform architecture:
 | `/api/v1/workflows/templates/{id}/` | GET/PUT/DELETE | Template detail/update/delete |
 | `/api/v1/workflows/instances/` | GET/POST | Workflow instance CRUD |
 | `/api/v1/workflows/instances/{id}/` | GET | Instance detail |
+| `/api/v1/rbac/assign-default-roles/` | POST | Bulk assign default roles to users |
 | `/api/v1/workflows/instances/{id}/action/` | POST | Approve/reject/return step |
 
 ### Data Migration

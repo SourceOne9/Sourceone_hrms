@@ -16,6 +16,7 @@ export type EmployeeApiData = {
     dateOfJoining: string
     salary: number
     status: string
+    onboardingStatus?: string
     managerId?: string | null
     avatarUrl?: string | null
     department?: Department

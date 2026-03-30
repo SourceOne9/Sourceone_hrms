@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/DropdownMenu"
 
 export function Topbar() {
-  const { user, logout } = useAuth()
+  const { user, isLoading, logout } = useAuth()
   const router = useRouter()
 
   return (
@@ -37,14 +37,18 @@ export function Topbar() {
               aria-label="User menu"
               className="rounded-full border-2 border-transparent transition-all duration-200 shadow-glow hover:border-accent hover:scale-105 outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
-              <Avatar name={user?.name || "User"} src={user?.avatar} size="default" />
+              {isLoading ? (
+                <div className="w-9 h-9 rounded-full bg-muted animate-pulse" />
+              ) : (
+                <Avatar name={user?.name || "User"} src={user?.avatar} size="default" />
+              )}
             </button>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-[220px]">
             <DropdownMenuLabel>
               <div className="flex flex-col">
-                <span className="text-sm font-semibold text-text">{user?.name || "User"}</span>
+                <span className="text-sm font-semibold text-text">{user?.name || ""}</span>
                 <span className="text-xs text-text-3 font-normal">{user?.email || ""}</span>
               </div>
             </DropdownMenuLabel>

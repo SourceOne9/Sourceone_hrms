@@ -8,40 +8,59 @@
  * POST → { employeeId, salary } or { entries: [{ employeeId, salary }] }
  */
 import { NextResponse } from "next/server"
+import { z } from "zod"
 import { salaryStore } from "@/lib/salary-store"
+import { withAuth, AuthContext } from "@/lib/security"
+import { Module, Action } from "@/lib/permissions"
 
-export async function GET() {
+const salarySingleSchema = z.object({
+    employeeId: z.string().uuid(),
+    salary: z.union([z.number(), z.string()]),
+})
+
+const salaryBatchSchema = z.object({
+    entries: z.array(z.object({
+        employeeId: z.string().uuid(),
+        salary: z.union([z.number(), z.string()]),
+    })).min(1).max(5000),
+})
+
+async function handleGET() {
     return NextResponse.json({ data: salaryStore.getAll() })
 }
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
     try {
         const body = await req.json()
 
         // Batch mode: { entries: [{ employeeId, salary }] }
         if (Array.isArray(body.entries)) {
-            const valid = body.entries.filter(
-                (e: { employeeId?: string; salary?: number }) => e.employeeId && e.salary != null
-            )
+            const parsed = salaryBatchSchema.safeParse(body)
+            if (!parsed.success) {
+                return NextResponse.json(
+                    { error: { detail: parsed.error.issues.map(i => i.message).join("; ") } },
+                    { status: 400 }
+                )
+            }
             salaryStore.setBatch(
-                valid.map((e: { employeeId: string; salary: number }) => ({
-                    employeeId: String(e.employeeId),
+                parsed.data.entries.map((e) => ({
+                    employeeId: e.employeeId,
                     salary: Number(e.salary) || 0,
                 }))
             )
-            return NextResponse.json({ data: { updated: valid.length } })
+            return NextResponse.json({ data: { updated: parsed.data.entries.length } })
         }
 
         // Single mode: { employeeId, salary }
-        if (body.employeeId && body.salary != null) {
-            salaryStore.set(String(body.employeeId), Number(body.salary) || 0)
-            return NextResponse.json({ data: { employeeId: body.employeeId, salary: Number(body.salary) } })
+        const parsed = salarySingleSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: { detail: parsed.error.issues.map(i => i.message).join("; ") } },
+                { status: 400 }
+            )
         }
-
-        return NextResponse.json(
-            { error: { detail: "employeeId and salary are required" } },
-            { status: 400 }
-        )
+        salaryStore.set(parsed.data.employeeId, Number(parsed.data.salary) || 0)
+        return NextResponse.json({ data: { employeeId: parsed.data.employeeId, salary: Number(parsed.data.salary) } })
     } catch {
         return NextResponse.json(
             { error: { detail: "Invalid request body" } },
@@ -49,3 +68,6 @@ export async function POST(req: Request) {
         )
     }
 }
+
+export const GET = withAuth({ module: Module.PAYROLL, action: Action.VIEW }, handleGET)
+export const POST = withAuth({ module: Module.PAYROLL, action: Action.CREATE }, handlePOST)

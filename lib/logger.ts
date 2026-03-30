@@ -1,7 +1,7 @@
 // Safe import for Edge runtime compatibility
 let ALS: any = null
 try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+     
     ALS = require('async_hooks').AsyncLocalStorage
 } catch (e) {
     // async_hooks not available in Edge runtime (Next.js Middleware)

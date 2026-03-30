@@ -2,11 +2,69 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.db import transaction
 from django.core.management import call_command
+import threading
 
 from apps.tenants.models import Tenant
 from config.tenant_context import set_current_tenant
 from config.db_utils import create_tenant_database
 from .models import User
+
+
+
+def _update_provisioning(tenant, step, progress, error=None):
+    tenant.settings = {**tenant.settings, "provisioning": {"step": step, "progress": progress, "error": error}}
+    tenant.save(using="default", update_fields=["settings"])
+
+
+def _provision_tenant_background(tenant, validated_data, password):
+    from django.conf import settings as django_settings
+    db_name = tenant.db_name
+    try:
+        _update_provisioning(tenant, "creating_database", 10)
+        create_tenant_database(db_name)
+        _update_provisioning(tenant, "configuring", 20)
+        if db_name not in django_settings.DATABASES:
+            default = django_settings.DATABASES["default"].copy()
+            default["NAME"] = db_name
+            django_settings.DATABASES[db_name] = default
+        _update_provisioning(tenant, "running_migrations", 30)
+        call_command("migrate", "--database", db_name, "--run-syncdb", verbosity=0)
+        _update_provisioning(tenant, "creating_admin", 60)
+        set_current_tenant(tenant)
+        user = User.objects.db_manager(db_name).create_user(
+            email=validated_data["email"], password=password,
+            first_name=validated_data.get("first_name", ""),
+            last_name=validated_data.get("last_name", ""),
+            is_tenant_admin=True,
+        )
+        _update_provisioning(tenant, "creating_profile", 70)
+        from apps.employees.models import Employee
+        Employee.objects.create(user=user, first_name=user.first_name or tenant.name,
+            last_name=user.last_name, email=user.email, designation="Admin",
+            status=Employee.Status.ACTIVE)
+        _update_provisioning(tenant, "seeding_rbac", 80)
+        try:
+            call_command("seed_rbac", "--database", db_name, verbosity=0)
+        except Exception:
+            pass
+        _update_provisioning(tenant, "assigning_roles", 90)
+        try:
+            from apps.rbac.models import Role, UserRole
+            admin_role = Role.objects.filter(slug="admin").first()
+            if admin_role:
+                UserRole.objects.get_or_create(user=user, role=admin_role)
+        except Exception:
+            pass
+        _update_provisioning(tenant, "completed", 100)
+    except Exception as e:
+        _update_provisioning(tenant, "failed", 0, error=str(e))
+        try:
+            from config.db_utils import drop_tenant_database
+            drop_tenant_database(db_name)
+        except Exception:
+            pass
+        tenant.status = Tenant.Status.INACTIVE
+        tenant.save(using="default", update_fields=["status"])
 
 
 # validate input and orchestrate tenant creation + first user
@@ -24,66 +82,26 @@ class RegisterSerializer(serializers.Serializer):
             raise serializers.ValidationError('A tenant with this slug already exists.')
         return value
 
-    # create registry tenant, tenant DB, migrate it, and create admin user
+    # create registry tenant instantly, provision DB in background thread
     def create(self, validated_data):
-        from django.conf import settings
-        tenant_name = validated_data.pop('tenant_name')
-        tenant_slug = validated_data.pop('tenant_slug')
-        password = validated_data.pop('password')
-        prefix = getattr(settings, 'TENANT_DB_NAME_PREFIX', 'recruitment_db_')
-        db_name = prefix + tenant_slug  # recruitment_db_<slug>
-
-        with transaction.atomic(using = 'default'):
-            tenant = Tenant.objects.using('default').create(
-                name = tenant_name,
-                slug = tenant_slug,
-                db_name = db_name
+        from django.conf import settings as django_settings
+        tenant_name = validated_data.pop("tenant_name")
+        tenant_slug = validated_data.pop("tenant_slug")
+        password = validated_data.pop("password")
+        prefix = getattr(django_settings, "TENANT_DB_NAME_PREFIX", "recruitment_db_")
+        db_name = (prefix + tenant_slug).replace("-", "_")
+        with transaction.atomic(using="default"):
+            tenant = Tenant.objects.using("default").create(
+                name=tenant_name, slug=tenant_slug, db_name=db_name,
+                settings={"provisioning": {"step": "queued", "progress": 0, "error": None}},
             )
-        try:
-            create_tenant_database(db_name)
-        except Exception as e:
-            tenant.delete(using = 'default')
-            raise serializers.ValidationError({'detail': f'Could not create tenant DB: {e}'})
-        if db_name not in settings.DATABASES:
-            default = settings.DATABASES['default'].copy()
-            default['NAME'] = db_name
-            settings.DATABASES[db_name] = default
-        call_command('migrate', '--database', db_name, '--run-syncdb', verbosity = 0)
-        set_current_tenant(tenant)
-        user = User.objects.db_manager(db_name).create_user(
-            email = validated_data['email'],
-            password = password,
-            tenant = tenant,
-            first_name = validated_data.get('first_name', ''),
-            last_name = validated_data.get('last_name', ''),
-            is_tenant_admin = True,
+        thread = threading.Thread(
+            target=_provision_tenant_background,
+            args=(tenant, {**validated_data}, password),
+            daemon=True,
         )
-
-        # Auto-create an Employee record linked to the registering user
-        from apps.employees.models import Employee
-        Employee.objects.create(
-            user=user,
-            first_name=user.first_name or tenant_name,
-            last_name=user.last_name,
-            email=user.email,
-            designation='Admin',
-            status=Employee.Status.ACTIVE,
-        )
-
-        # Seed RBAC roles/permissions and assign admin role to this user
-        try:
-            call_command('seed_rbac', '--database', db_name, verbosity=0)
-        except Exception:
-            pass  # non-fatal — roles can be seeded later
-        try:
-            from apps.rbac.models import Role, UserRole
-            admin_role = Role.objects.filter(slug='admin').first()
-            if admin_role:
-                UserRole.objects.get_or_create(user=user, role=admin_role)
-        except Exception:
-            pass  # non-fatal
-
-        return {'tenant': tenant, 'user': user}
+        thread.start()
+        return {"tenant": tenant}
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
@@ -145,6 +163,8 @@ class UserMeSerializer(serializers.ModelSerializer):
     tenant_id = serializers.SerializerMethodField()
     employee_id = serializers.SerializerMethodField()
 
+    onboarding_status = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
@@ -152,7 +172,7 @@ class UserMeSerializer(serializers.ModelSerializer):
             'avatar', 'accent_color', 'bio',
             'must_change_password', 'last_login_at',
             'tenant_id', 'tenant_slug', 'is_tenant_admin',
-            'employee_id',
+            'employee_id', 'onboarding_status',
         ]
         read_only_fields = fields
 
@@ -172,6 +192,12 @@ class UserMeSerializer(serializers.ModelSerializer):
         employee_profile = getattr(obj, 'employee_profile', None)
         if employee_profile:
             return str(employee_profile.id)
+        return None
+
+    def get_onboarding_status(self, obj):
+        employee_profile = getattr(obj, 'employee_profile', None)
+        if employee_profile:
+            return employee_profile.onboarding_status
         return None
 
 class UpdateMeSerializer(serializers.ModelSerializer):

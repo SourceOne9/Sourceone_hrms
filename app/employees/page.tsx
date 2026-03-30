@@ -38,14 +38,6 @@ const employeeSchema = z.object({
     role: z.enum(["CEO", "HR", "PAYROLL", "TEAM_LEAD", "EMPLOYEE"]),
     managerId: z.string().optional().nullable(),
     avatarUrl: z.string().optional().nullable(),
-}).superRefine((val, ctx) => {
-    if (val.role !== "CEO" && !val.managerId) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Manager is required for non-CEO employees",
-            path: ["managerId"],
-        })
-    }
 })
 
 type EmployeeFormData = z.infer<typeof employeeSchema>
@@ -81,6 +73,7 @@ function EmployeesContent() {
 
     const page = parseInt(searchParams?.get("page") || "1", 10)
     const limit = parseInt(searchParams?.get("limit") || "10", 10)
+    const searchQuery = searchParams?.get("search") || ""
 
     const [totalRows, setTotalRows] = React.useState(0)
     const [pageCount, setPageCount] = React.useState(1)
@@ -89,11 +82,13 @@ function EmployeesContent() {
     const [departments, setDepartments] = React.useState<Department[]>([])
     const [isLoading, setIsLoading] = React.useState(true)
 
+    const [viewingOnboardingStatus, setViewingOnboardingStatus] = React.useState<string>("")
     const [isModalOpen, setIsModalOpen] = React.useState(false)
     const [modalMode, setModalMode] = React.useState<"CREATE" | "EDIT" | "VIEW">("CREATE")
 
     const [credCard, setCredCard] = React.useState<{ username: string; password: string; name: string } | null>(null)
     const [isResettingCreds, setIsResettingCreds] = React.useState<string | null>(null)
+    const [isRelinkingUsers, setIsRelinkingUsers] = React.useState(false)
 
     const [managers, setManagers] = React.useState<{id: string, firstName: string, lastName: string, designation: string, department?: {name: string}}[]>([])
 
@@ -169,7 +164,7 @@ function EmployeesContent() {
         try {
             setIsLoading(true)
             const [empRes, deptRes, mgrRes] = await Promise.all([
-                EmployeeAPI.fetchEmployees(page, limit),
+                EmployeeAPI.fetchEmployees(page, limit, searchQuery ? { search: searchQuery } : undefined),
                 DepartmentAPI.list(),
                 EmployeeAPI.fetchManagers(),
             ])
@@ -183,7 +178,7 @@ function EmployeesContent() {
         } finally {
             setIsLoading(false)
         }
-    }, [page, limit])
+    }, [page, limit, searchQuery])
 
     React.useEffect(() => {
         if (!authLoading) fetchData()
@@ -197,13 +192,14 @@ function EmployeesContent() {
 
     const openEditModal = (empRaw: EmployeeApiData) => {
         setModalMode("EDIT")
-        form.reset({ id: empRaw.id, employeeCode: empRaw.employeeCode, firstName: empRaw.firstName, lastName: empRaw.lastName, email: empRaw.email, phone: empRaw.phone || "", designation: empRaw.designation, departmentId: empRaw.departmentId, dateOfJoining: new Date(empRaw.dateOfJoining).toISOString().split('T')[0], salary: empRaw.salary, status: empRaw.status as any, role: (empRaw as any).user?.role || "EMPLOYEE", managerId: empRaw.managerId || "" })
+        form.reset({ id: empRaw.id, employeeCode: empRaw.employeeCode, firstName: empRaw.firstName, lastName: empRaw.lastName, email: empRaw.email, phone: empRaw.phone || "", designation: empRaw.designation, departmentId: empRaw.departmentId, dateOfJoining: (empRaw.dateOfJoining ? new Date(empRaw.dateOfJoining).toISOString() : "").split('T')[0], salary: empRaw.salary, status: empRaw.status as any, role: (empRaw as any).user?.role || "EMPLOYEE", managerId: empRaw.managerId || "" })
         setIsModalOpen(true)
     }
 
     const openViewModal = (empRaw: EmployeeApiData) => {
         setModalMode("VIEW")
-        form.reset({ employeeCode: empRaw.employeeCode, firstName: empRaw.firstName, lastName: empRaw.lastName, email: empRaw.email, phone: empRaw.phone || "", designation: empRaw.designation, departmentId: empRaw.departmentId, dateOfJoining: new Date(empRaw.dateOfJoining).toISOString().split('T')[0], salary: empRaw.salary, status: empRaw.status as any, role: (empRaw as any).user?.role || "EMPLOYEE", managerId: empRaw.managerId || "" })
+        setViewingOnboardingStatus(empRaw.onboardingStatus || "pending")
+        form.reset({ employeeCode: empRaw.employeeCode, firstName: empRaw.firstName, lastName: empRaw.lastName, email: empRaw.email, phone: empRaw.phone || "", designation: empRaw.designation, departmentId: empRaw.departmentId, dateOfJoining: (empRaw.dateOfJoining ? new Date(empRaw.dateOfJoining).toISOString() : "").split('T')[0], salary: empRaw.salary, status: empRaw.status as any, role: (empRaw as any).user?.role || "EMPLOYEE", managerId: empRaw.managerId || "" })
         setIsModalOpen(true)
     }
 
@@ -229,6 +225,25 @@ function EmployeesContent() {
             toast.error(err?.message || 'Failed to reset credentials')
         } finally {
             setIsResettingCreds(null)
+        }
+    }
+
+    const handleRelinkUsers = async () => {
+        if (!await confirmAction("Repair Employee Logins?", "This will link employees without a login account connection to existing users with the same email address.")) return
+        setIsRelinkingUsers(true)
+        try {
+            const result = await EmployeeAPI.relinkUsers()
+            const summary = `${result.relinkedCount} relinked, ${result.skippedCount} skipped.`
+            if (result.relinkedCount > 0) {
+                showSuccess("Login Links Repaired", summary)
+            } else {
+                toast.success(`No links changed. ${summary}`)
+            }
+            fetchData()
+        } catch (err: any) {
+            toast.error(err?.message || "Failed to repair employee logins")
+        } finally {
+            setIsRelinkingUsers(false)
         }
     }
 
@@ -266,6 +281,14 @@ function EmployeesContent() {
                 pageCount={pageCount}
                 pageIndex={Math.max(0, page - 1)}
                 totalRows={totalRows}
+                searchValue={searchQuery}
+                onSearchChange={(value) => {
+                    const params = new URLSearchParams(searchParams?.toString() || "")
+                    if (value) params.set("search", value)
+                    else params.delete("search")
+                    params.set("page", "1")
+                    router.push(`${pathname}?${params.toString()}`)
+                }}
                 onPageChange={(newPageIndex) => {
                     const params = new URLSearchParams(searchParams?.toString() || "")
                     params.set("page", (newPageIndex + 1).toString())
@@ -275,11 +298,13 @@ function EmployeesContent() {
                 onOpenEditModal={openEditModal}
                 onOpenViewModal={openViewModal}
                 onResetCredentials={handleResetCredentials}
+                onRelinkUsers={handleRelinkUsers}
                 onDelete={handleDelete}
                 onImportClick={() => setIsBulkImportOpen(true)}
                 onExportCSV={() => exportToCSV(employees.map(({ color, initials, raw, ...rest }) => rest), 'employees_list')}
                 onExportPDF={() => exportToPDF(['Name', 'Email', 'Department', 'Role', 'Status', 'Start Date'], employees.map(e => [e.name, e.email, e.dept, e.role, e.status, e.start]), 'employees_list', 'Employee Directory Report')}
                 isResettingCreds={isResettingCreds}
+                isRelinkingUsers={isRelinkingUsers}
             />
 
             <EmployeeFormModal
@@ -292,6 +317,7 @@ function EmployeesContent() {
                 onSubmit={onSubmit}
                 handleAvatarUpload={handleEmployeeAvatarUpload}
                 onOpenDeptModal={() => setIsDeptModalOpen(true)}
+                onboardingStatus={modalMode === "VIEW" ? viewingOnboardingStatus : undefined}
             />
 
             <BulkEmployeeImportModal

@@ -1,10 +1,15 @@
 /**
  * /api/cron/agent-reports — Django proxy (Sprint 14).
+ *
+ * NOTE: Django endpoint /api/v1/cron/agent-reports/ does not exist yet.
  */
-import { proxyToDjango } from "@/lib/django-proxy"
-import { deprecatedRoute } from "@/lib/route-deprecation"
+import { NextResponse } from "next/server"
+import { verifyBearerSecret } from "@/lib/security"
 
 export async function POST(req: Request) {
-    deprecatedRoute("/api/cron/agent-reports POST", "Django /api/v1/cron/agent-reports/")
-    return proxyToDjango(req, "/cron/agent-reports/")
+    if (!verifyBearerSecret(req.headers.get("authorization"), process.env.CRON_SECRET)) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    return NextResponse.json({ error: 'Not implemented' }, { status: 501 })
 }

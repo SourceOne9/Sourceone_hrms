@@ -74,6 +74,7 @@ export async function apiClient<T>(
       ...options,
       headers,
       body,
+      credentials: "include",
       signal: AbortSignal.timeout(10_000),
     });
   } catch (err) {
@@ -95,6 +96,7 @@ export async function apiClient<T>(
         ...options,
         headers,
         body,
+        credentials: "include",
         signal: AbortSignal.timeout(10_000),
       });
 
@@ -130,7 +132,13 @@ export async function apiClient<T>(
     return { data: null as T, status: 204 };
   }
 
-  const json = await response.json();
+  let json: any;
+  try {
+    const text = await response.text();
+    json = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(`Server returned non-JSON response (${response.status})`);
+  }
 
   if (!response.ok) {
     // Django wraps errors as {"data":null,"error":{"detail":[...]},"meta":{}}
@@ -154,6 +162,60 @@ export async function apiClient<T>(
   };
 }
 
+// File upload helper -- sends FormData without JSON Content-Type or body transforms
+async function apiUpload<T>(path: string, formData: FormData): Promise<ApiResponse<T>> {
+  const url = `${BASE_URL}/api/v1${path}`;
+  const headers: Record<string, string> = {};
+  // Do NOT set Content-Type -- browser sets multipart/form-data with boundary
+  const token = getAccessToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const slug = getTenantSlug();
+  if (slug) headers["X-Tenant-Slug"] = slug;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: formData,
+    credentials: "include",
+    signal: AbortSignal.timeout(30_000),
+  });
+
+  if (response.status === 204) return { data: null as T, status: 204 };
+  let json: any;
+  try { const text = await response.text(); json = text ? JSON.parse(text) : {}; }
+  catch { throw new Error(`Server returned non-JSON response (${response.status})`); }
+
+  if (!response.ok) {
+    const errObj = json.error || json;
+    const detail = errObj.detail;
+    const message = Array.isArray(detail) ? detail.join(". ") : (typeof detail === "string" ? detail : null);
+    const error = new Error(message || "Upload failed") as Error & { status: number; data: unknown };
+    error.status = response.status;
+    error.data = toCamelCase(errObj);
+    throw error;
+  }
+
+  const payload = json.data !== undefined ? json.data : json;
+  return { data: toCamelCase<T>(payload), status: response.status };
+}
+
+/** Read the CSRF token from the csrf_token cookie (set by middleware) */
+export function getCsrfToken(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? match[1] : null;
+}
+
+/** Get headers for fetch calls to Next.js API routes (includes CSRF + auth) */
+export function getNextApiHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = getAccessToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const csrf = getCsrfToken();
+  if (csrf) headers["X-CSRF-Token"] = csrf;
+  return headers;
+}
+
 // Convenience methods
 export const api = {
   get: <T>(path: string) => apiClient<T>(path, { method: "GET" }),
@@ -164,4 +226,5 @@ export const api = {
   patch: <T>(path: string, data?: unknown) =>
     apiClient<T>(path, { method: "PATCH", body: data ? JSON.stringify(data) : undefined }),
   delete: <T>(path: string) => apiClient<T>(path, { method: "DELETE" }),
+  upload: <T>(path: string, formData: FormData) => apiUpload<T>(path, formData),
 };

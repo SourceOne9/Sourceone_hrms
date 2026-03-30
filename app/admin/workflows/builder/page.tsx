@@ -11,6 +11,8 @@ import { Select } from '@/components/ui/Select'
 import { Textarea } from '@/components/ui/Textarea'
 import { Card, CardContent } from '@/components/ui/Card'
 import { ConfigPanel } from '@/components/ui/ConfigPanel'
+import { useAuth } from "@/context/AuthContext"
+import { canAccessModule, Module } from "@/lib/permissions"
 
 interface StepDraft {
     name: string
@@ -37,7 +39,9 @@ const APPROVER_TYPES = [
 ]
 
 export default function BuilderPage() {
+    const { user, isLoading } = useAuth()
     const router = useRouter()
+    React.useEffect(() => { if (!isLoading && user && !canAccessModule(user.role, Module.WORKFLOWS)) router.push("/") }, [user, isLoading, router])
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
     const [entityType, setEntityType] = useState('LEAVE')

@@ -18,11 +18,11 @@
  *       apps/performance/management/commands/evaluate_performance.py
  */
 
+import { verifyBearerSecret } from "@/lib/security"
+
 export async function POST(req: Request) {
-    // Verify cron secret
-    const authHeader = req.headers.get("authorization")
-    const cronSecret = process.env.CRON_SECRET
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    // Verify cron secret — reject if CRON_SECRET is not set or doesn't match
+    if (!verifyBearerSecret(req.headers.get("authorization"), process.env.CRON_SECRET)) {
         return Response.json(
             { error: "Unauthorized" },
             { status: 401 }

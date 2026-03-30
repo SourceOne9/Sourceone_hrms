@@ -20,6 +20,9 @@ interface GoLiveStepProps extends StepProps {
   goToStep: (step: number) => void
   onLaunch: () => void
   isLaunching: boolean
+  launchError?: string
+  provisionStep?: string
+  provisionProgress?: number
 }
 
 /* ------------------------------------------------------------------ */
@@ -76,11 +79,27 @@ function SpinnerIcon() {
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
+const STEP_LABELS: Record<string, string> = {
+  queued: "Starting setup...",
+  creating_database: "Creating database...",
+  configuring: "Configuring connection...",
+  running_migrations: "Setting up tables...",
+  creating_admin: "Creating admin account...",
+  creating_profile: "Building your profile...",
+  seeding_rbac: "Configuring permissions...",
+  assigning_roles: "Assigning admin role...",
+  completed: "All done!",
+  failed: "Setup failed",
+}
+
 export default function GoLiveStep({
   data,
   goToStep,
   onLaunch,
   isLaunching,
+  launchError,
+  provisionStep,
+  provisionProgress,
 }: GoLiveStepProps) {
   const [modulesExpanded, setModulesExpanded] = useState(false)
 
@@ -237,6 +256,31 @@ export default function GoLiveStep({
         ))}
       </motion.div>
 
+      {/* ---- Error display ---- */}
+      {launchError && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-center"
+        >
+          <p className="text-red-400 text-sm font-medium">{launchError}</p>
+          {launchError.includes("throttled") && (
+            <p className="text-red-400/70 text-xs mt-1">
+              Registration is rate-limited. Please wait a few minutes and try again.
+            </p>
+          )}
+        </motion.div>
+      )}
+
+      {isLaunching && provisionProgress !== undefined && provisionProgress > 0 && (
+        <div className="mt-6 max-w-md mx-auto">
+          <div className="h-2 rounded-full bg-border overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-accent to-[#5ac8fa] transition-all duration-500" style={{ width: provisionProgress + "%" }} />
+          </div>
+          <p className="text-xs text-text-3 text-center mt-2">{provisionProgress}% complete</p>
+        </div>
+      )}
+
       {/* ---- Launch button ---- */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -277,7 +321,7 @@ export default function GoLiveStep({
             {isLaunching ? (
               <>
                 <SpinnerIcon />
-                Setting Up Your Platform...
+                {provisionStep && STEP_LABELS[provisionStep] ? STEP_LABELS[provisionStep] : "Setting Up Your Platform..."}
               </>
             ) : (
               <>

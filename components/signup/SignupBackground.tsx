@@ -63,7 +63,7 @@ export default function SignupBackground() {
 
       {/* 
         3. A few tiny, extremely slow drifting sparks 
-        Just enough movement to show it's alive, but not distracting.
+        Just enough movement to show it&apos;s alive, but not distracting.
       */}
       {[...Array(12)].map((_, i) => (
         <motion.div

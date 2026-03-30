@@ -9,6 +9,9 @@
  * The current approach uses a module-level Map that resets on server restart.
  */
 import { NextResponse } from "next/server"
+import { z } from "zod"
+import { withAuth, AuthContext } from "@/lib/security"
+import { Module, Action } from "@/lib/permissions"
 
 interface DepartmentRecord {
     id: string
@@ -61,7 +64,7 @@ async function fetchDepartmentsFromDjango(req: Request): Promise<Map<string, num
     return counts
 }
 
-export async function GET(req: Request) {
+async function handleGET(req: Request) {
     const djangoDepts = await fetchDepartmentsFromDjango(req)
 
     // Merge Django-sourced departments into local store
@@ -85,18 +88,23 @@ export async function GET(req: Request) {
     return NextResponse.json({ data: departments })
 }
 
-export async function POST(req: Request) {
+const departmentSchema = z.object({
+    name: z.string().min(1, "Department name is required").max(200),
+    color: z.string().max(200).optional(),
+})
+
+async function handlePOST(req: Request) {
     try {
         const body = await req.json()
-        const name = body.name?.trim()
-        const color = body.color || "from-[#a18cd1] to-[#fbc2eb]"
-
-        if (!name) {
+        const parsed = departmentSchema.safeParse(body)
+        if (!parsed.success) {
             return NextResponse.json(
-                { error: { detail: "Department name is required" } },
+                { error: { detail: parsed.error.issues.map(i => i.message).join("; ") } },
                 { status: 400 }
             )
         }
+        const name = parsed.data.name.trim()
+        const color = parsed.data.color || "from-[#a18cd1] to-[#fbc2eb]"
 
         // Check for duplicate (case-insensitive)
         const existing = [...departmentStore.keys()].find(
@@ -122,3 +130,6 @@ export async function POST(req: Request) {
         )
     }
 }
+
+export const GET = withAuth({ module: Module.EMPLOYEES, action: Action.VIEW }, handleGET)
+export const POST = withAuth({ module: Module.EMPLOYEES, action: Action.CREATE }, handlePOST)

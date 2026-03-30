@@ -1,6 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/context/AuthContext"
+import { canAccessModule, Module } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
 import { PageHeader } from "@/components/ui/PageHeader"
@@ -52,20 +55,49 @@ const SEVERITY_COLORS = {
 }
 
 export default function PerformanceAdminDashboard() {
+    const { user, isLoading: authLoading } = useAuth()
+    const router = useRouter()
     const [alerts, setAlerts] = useState<Alert[]>([])
     const [scores, setScores] = useState<Score[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        api.get('/performance/metrics/')
+        if (!authLoading && !canAccessModule(user?.role ?? "", Module.PERFORMANCE)) {
+            router.push("/")
+        }
+    }, [user, authLoading, router])
+
+    useEffect(() => {
+        api.get('/performance/reviews/')
             .then((resJson: any) => {
                 const data = resJson.data || resJson
-                setAlerts(data.alerts || [])
-                setScores(data.scores || [])
+                const results = data.results || (Array.isArray(data) ? data : [])
+                // Transform review data into scores format
+                const mappedScores: Score[] = results.map((r: any) => ({
+                    employeeName: r.employeeName || "—",
+                    avatarUrl: r.avatarUrl || null,
+                    baseScore: Number(r.overallScore || r.rating || 0),
+                    aiAdjustment: 0,
+                    finalScore: Number(r.overallScore || r.rating || 0),
+                    burnoutRisk: false,
+                    behavioralAnomaly: false,
+                }))
+                setScores(mappedScores)
+                // Generate alerts from low-scoring employees
+                const mappedAlerts: Alert[] = results
+                    .filter((r: any) => Number(r.overallScore || r.rating || 0) < 3)
+                    .map((r: any) => ({
+                        employeeName: r.employeeName || "—",
+                        severity: Number(r.overallScore || 0) < 2 ? "critical" as const : "medium" as const,
+                        message: `Performance score ${r.overallScore || r.rating || 0}/5 — needs improvement`,
+                    }))
+                setAlerts(mappedAlerts)
             })
-            .catch(console.error)
+            .catch(() => { })
             .finally(() => setLoading(false))
     }, [])
+
+    if (authLoading || !canAccessModule(user?.role ?? "", Module.PERFORMANCE)) return null
 
     if (loading) {
         return (

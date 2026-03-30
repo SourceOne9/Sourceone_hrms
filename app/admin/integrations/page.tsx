@@ -1,6 +1,9 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/context/AuthContext"
+import { canAccessModule, Module } from "@/lib/permissions"
 import { PlusIcon, TrashIcon, RocketIcon, DownloadIcon, CheckCircledIcon } from "@radix-ui/react-icons"
 import { toast } from "sonner"
 import { api } from "@/lib/api-client"
@@ -24,6 +27,8 @@ const AVAILABLE_EVENTS = [
 ]
 
 export default function IntegrationsPage() {
+    const { user, isLoading: authLoading } = useAuth()
+    const router = useRouter()
     const [webhooks, setWebhooks] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -44,16 +49,23 @@ export default function IntegrationsPage() {
             setIsLoading(true)
             const { data } = await api.get<any>('/settings/webhooks/')
             setWebhooks(data.data || data || [])
-        } catch (error) {
-            toast.error("Failed to load webhooks")
+        } catch {
+            // Webhooks endpoint not yet available — show empty state
+            setWebhooks([])
         } finally {
             setIsLoading(false)
         }
     }
 
     useEffect(() => {
-        fetchWebhooks()
-    }, [])
+        if (!authLoading && !canAccessModule(user?.role ?? "", Module.SETTINGS)) {
+            router.push("/")
+        }
+    }, [user, authLoading, router])
+
+    useEffect(() => {
+        if (!authLoading) fetchWebhooks()
+    }, [authLoading])
 
     const onSubmit = async (formData: any) => {
         try {
@@ -103,6 +115,8 @@ export default function IntegrationsPage() {
             setExportLoading(false)
         }
     }
+
+    if (authLoading || !canAccessModule(user?.role ?? "", Module.SETTINGS)) return null
 
     return (
         <div className="p-8 max-w-6xl mx-auto space-y-10 animate-in fade-in duration-500">

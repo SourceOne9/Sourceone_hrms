@@ -1,36 +1,39 @@
 /**
  * /api/scim/v2/Users/[id] — Django proxy (Sprint 14).
  * SCIM endpoint handles its own auth via Bearer token.
+ *
+ * NOTE: Django endpoint /api/v1/scim/v2/Users/{id}/ does not exist yet.
  */
-import { proxyToDjango } from "@/lib/django-proxy"
-import { deprecatedRoute } from "@/lib/route-deprecation"
+import { NextResponse } from "next/server"
+import { verifyBearerSecret } from "@/lib/security"
 
-function extractId(req: Request): string {
-    const url = new URL(req.url)
-    const segments = url.pathname.split("/").filter(Boolean)
-    return segments[segments.length - 1]
+function validateScimToken(req: Request): NextResponse | null {
+    if (!verifyBearerSecret(req.headers.get("authorization"), process.env.SCIM_TOKEN)) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    return null
 }
 
 export async function GET(req: Request) {
-    const id = extractId(req)
-    deprecatedRoute("/api/scim/v2/Users/[id] GET", "Django /api/v1/scim/v2/Users/{id}/")
-    return proxyToDjango(req, `/scim/v2/Users/${id}/`)
+    const denied = validateScimToken(req)
+    if (denied) return denied
+    return NextResponse.json({ error: 'Not implemented' }, { status: 501 })
 }
 
 export async function PUT(req: Request) {
-    const id = extractId(req)
-    deprecatedRoute("/api/scim/v2/Users/[id] PUT", "Django /api/v1/scim/v2/Users/{id}/")
-    return proxyToDjango(req, `/scim/v2/Users/${id}/`)
+    const denied = validateScimToken(req)
+    if (denied) return denied
+    return NextResponse.json({ error: 'Not implemented' }, { status: 501 })
 }
 
 export async function PATCH(req: Request) {
-    const id = extractId(req)
-    deprecatedRoute("/api/scim/v2/Users/[id] PATCH", "Django /api/v1/scim/v2/Users/{id}/")
-    return proxyToDjango(req, `/scim/v2/Users/${id}/`)
+    const denied = validateScimToken(req)
+    if (denied) return denied
+    return NextResponse.json({ error: 'Not implemented' }, { status: 501 })
 }
 
 export async function DELETE(req: Request) {
-    const id = extractId(req)
-    deprecatedRoute("/api/scim/v2/Users/[id] DELETE", "Django /api/v1/scim/v2/Users/{id}/")
-    return proxyToDjango(req, `/scim/v2/Users/${id}/`)
+    const denied = validateScimToken(req)
+    if (denied) return denied
+    return NextResponse.json({ error: 'Not implemented' }, { status: 501 })
 }

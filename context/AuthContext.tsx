@@ -25,6 +25,7 @@ interface User {
   tenantId?: string
   isTenantAdmin?: boolean
   mustChangePassword?: boolean
+  onboardingStatus?: string | null
   functionalCapabilities?: Record<string, string[]>
   /** Django permission codenames resolved from user's assigned roles */
   permissionCodenames?: string[]
@@ -162,6 +163,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return undefined
   }, [])
 
+
+  /** Auto-create employee profile for tenant admin users who don't have one yet. */
+  const ensureEmployeeProfile = React.useCallback(async (authUser: AuthUser): Promise<string | undefined> => {
+    if (authUser.employeeId || !authUser.isTenantAdmin) return authUser.employeeId || undefined
+    try {
+      const { data } = await api.post<{ id: string }>("/employees/", {
+        firstName: authUser.firstName || "Admin",
+        lastName: authUser.lastName || "User",
+        email: authUser.email,
+        designation: "Administrator",
+        department: "Management",
+        employeeCode: `ADM-${Date.now().toString().slice(-6)}`,
+        status: "active",
+        dateOfJoining: new Date().toISOString().split("T")[0],
+      })
+      return data?.id || undefined
+    } catch {
+      // Non-critical: profile creation failed (may already exist or permissions issue)
+      return undefined
+    }
+  }, [])
+
   // Convert Django AuthUser to our internal User object
   const mapUser = React.useCallback((
     authUser: AuthUser,
@@ -182,6 +205,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       tenantId: authUser.tenantId,
       isTenantAdmin: authUser.isTenantAdmin,
       mustChangePassword: authUser.mustChangePassword,
+      onboardingStatus: authUser.onboardingStatus,
       functionalCapabilities: capabilities,
       permissionCodenames: codenames,
       featureFlags: flags,
@@ -222,10 +246,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     if (isLoading) return
     const isPublicPage = pathname === "/login" || pathname === "/signup"
+    const isGatedPage = pathname === "/change-password" || pathname === "/onboarding"
     if (!user && !isPublicPage) {
       router.push("/login")
     } else if (user && pathname === "/login") {
       router.push("/")
+    } else if (user && !isGatedPage && !isPublicPage && user.mustChangePassword) {
+      router.push("/change-password")
+    } else if (user && !isGatedPage && !isPublicPage && user.onboardingStatus && user.onboardingStatus !== "completed" && !user.isTenantAdmin) {
+      router.push("/onboarding")
     } else if (user?.featureFlags && Object.keys(user.featureFlags).length > 0) {
       // Block navigation to disabled feature pages
       const ROUTE_MODULE_MAP: Record<string, string> = {

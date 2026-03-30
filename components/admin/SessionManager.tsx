@@ -76,15 +76,11 @@ export function SessionManager() {
                         <div key={session.id} className="flex items-center justify-between p-4 bg-surface-2 border border-border rounded-xl hover:border-accent/30 transition-all group">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-surface to-bg-2 flex items-center justify-center border border-border overflow-hidden">
-                                    {session.avatar ? (
-                                        <img src={session.avatar} alt={session.userName} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <PersonIcon className="w-5 h-5 text-text-3" />
-                                    )}
+                                    <PersonIcon className="w-5 h-5 text-text-3" />
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-md font-bold text-text">{session.userName}</span>
+                                        <span className="text-md font-bold text-text">{session.userEmail}</span>
                                         {session.isActive ? (
                                             <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
                                         ) : (
@@ -107,13 +103,13 @@ export function SessionManager() {
                             <div className="flex items-center gap-4">
                                 <div className="text-right">
                                     <div className="text-xs font-bold text-text-2 uppercase tracking-tight">Last Active</div>
-                                    <div className="text-sm text-text-3">{format(new Date(session.lastActive || session.lastActivity || session.createdAt), "MMM d, HH:mm")}</div>
+                                    <div className="text-sm text-text-3">{format(new Date(session.lastActivity || session.createdAt), "MMM d, HH:mm")}</div>
                                 </div>
                                 <Button
                                     variant="danger"
                                     size="icon"
-                                    onClick={() => handleRevoke(session.id, session.userName || "User")}
-                                    disabled={session.isRevoked || revoking === session.id}
+                                    onClick={() => handleRevoke(session.id, session.userEmail || "User")}
+                                    disabled={!session.isActive || revoking === session.id}
                                     title="Revoke Session"
                                 >
                                     {revoking === session.id ? <Spinner size="sm" /> : <LockClosedIcon className="w-4 h-4" />}

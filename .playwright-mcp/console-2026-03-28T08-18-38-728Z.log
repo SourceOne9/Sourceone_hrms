@@ -1,0 +1,768 @@
+[     471ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/login?callbackUrl=%2Femployees:0
+[     478ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/login?callbackUrl=%2Femployees:0
+[     826ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[    1084ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   16206ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/employees:0
+[   16207ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/employees:0
+[   16519ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   17241ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   19939ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/roles/capabilities/:0
+[   20385ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[   41325ms] RangeError: Invalid time value
+    at Date.toISOString (<anonymous>)
+    at openViewModal (http://localhost:3000/_next/static/chunks/_d08bd9f3._.js:5301:59)
+    at onRowClick (http://localhost:3000/_next/static/chunks/_d08bd9f3._.js:3417:28)
+    at onClick (http://localhost:3000/_next/static/chunks/_d08bd9f3._.js:2917:62)
+    at executeDispatch (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10314:13)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:965:74)
+    at processDispatchQueue (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10340:41)
+    at http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10615:13
+    at batchedUpdates$1 (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2253:44)
+    at dispatchEventForPluginEventSystem (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10416:9)
+    at dispatchEvent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:12935:37)
+    at dispatchDiscreteEvent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:12917:64)
+[   56895ms] RangeError: Invalid time value
+    at Date.toISOString (<anonymous>)
+    at openViewModal (http://localhost:3000/_next/static/chunks/_d08bd9f3._.js:5301:59)
+    at onRowClick (http://localhost:3000/_next/static/chunks/_d08bd9f3._.js:3417:28)
+    at onClick (http://localhost:3000/_next/static/chunks/_d08bd9f3._.js:2917:62)
+    at executeDispatch (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10314:13)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:965:74)
+    at processDispatchQueue (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10340:41)
+    at http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10615:13
+    at batchedUpdates$1 (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2253:44)
+    at dispatchEventForPluginEventSystem (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10416:9)
+    at dispatchEvent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:12935:37)
+    at dispatchDiscreteEvent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:12917:64)
+[   82212ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[   90324ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/employees:0
+[   90325ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/employees:0
+[   90623ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   90852ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   93876ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/roles/capabilities/:0
+[   94264ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  136316ms] [ERROR] %o
+
+%s ReferenceError: isLoading is not defined
+    at OrgChartPage (http://localhost:3000/_next/static/chunks/_863b1591._.js:1171:9)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:14826:24)
+    at renderWithHooks (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:4651:24)
+    at updateFunctionComponent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:6112:21)
+    at beginWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:6708:24)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:965:74)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9562:97)
+    at workLoopSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9456:40)
+    at renderRootSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9440:13)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9105:47)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10230:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_a0e4c7b4._.js:2647:64) The above error occurred in the <OrgChartPage> component. It was handled by the <ErrorBoundaryHandler> error boundary. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:1342
+[  136335ms] [ERROR] PAGE CRASH ERROR: ReferenceError: isLoading is not defined
+    at OrgChartPage (http://localhost:3000/_next/static/chunks/_863b1591._.js:1171:9)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:14826:24)
+    at renderWithHooks (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:4651:24)
+    at updateFunctionComponent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:6112:21)
+    at beginWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:6708:24)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:965:74)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9562:97)
+    at workLoopSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9456:40)
+    at renderRootSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9440:13)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9105:47)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10230:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_a0e4c7b4._.js:2647:64) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  136336ms] [ERROR] PAGE CRASH ERROR: ReferenceError: isLoading is not defined
+    at OrgChartPage (http://localhost:3000/_next/static/chunks/_863b1591._.js:1171:9)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:14826:24)
+    at renderWithHooks (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:4651:24)
+    at updateFunctionComponent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:6112:21)
+    at beginWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:6708:24)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:965:74)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9562:97)
+    at workLoopSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9456:40)
+    at renderRootSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9440:13)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9105:47)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10230:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_a0e4c7b4._.js:2647:64) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  136585ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  139592ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/node_modules_reactflow_dist_style_58d81dac.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/org-chart:0
+[  157227ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/node_modules_reactflow_dist_style_58d81dac.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/org-chart:0
+[  158122ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  161123ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/node_modules_reactflow_dist_style_58d81dac.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/teams:0
+[  164164ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/node_modules_reactflow_dist_style_58d81dac.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/teams:0
+[  166228ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  166443ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  166681ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  172954ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/node_modules_reactflow_dist_style_58d81dac.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/employees:0
+[  176811ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/node_modules_reactflow_dist_style_58d81dac.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/employees:0
+[  180071ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/node_modules_reactflow_dist_style_58d81dac.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/employees:0
+[  215475ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  222165ms] [WARNING] [React Flow]: It looks like you've created a new nodeTypes or edgeTypes object. If this wasn't on purpose please define the nodeTypes/edgeTypes outside of the component or memoize them. Help: https://reactflow.dev/error#002 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  222166ms] [WARNING] [React Flow]: It looks like you've created a new nodeTypes or edgeTypes object. If this wasn't on purpose please define the nodeTypes/edgeTypes outside of the component or memoize them. Help: https://reactflow.dev/error#002 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  227739ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  227841ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  228090ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  279885ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  280062ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  280091ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  311035ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  314523ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  314589ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  314797ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  333992ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  334039ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  334071ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  336889ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/employees/profile/:0
+[  340106ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/employees/profile/:0
+[  353624ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  353682ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  353893ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  354601ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  354666ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/employees/salaries:0
+[  354805ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  357674ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/employees/profile/:0
+[  360760ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/employees/profile/:0
+[  364075ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  368278ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  368279ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  368280ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  368280ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  368280ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  368281ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  368283ms] [ERROR] Each child in a list should have a unique "key" prop.%s%s See https://react.dev/link/warning-keys for more information. 
+
+Check the render method of `AdminDashboard`.  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  463149ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/:0
+[  463149ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/:0
+[  463425ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  463807ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  466769ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/roles/capabilities/:0
+[  471099ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  471099ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  471100ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  471100ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  471100ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  471100ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  471101ms] [ERROR] Each child in a list should have a unique "key" prop.%s%s See https://react.dev/link/warning-keys for more information. 
+
+Check the render method of `AdminDashboard`.  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  541999ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Parsing ecmascript source code failed
+  166 |                 ) : (
+  167 |                         <div key="stat-0" data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
+> 168 |                         <div key="stat-1" data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
+      |                              ^^^
+  169 |                         <div key="stat-2" data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
+  170 |                         <div key="stat-3" data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  577465ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Parsing ecmascript source code failed
+  166 |                 ) : (
+  167 |                         <div key="stat-0" data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
+> 168 |                         <div key="stat-1" data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
+      |                              ^^^
+  169 |                         <div key="stat-2" data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
+  170 |                         <div key="stat-3" data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  577516ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Parsing ecmascript source code failed
+  166 |                 ) : (
+  167 |                         <div key="stat-0" data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
+> 168 |                         <div key="stat-1" data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
+      |                              ^^^
+  169 |                         <div key="stat-2" data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
+  170 |                         <div key="stat-3" data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  577612ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Parsing ecmascript source code failed
+  166 |                 ) : (
+  167 |                         <div key="stat-0" data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
+> 168 |                         <div key="stat-1" data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
+      |                              ^^^
+  169 |                         <div key="stat-2" data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
+  170 |                         <div key="stat-3" data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  577624ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/:0
+[  577887ms] Error: ./components/dashboard/AdminDashboard.tsx:168:30
+Parsing ecmascript source code failed
+  166 |                 ) : (
+  167 |                         <div key="stat-0" data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
+> 168 |                         <div key="stat-1" data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
+      |                              ^^^
+  169 |                         <div key="stat-2" data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
+  170 |                         <div key="stat-3" data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./components/dashboard/AdminDashboard.tsx:168:30)
+    at Object.getCompilationErrors (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\hot-reloader-turbopack.js:1008:59)
+    at DevBundlerService.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\lib\dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:706:42)
+    at DevServer.findPageComponents (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:676:43)
+    at async DevServer.renderErrorToResponseImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\base-server.js:1733:26)
+[  577890ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Parsing ecmascript source code failed
+  166 |                 ) : (
+  167 |                         <div key="stat-0" data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
+> 168 |                         <div key="stat-1" data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
+      |                              ^^^
+  169 |                         <div key="stat-2" data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
+  170 |                         <div key="stat-3" data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  577983ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Parsing ecmascript source code failed
+  166 |                 ) : (
+  167 |                         <div key="stat-0" data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
+> 168 |                         <div key="stat-1" data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
+      |                              ^^^
+  169 |                         <div key="stat-2" data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
+  170 |                         <div key="stat-3" data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  586458ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Parsing ecmascript source code failed
+  166 |                 ) : (
+  167 |                         <div key="stat-0" data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
+> 168 |                         <div key="stat-1" data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
+      |                              ^^^
+  169 |                         <div key="stat-2" data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
+  170 |                         <div key="stat-3" data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  586507ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/:0
+[  586767ms] Error: ./components/dashboard/AdminDashboard.tsx:168:30
+Parsing ecmascript source code failed
+  166 |                 ) : (
+  167 |                         <div key="stat-0" data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
+> 168 |                         <div key="stat-1" data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
+      |                              ^^^
+  169 |                         <div key="stat-2" data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
+  170 |                         <div key="stat-3" data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./components/dashboard/AdminDashboard.tsx:168:30)
+    at Object.getCompilationErrors (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\hot-reloader-turbopack.js:1008:59)
+    at DevBundlerService.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\lib\dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:706:42)
+    at DevServer.findPageComponents (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:676:43)
+    at async DevServer.renderErrorToResponseImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\base-server.js:1733:26)
+[  586776ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Parsing ecmascript source code failed
+  166 |                 ) : (
+  167 |                         <div key="stat-0" data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
+> 168 |                         <div key="stat-1" data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
+      |                              ^^^
+  169 |                         <div key="stat-2" data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
+  170 |                         <div key="stat-3" data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  586827ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:168:30
+Parsing ecmascript source code failed
+  166 |                 ) : (
+  167 |                         <div key="stat-0" data-aos="fade-up" data-aos-delay="0"><DashboardStatCard label="Total Employees" value={data?.stats?.totalEmployees?.toString() || "0"} sub="across all departments" icon={<span>👥</span>} /></div>
+> 168 |                         <div key="stat-1" data-aos="fade-up" data-aos-delay="80"><DashboardStatCard label="Active Employees" value={data?.stats?.activeEmployees?.toString() || "0"} sub="currently working" icon={<span>✅</span>} /></div>
+      |                              ^^^
+  169 |                         <div key="stat-2" data-aos="fade-up" data-aos-delay="160"><DashboardStatCard label="On Notice" value={data?.stats?.onLeaveEmployees?.toString() || "0"} sub="serving notice period" icon={<span>🌴</span>} /></div>
+  170 |                         <div key="stat-3" data-aos="fade-up" data-aos-delay="240"><DashboardStatCard label="Monthly Payroll" value={data?.stats?.monthlyPayroll?.toString() || "0"} sub={`avg ₹${Math.round(data?.avgSalary || 0).toLocaleString("en-IN")}/emp`} isMoney icon={<span>💵</span>} /></div>
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  721824ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:239:31
+Parsing ecmascript source code failed
+  237 |                 ) : (
+  238 |                         {/* Pie Chart */}
+> 239 |                         <Card data-aos="zoom-in" data-aos-delay="0" className="p-5 flex flex-col h-[340px]">
+      |                               ^^^^
+  240 |                             <div className="text-sm font-bold text-text flex items-center justify-between mb-2">
+  241 |                                 <span>Department Split</span>
+  242 |                                 {selectedDept && (
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  734610ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/:0
+[  734771ms] Error: ./components/dashboard/AdminDashboard.tsx:239:31
+Parsing ecmascript source code failed
+  237 |                 ) : (
+  238 |                         {/* Pie Chart */}
+> 239 |                         <Card data-aos="zoom-in" data-aos-delay="0" className="p-5 flex flex-col h-[340px]">
+      |                               ^^^^
+  240 |                             <div className="text-sm font-bold text-text flex items-center justify-between mb-2">
+  241 |                                 <span>Department Split</span>
+  242 |                                 {selectedDept && (
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./components/dashboard/AdminDashboard.tsx:239:31)
+    at Object.getCompilationErrors (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\hot-reloader-turbopack.js:1008:59)
+    at DevBundlerService.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\lib\dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:706:42)
+    at DevServer.findPageComponents (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:676:43)
+    at async DevServer.renderErrorToResponseImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\base-server.js:1733:26)
+[  734788ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:239:31
+Parsing ecmascript source code failed
+  237 |                 ) : (
+  238 |                         {/* Pie Chart */}
+> 239 |                         <Card data-aos="zoom-in" data-aos-delay="0" className="p-5 flex flex-col h-[340px]">
+      |                               ^^^^
+  240 |                             <div className="text-sm font-bold text-text flex items-center justify-between mb-2">
+  241 |                                 <span>Department Split</span>
+  242 |                                 {selectedDept && (
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  734824ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:239:31
+Parsing ecmascript source code failed
+  237 |                 ) : (
+  238 |                         {/* Pie Chart */}
+> 239 |                         <Card data-aos="zoom-in" data-aos-delay="0" className="p-5 flex flex-col h-[340px]">
+      |                               ^^^^
+  240 |                             <div className="text-sm font-bold text-text flex items-center justify-between mb-2">
+  241 |                                 <span>Department Split</span>
+  242 |                                 {selectedDept && (
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  735593ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/:0
+[  735760ms] Error: ./components/dashboard/AdminDashboard.tsx:239:31
+Parsing ecmascript source code failed
+  237 |                 ) : (
+  238 |                         {/* Pie Chart */}
+> 239 |                         <Card data-aos="zoom-in" data-aos-delay="0" className="p-5 flex flex-col h-[340px]">
+      |                               ^^^^
+  240 |                             <div className="text-sm font-bold text-text flex items-center justify-between mb-2">
+  241 |                                 <span>Department Split</span>
+  242 |                                 {selectedDept && (
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./components/dashboard/AdminDashboard.tsx:239:31)
+    at Object.getCompilationErrors (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\hot-reloader-turbopack.js:1008:59)
+    at DevBundlerService.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\lib\dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:706:42)
+    at DevServer.findPageComponents (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:676:43)
+    at async DevServer.renderErrorToResponseImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\base-server.js:1733:26)
+[  735783ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:239:31
+Parsing ecmascript source code failed
+  237 |                 ) : (
+  238 |                         {/* Pie Chart */}
+> 239 |                         <Card data-aos="zoom-in" data-aos-delay="0" className="p-5 flex flex-col h-[340px]">
+      |                               ^^^^
+  240 |                             <div className="text-sm font-bold text-text flex items-center justify-between mb-2">
+  241 |                                 <span>Department Split</span>
+  242 |                                 {selectedDept && (
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  735811ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:239:31
+Parsing ecmascript source code failed
+  237 |                 ) : (
+  238 |                         {/* Pie Chart */}
+> 239 |                         <Card data-aos="zoom-in" data-aos-delay="0" className="p-5 flex flex-col h-[340px]">
+      |                               ^^^^
+  240 |                             <div className="text-sm font-bold text-text flex items-center justify-between mb-2">
+  241 |                                 <span>Department Split</span>
+  242 |                                 {selectedDept && (
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  769325ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:239:31
+Parsing ecmascript source code failed
+  237 |                 ) : (
+  238 |                         {/* Pie Chart */}
+> 239 |                         <Card data-aos="zoom-in" data-aos-delay="0" className="p-5 flex flex-col h-[340px]">
+      |                               ^^^^
+  240 |                             <div className="text-sm font-bold text-text flex items-center justify-between mb-2">
+  241 |                                 <span>Department Split</span>
+  242 |                                 {selectedDept && (
+
+Expected '</', got 'ident'
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  793717ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:244:34
+Parsing ecmascript source code failed
+  242 |                                 {selectedDept && (
+  243 |                                     <Button variant="ghost" size="sm" onClick={() => setSelectedDept(null)}>Reset</Button>
+> 244 |                                 </>)}
+      |                                  ^^^^
+  245 |                             </div>
+  246 |                             <div className="flex-1 min-h-0 flex flex-col items-center justify-center relative">
+  247 |                                 <div className="h-[160px] w-full relative">
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  801965ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:244:34
+Parsing ecmascript source code failed
+  242 |                                 {selectedDept && (
+  243 |                                     <Button variant="ghost" size="sm" onClick={() => setSelectedDept(null)}>Reset</Button>
+> 244 |                                 </>)}
+      |                                  ^^^^
+  245 |                             </div>
+  246 |                             <div className="flex-1 min-h-0 flex flex-col items-center justify-center relative">
+  247 |                                 <div className="h-[160px] w-full relative">
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  803359ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:244:34
+Parsing ecmascript source code failed
+  242 |                                 {selectedDept && (
+  243 |                                     <Button variant="ghost" size="sm" onClick={() => setSelectedDept(null)}>Reset</Button>
+> 244 |                                 </>)}
+      |                                  ^^^^
+  245 |                             </div>
+  246 |                             <div className="flex-1 min-h-0 flex flex-col items-center justify-center relative">
+  247 |                                 <div className="h-[160px] w-full relative">
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  804114ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:244:34
+Parsing ecmascript source code failed
+  242 |                                 {selectedDept && (
+  243 |                                     <Button variant="ghost" size="sm" onClick={() => setSelectedDept(null)}>Reset</Button>
+> 244 |                                 </>)}
+      |                                  ^^^^
+  245 |                             </div>
+  246 |                             <div className="flex-1 min-h-0 flex flex-col items-center justify-center relative">
+  247 |                                 <div className="h-[160px] w-full relative">
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  804264ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:244:34
+Parsing ecmascript source code failed
+  242 |                                 {selectedDept && (
+  243 |                                     <Button variant="ghost" size="sm" onClick={() => setSelectedDept(null)}>Reset</Button>
+> 244 |                                 </>)}
+      |                                  ^^^^
+  245 |                             </div>
+  246 |                             <div className="flex-1 min-h-0 flex flex-col items-center justify-center relative">
+  247 |                                 <div className="h-[160px] w-full relative">
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920
+[  819153ms] [ERROR] ./components/dashboard/AdminDashboard.tsx:173:18
+Parsing ecmascript source code failed
+  171 |                         <div key="stat-4" data-aos="fade-up" data-aos-delay="320"><DashboardStatCard label="Active Today" value={loginData?.activeTodayCount?.toString() || "0"} sub="logged in today" icon={<span>🔐</span>} /></div>
+  172 |                         <div key="stat-5" data-aos="fade-up" data-aos-delay="400"><DashboardStatCard label="Attrition Rate" value={(data?.stats?.attritionRate || 0).toFixed(1) + "%"} sub="overall attrition" badge={data?.stats?.attritionRate > 5 ? "Alert" : undefined} badgeType={data?.stats?.attritionRate > 5 ? "down" : undefined} icon={<span>📉</span>} /></div>
+> 173 |                 )}
+      |                  ^
+  174 |             </div>
+  175 |
+  176 |             {/* Recent Logins */}
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./components/dashboard/AdminDashboard.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/dashboard/AdminDashboard.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b3fb3b5f._.js:1920

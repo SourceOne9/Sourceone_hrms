@@ -243,6 +243,28 @@
 2. Employees see only their own workflow instances.
 3. Click an instance to view the full action history: who approved/rejected at each step, with timestamps and comments.
 
+## Onboarding
+
+### New Employee Onboarding
+
+1. Employee is created by admin with auto-generated credentials and `onboarding_status` set to incomplete.
+2. On first login, the dashboard detects incomplete onboarding and redirects to `/onboarding`.
+3. The onboarding page presents a multi-step wizard:
+   - **Profile & KYC**: Personal details, emergency contacts, ID documents
+   - **Education**: Degree, institution, field of study, years (via `EmployeeEducation` model)
+   - **Feature Configuration**: Team assignment and module preferences
+   - **Go Live**: Final review and completion
+4. Each step calls `POST /api/v1/employees/onboarding/` to save progress.
+5. On completion, `onboarding_status` is marked complete and `onboarding_completed_at` is set.
+6. The employee is redirected to the main dashboard.
+
+### Auto-Role Assignment
+
+1. When a new employee is created, the system automatically assigns the default role via `auto_assign_default_role`.
+2. Admin can bulk-assign default roles to existing users without roles via `POST /api/v1/rbac/assign-default-roles/`.
+
+---
+
 ## Authentication
 
 ### Login Flow (Django JWT)

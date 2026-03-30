@@ -139,29 +139,57 @@ export default function FeedbackPage() {
     const myEmployeeId = React.useMemo(() => {
         if (!user) return null
         // Prefer direct employeeId from auth context
-        if ((user as any).employeeId) return (user as any).employeeId
+        const directId = (user as any).employeeId
+        if (directId) {
+            const resolved = String(directId).trim()
+            console.debug("[Feedback] myEmployeeId from auth context:", resolved)
+            return resolved
+        }
         // Fallback: match by name
         const me = employees.find(e =>
             `${e.firstName} ${e.lastName}`.toLowerCase() === user.name?.toLowerCase()
         )
-        return me?.id || null
+        const fallbackId = me?.id ? String(me.id).trim() : null
+        console.debug("[Feedback] myEmployeeId from name match:", fallbackId, "| user.name:", user.name)
+        return fallbackId
     }, [user, employees])
 
     const filteredFeedback = React.useMemo(() => {
         if (isAdmin && tab === "all") return feedbackList
+        const myId = myEmployeeId ? String(myEmployeeId).trim() : null
         if (tab === "received") {
             // Feedback where I am the recipient AND I am NOT the sender
-            return feedbackList.filter(f => f.toEmployeeId === myEmployeeId && f.fromEmployeeId !== myEmployeeId)
+            return feedbackList.filter(f => {
+                const toId = f.toEmployeeId ? String(f.toEmployeeId).trim() : ""
+                const fromId = f.fromEmployeeId ? String(f.fromEmployeeId).trim() : ""
+                return toId === myId && fromId !== myId
+            })
         }
         if (tab === "sent") {
             // Feedback where I am the sender
-            return feedbackList.filter(f => f.fromEmployeeId === myEmployeeId)
+            return feedbackList.filter(f => {
+                const fromId = f.fromEmployeeId ? String(f.fromEmployeeId).trim() : ""
+                return fromId === myId
+            })
         }
         return feedbackList
     }, [feedbackList, tab, myEmployeeId, isAdmin])
 
-    const receivedCount = React.useMemo(() => feedbackList.filter(f => f.toEmployeeId === myEmployeeId && f.fromEmployeeId !== myEmployeeId).length, [feedbackList, myEmployeeId])
-    const sentCount = React.useMemo(() => feedbackList.filter(f => f.fromEmployeeId === myEmployeeId).length, [feedbackList, myEmployeeId])
+    const receivedCount = React.useMemo(() => {
+        const myId = myEmployeeId ? String(myEmployeeId).trim() : null
+        return feedbackList.filter(f => {
+            const toId = f.toEmployeeId ? String(f.toEmployeeId).trim() : ""
+            const fromId = f.fromEmployeeId ? String(f.fromEmployeeId).trim() : ""
+            return toId === myId && fromId !== myId
+        }).length
+    }, [feedbackList, myEmployeeId])
+    const sentCount = React.useMemo(() => {
+        const myId = myEmployeeId ? String(myEmployeeId).trim() : null
+        return feedbackList.filter(f => {
+            const fromId = f.fromEmployeeId ? String(f.fromEmployeeId).trim() : ""
+            return fromId === myId
+        }).length
+    }, [feedbackList, myEmployeeId])
 
     const filteredEmployees = React.useMemo(() => {
         // Exclude self from employee picker
@@ -262,7 +290,7 @@ export default function FeedbackPage() {
                         <ChatBubbleIcon className="w-7 h-7 text-blue-500" />
                     </div>
                     <p className="text-sm text-text-3 font-medium">
-                        {tab === "received" ? "No feedback received yet" : tab === "sent" ? "You haven't sent any feedback yet" : "No feedback found"}
+                        {tab === "received" ? "No feedback received yet" : tab === "sent" ? "You haven&apos;t sent any feedback yet" : "No feedback found"}
                     </p>
                     <Button variant="secondary" size="sm" onClick={() => { resetForm(); setShowCreate(true) }}>
                         Give Feedback
@@ -271,10 +299,13 @@ export default function FeedbackPage() {
             ) : (
                 <div className="grid gap-3">
                     {filteredFeedback.map(fb => (
-                        <button
+                        <div
                             key={fb.id}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => setViewFeedback(fb)}
-                            className="w-full text-left"
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setViewFeedback(fb) }}
+                            className="w-full text-left cursor-pointer"
                         >
                             <Card className="p-4 hover:border-accent/30 transition-all group">
                                 <div className="flex items-start gap-3">
@@ -318,7 +349,7 @@ export default function FeedbackPage() {
                                     </span>
                                 </div>
                             </Card>
-                        </button>
+                        </div>
                     ))}
                 </div>
             )}

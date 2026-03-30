@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server"
 import { google } from "@ai-sdk/google"
 import { generateText } from "ai"
+import { z } from "zod"
+import { withAuth, AuthContext } from "@/lib/security"
+import { Module, Action } from "@/lib/permissions"
+
+const chatSchema = z.object({
+    messages: z.array(z.object({
+        role: z.enum(["user", "assistant", "system"]),
+        content: z.string().min(1).max(10_000),
+    })).min(1, "At least one message required").max(50),
+})
 
 const SYSTEM_PROMPT = `You are EMS Pro Assistant — a helpful, concise HR management AI embedded in an Employee Management System.
 
@@ -22,14 +32,14 @@ interface ChatMessage {
     content: string
 }
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
     try {
         const body = await req.json()
-        const messages: ChatMessage[] = body.messages || []
-
-        if (!messages.length) {
-            return NextResponse.json({ reply: "Please send a message." }, { status: 400 })
+        const parsed = chatSchema.safeParse(body)
+        if (!parsed.success) {
+            return NextResponse.json({ reply: "Invalid request: " + parsed.error.issues[0]?.message }, { status: 400 })
         }
+        const messages: ChatMessage[] = parsed.data.messages
 
         const { text } = await generateText({
             model: google("gemini-2.5-flash"),
@@ -58,3 +68,6 @@ export async function POST(req: Request) {
         )
     }
 }
+
+// Chat just requires authentication, no specific module permission
+export const POST = withAuth({ module: Module.DASHBOARD, action: Action.VIEW }, handlePOST)

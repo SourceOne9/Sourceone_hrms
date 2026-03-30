@@ -1,8 +1,8 @@
 import { type Page, expect } from "@playwright/test"
 
-export const TEST_TENANT = "sourceoneai"
-export const TEST_EMAIL = "workashishsinghwork@gmail.com"
-export const TEST_PASSWORD = "Source@2026!"
+export const TEST_TENANT = process.env.TEST_TENANT || ""
+export const TEST_EMAIL = process.env.TEST_EMAIL || ""
+export const TEST_PASSWORD = process.env.TEST_PASSWORD || ""
 
 /**
  * Logs into the HR portal via the login page.

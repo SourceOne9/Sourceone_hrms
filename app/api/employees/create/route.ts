@@ -8,8 +8,21 @@
  * 3. Returns the employee data + generated temp password
  */
 import { NextResponse } from "next/server"
+import crypto from "crypto"
+import { z } from "zod"
 import { salaryStore } from "@/lib/salary-store"
 import { toSnakeCase } from "@/lib/transform"
+import { withAuth, AuthContext } from "@/lib/security"
+import { Module, Action } from "@/lib/permissions"
+
+const createEmployeeSchema = z.object({
+    email: z.string().email("Valid email required"),
+    firstName: z.string().min(1).max(100).optional(),
+    lastName: z.string().min(1).max(100).optional(),
+    first_name: z.string().min(1).max(100).optional(),
+    last_name: z.string().min(1).max(100).optional(),
+    salary: z.union([z.number(), z.string()]).optional(),
+}).passthrough()
 
 function getDjangoBase(): string {
     return (
@@ -30,31 +43,52 @@ function forwardHeaders(req: Request): Record<string, string> {
 }
 
 function generateTempPassword(): string {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"
-    let pw = ""
-    for (let i = 0; i < 12; i++) pw += chars.charAt(Math.floor(Math.random() * chars.length))
-    return pw
+    return crypto.randomBytes(12).toString('base64url').slice(0, 16)
 }
 
-export async function POST(req: Request) {
+async function findExistingUserId(
+    base: string,
+    headers: Record<string, string>,
+    email: string
+): Promise<string | null> {
+    try {
+        const res = await fetch(`${base}/api/v1/users/?limit=1000`, {
+            headers,
+            signal: AbortSignal.timeout(10_000),
+        })
+        if (!res.ok) return null
+        const json = await res.json()
+        const users = json.data?.results || json.results || (Array.isArray(json.data) ? json.data : [])
+        const match = users.find((u: Record<string, unknown>) =>
+            String(u.email || "").toLowerCase() === email.toLowerCase()
+        )
+        return (match?.id as string) || null
+    } catch {
+        return null
+    }
+}
+
+async function handlePOST(req: Request) {
     try {
         const rawBody = await req.json()
+
+        // Server-side validation
+        const parsed = createEmployeeSchema.safeParse(rawBody)
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: { detail: parsed.error.issues.map(i => i.message).join("; ") } },
+                { status: 400 }
+            )
+        }
+
         // Convert camelCase keys from frontend to snake_case for Django
         const body = toSnakeCase(rawBody) as Record<string, unknown>
         const base = getDjangoBase()
         const headers = forwardHeaders(req)
 
-
         const email = (body.email || rawBody.email) as string
         const firstName = (body.first_name || "") as string
         const lastName = (body.last_name || "") as string
-
-        if (!email) {
-            return NextResponse.json(
-                { error: { detail: "Email is required" } },
-                { status: 400 }
-            )
-        }
 
         const tempPassword = generateTempPassword()
 
@@ -78,9 +112,11 @@ export async function POST(req: Request) {
                 const userData = userJson.data || userJson
                 userId = (userData.id as string) || null
             }
-            // If user creation fails (e.g. already exists), continue without user link
+            if (!userId) {
+                userId = await findExistingUserId(base, headers, email)
+            }
         } catch {
-            // User creation network error — continue without user link
+            userId = await findExistingUserId(base, headers, email)
         }
 
         const salary = Number(body.salary || rawBody.salary) || 0
@@ -140,3 +176,5 @@ export async function POST(req: Request) {
         )
     }
 }
+
+export const POST = withAuth({ module: Module.EMPLOYEES, action: Action.CREATE }, handlePOST)

@@ -4,24 +4,15 @@ import * as React from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
-import { api } from "@/lib/api-client"
 
 export function OnboardingCompanion() {
     const [loading, setLoading] = React.useState(true)
     const [message, setMessage] = React.useState<string | null>(null)
 
     React.useEffect(() => {
-        const fetchOnboarding = async () => {
-            try {
-                const { data } = await api.get<{ message: string }>('/onboarding/agent/')
-                setMessage(data.message)
-            } catch (error) {
-                console.error("Failed to fetch onboarding message:", error)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchOnboarding()
+        // Onboarding agent API route is not yet implemented — skip gracefully
+        setLoading(false)
+        setMessage(null)
     }, [])
 
     if (loading) {

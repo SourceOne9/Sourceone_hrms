@@ -32,6 +32,7 @@ interface EmployeeFormModalProps {
     onSubmit: (data: any) => void
     handleAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
     onOpenDeptModal: () => void
+    onboardingStatus?: string
 }
 
 function SectionDivider({ label }: { label: string }) {
@@ -54,6 +55,7 @@ export const EmployeeFormModal = React.memo(function EmployeeFormModal({
     onSubmit,
     handleAvatarUpload,
     onOpenDeptModal,
+    onboardingStatus,
 }: EmployeeFormModalProps) {
     if (!isOpen) return null
 
@@ -105,6 +107,24 @@ export const EmployeeFormModal = React.memo(function EmployeeFormModal({
                 </div>
                 {!isView && <p className="text-[11px] text-text-3 mt-1.5">Square image, max 2MB</p>}
             </div>
+
+            {/* Onboarding Status Badge (view mode) */}
+            {isView && onboardingStatus && (
+                <div className="flex items-center justify-center gap-2 pb-2">
+                    <span className="text-xs font-semibold text-text-3 uppercase">Onboarding:</span>
+                    <span className={"inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold " + (
+                        onboardingStatus === "completed" ? "bg-success/15 text-success" :
+                        onboardingStatus === "in_progress" ? "bg-warning/15 text-warning" :
+                        "bg-neutral/15 text-text-3"
+                    )}>
+                        <span className={"w-1.5 h-1.5 rounded-full " + (
+                            onboardingStatus === "completed" ? "bg-success" :
+                            onboardingStatus === "in_progress" ? "bg-warning" : "bg-text-4"
+                        )} />
+                        {onboardingStatus === "completed" ? "Completed" : onboardingStatus === "in_progress" ? "In Progress" : "Pending"}
+                    </span>
+                </div>
+            )}
 
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 {/* ── Personal Information ── */}
@@ -211,7 +231,7 @@ export const EmployeeFormModal = React.memo(function EmployeeFormModal({
                         />
                         {selectedRole !== "CEO" ? (
                             <Combobox
-                                label="Reporting Manager *"
+                                label="Reporting Manager"
                                 options={managerComboOptions}
                                 value={form.watch('managerId') || ''}
                                 onValueChange={(val) => form.setValue('managerId', val, { shouldValidate: true })}

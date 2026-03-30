@@ -1,6 +1,6 @@
 "use client"
 import * as React from "react"
-import * as XLSX from "xlsx"
+import ExcelJS from "exceljs"
 import { Button } from "@/components/ui/Button"
 
 /**
@@ -51,12 +51,23 @@ export function CsvImportModal({
     function parseFile(file: File) {
         setState("parsing")
         const reader = new FileReader()
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             try {
-                const data = new Uint8Array(e.target!.result as ArrayBuffer)
-                const workbook = XLSX.read(data, { type: "array" })
-                const sheet = workbook.Sheets[workbook.SheetNames[0]]
-                const parsed: Record<string, any>[] = XLSX.utils.sheet_to_json(sheet, { defval: "" })
+                if (!e.target?.result) return
+                const buffer = e.target.result as ArrayBuffer
+                const workbook = new ExcelJS.Workbook()
+                await workbook.xlsx.load(buffer)
+                const sheet = workbook.worksheets[0]
+                if (!sheet) { setState("error"); setErrorMsg("No worksheet found."); return }
+                const headers: string[] = []
+                sheet.getRow(1).eachCell((cell, colNumber) => { headers[colNumber - 1] = String(cell.value ?? "") })
+                const parsed: Record<string, any>[] = []
+                sheet.eachRow((row, rowNumber) => {
+                    if (rowNumber === 1) return
+                    const obj: Record<string, any> = {}
+                    headers.forEach((h, i) => { obj[h] = row.getCell(i + 1).value ?? "" })
+                    parsed.push(obj)
+                })
                 if (parsed.length === 0) {
                     setState("error")
                     setErrorMsg("The file appears to be empty or has no data rows.")
@@ -92,12 +103,14 @@ export function CsvImportModal({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ rows }),
             })
-            const json = await res.json()
             if (!res.ok) {
+                let errorMsg = "Import failed."
+                try { const errJson = await res.json(); errorMsg = errJson.error || errorMsg } catch {}
                 setState("error")
-                setErrorMsg(json.error || "Import failed.")
+                setErrorMsg(errorMsg)
                 return
             }
+            const json = await res.json()
             setImportResult({ inserted: json.inserted ?? rows.length, skipped: json.skipped ?? 0 })
             setState("done")
             onSuccess()
@@ -107,11 +120,18 @@ export function CsvImportModal({
         }
     }
 
-    function downloadTemplate() {
-        const ws = XLSX.utils.aoa_to_sheet([templateHeaders])
-        const wb = XLSX.utils.book_new()
-        XLSX.utils.book_append_sheet(wb, ws, "Template")
-        XLSX.writeFile(wb, `${title.replace(/\s+/g, "_")}_template.xlsx`)
+    async function downloadTemplate() {
+        const wb = new ExcelJS.Workbook()
+        const ws = wb.addWorksheet("Template")
+        ws.addRow(templateHeaders)
+        const buffer = await wb.xlsx.writeBuffer()
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `${title.replace(/\s+/g, "_")}_template.xlsx`
+        a.click()
+        URL.revokeObjectURL(url)
     }
 
     if (!isOpen) return null

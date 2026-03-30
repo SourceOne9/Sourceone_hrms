@@ -1,0 +1,177 @@
+[     146ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/:0
+[     146ms] [ERROR] Loading the stylesheet 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap' violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline'". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback. The action has been blocked. @ http://localhost:3000/:0
+[     232ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[     387ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[    7450ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/roles/capabilities/:0
+[   16638ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   16639ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   16646ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   16648ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   16650ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   16651ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   16656ms] [ERROR] Each child in a list should have a unique "key" prop.%s%s See https://react.dev/link/warning-keys for more information. 
+
+Check the render method of `AdminDashboard`.  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[   17982ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[   17983ms] [ERROR] Dashboard logins fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:728:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  347989ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  662912ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  670347ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://127.0.0.1:8000/api/v1/dashboard/logins/:0
+[  670361ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://127.0.0.1:8000/api/v1/dashboard/:0
+[  730460ms] [ERROR] Dashboard logins fetch failed: TypeError: Failed to fetch
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1060:26)
+    at Object.get (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1200:18)
+    at Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:728:159)
+    at AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:804:175) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  730460ms] [ERROR] Dashboard stats fetch failed: TypeError: Failed to fetch
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1060:26)
+    at Object.get (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1200:18)
+    at Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:159)
+    at AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:798:175) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  730614ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  731117ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  736779ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/roles/capabilities/:0
+[  745202ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  745204ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  745206ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  745207ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  745210ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  745211ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  745218ms] [ERROR] Each child in a list should have a unique "key" prop.%s%s See https://react.dev/link/warning-keys for more information. 
+
+Check the render method of `AdminDashboard`.  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  747281ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  747282ms] [ERROR] Dashboard logins fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:728:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  984856ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[ 1167302ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1197289ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1197290ms] [ERROR] Dashboard logins fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:728:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1227301ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1257287ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1287307ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1287311ms] [ERROR] Dashboard logins fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:728:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1317301ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1317302ms] [ERROR] Dashboard logins fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:728:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1347298ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1347299ms] [ERROR] Dashboard logins fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:728:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1377305ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1377305ms] [ERROR] Dashboard logins fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:728:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1407289ms] [ERROR] Dashboard stats fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:26)
+    at async Promise.all (index 0)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1407297ms] [ERROR] Dashboard logins fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1069:19)
+    at async Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:728:26)
+    at async Promise.all (index 1)
+    at async AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:797:48) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[ 1426712ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0

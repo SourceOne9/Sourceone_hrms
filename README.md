@@ -2,7 +2,7 @@
 
 ## Overview
 
-EMS Pro is a production-grade, multi-tenant Employee Management System. The **frontend** is built with **Next.js 16**, **React 19**, and **TailwindCSS 3.4**. The **backend** runs on **Django 5.1 + Django REST Framework** with DB-per-tenant PostgreSQL isolation. The system includes 7 roles, 18 permissioned modules (63 codenames), 100+ API routes, structured performance reviews, and a desktop agent-based workforce activity tracking surface.
+EMS Pro is a production-grade, multi-tenant Employee Management System. The **frontend** is built with **Next.js 16**, **React 19**, and **TailwindCSS 3.4**. The **backend** runs on **Django 6.0 + Django REST Framework** with DB-per-tenant PostgreSQL isolation. The system includes 7 roles, 18 permissioned modules (63 codenames), 142 API route handlers, 38 pages, 30 Django apps (85+ models), structured performance reviews, a workflow engine, employee onboarding, and a desktop agent-based workforce activity tracking surface.
 
 ## Build Status
 
@@ -15,7 +15,7 @@ EMS Pro is a production-grade, multi-tenant Employee Management System. The **fr
 | Layer | Technology |
 | --- | --- |
 | Frontend | Next.js 16 (App Router, Turbopack), React 19, TailwindCSS 3.4, Radix UI |
-| Backend | Django 5.1, Django REST Framework, SimpleJWT |
+| Backend | Django 6.0, Django REST Framework, SimpleJWT |
 | Backend (Legacy) | Next.js API Routes, Prisma 7.4 (being phased out) |
 | Database | PostgreSQL — DB-per-tenant isolation |
 | Auth | Django SimpleJWT with tenant-aware claims (`lib/django-auth.ts`) |
@@ -34,6 +34,7 @@ EMS Pro is a production-grade, multi-tenant Employee Management System. The **fr
 ### Core HR
 
 - Employee directory with CRUD, avatar upload, and bulk CSV/XLSX import
+- Employee onboarding flow with education, profile, and KYC steps
 - Department management with guarded deletion
 - Teams with team lead assignment and membership management
 - Organization chart and reporting hierarchy management
@@ -106,10 +107,9 @@ RBAC is defined in `lib/permissions.ts` (static matrix) and Django `seed_rbac.py
 
 | Status | Modules |
 | --- | --- |
-| **Done (12)** | Employees, Attendance, Leaves, Training, Announcements, Assets, Documents, Tickets, Recruitment, Resignation, Organization, Teams |
-| **Partial (6)** | Payroll, Performance, Feedback, Reports, Settings, Dashboard |
+| **Done (18)** | Employees, Attendance, Leaves, Training, Announcements, Assets, Documents, Tickets, Recruitment, Resignation, Organization, Teams, Performance, Dashboard, Payroll, Feedback, Reports, Settings |
 
-Frontend clients for all 18 modules already call Django `/api/v1/` endpoints. The 6 partial modules need Django apps (models, views, serializers) to be built.
+Frontend clients for all 18 modules call Django `/api/v1/` endpoints. All 18 modules are 100% migrated and implemented as full Django apps (models, views, serializers).
 
 ---
 
@@ -175,9 +175,12 @@ cd backend/hiringnow && pytest
 
 ## Documentation
 
+- [Codebase Index](docs/CODEBASE_INDEX.md)
 - [System Architecture](docs/SYSTEM_ARCHITECTURE.md)
 - [API Documentation](docs/API_DOCUMENTATION.md)
 - [User Flows](docs/USER_FLOWS.md)
+- [AI Agents](docs/AI_AGENTS.md)
+- [Performance Agent Architecture](docs/PERFORMANCE_AGENT_ARCHITECTURE.md)
 - [Contributing](docs/CONTRIBUTING.md)
 - [Changelog](docs/CHANGELOG.md)
 - [Project Backlog](docs/PROJECT_BACKLOG.md)

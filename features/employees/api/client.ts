@@ -16,6 +16,13 @@ interface CredentialsResponse {
     tempPassword: string
 }
 
+interface RelinkUsersResponse {
+    relinkedCount: number
+    skippedCount: number
+    relinked: Array<{ employeeId: string; userId: string; email: string }>
+    skipped: Array<{ employeeId: string; email: string; reason: string }>
+}
+
 /**
  * Transform a Django employee response into the shape the frontend expects.
  * Django returns `department` as a plain string; the frontend expects it as
@@ -68,8 +75,8 @@ function enrichEmployee(raw: Record<string, unknown>): EmployeeApiData {
         email: (raw.email || "") as string,
         phone: (raw.phone || null) as string | null,
         designation: (raw.designation || "") as string,
-        department: dept ? { id: dept, name: dept, color: "from-[#007aff] to-[#5856d6]" } : undefined,
-        departmentId: (dept || "") as string,
+        department: (raw.departmentDetail as any) || (dept ? { id: dept, name: dept, color: "from-[#007aff] to-[#5856d6]" } : undefined),
+        departmentId: ((raw.departmentDetail as any)?.id || dept || "") as string,
         dateOfJoining: startDate as string,
         salary: (raw.salary || 0) as number,
         status,
@@ -110,11 +117,23 @@ function toDjangoPayload(payload: Record<string, unknown>): Record<string, unkno
     return out
 }
 
+/** Build auth headers for Next.js API route calls (includes JWT + tenant slug). */
+function getNextRouteHeaders(): Record<string, string> {
+    const headers: Record<string, string> = { "Content-Type": "application/json" }
+    if (typeof window !== "undefined") {
+        const token = localStorage.getItem("access_token")
+        if (token) headers["Authorization"] = `Bearer ${token}`
+        const slug = localStorage.getItem("tenant_slug")
+        if (slug) headers["X-Tenant-Slug"] = slug
+    }
+    return headers
+}
+
 /** Save salary to local store (fire-and-forget). */
 function saveSalary(employeeId: string, salary: number): void {
     fetch("/api/employees/salaries", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getNextRouteHeaders(),
         body: JSON.stringify({ employeeId, salary }),
     }).catch(() => { /* best-effort */ })
 }
@@ -123,8 +142,7 @@ function saveSalary(employeeId: string, salary: number): void {
 async function fetchSalaryMap(): Promise<Map<string, number>> {
     const map = new Map<string, number>()
     try {
-        const headers: Record<string, string> = { "Content-Type": "application/json" }
-        const res = await fetch("/api/employees/salaries", { headers })
+        const res = await fetch("/api/employees/salaries", { headers: getNextRouteHeaders() })
         if (res.ok) {
             const json = await res.json()
             const data = json.data || {}
@@ -222,6 +240,11 @@ export const EmployeeAPI = {
         return json.data || json
     },
 
+    relinkUsers: async (): Promise<RelinkUsersResponse> => {
+        const { data } = await api.post<RelinkUsersResponse>("/employees/relink-users/", {})
+        return data
+    },
+
     upsertEmployee: async (isEdit: boolean, id: string | undefined, payload: unknown): Promise<EmployeeApiData> => {
         const rawPayload = payload as Record<string, unknown>
         const salary = Number(rawPayload.salary) || 0
@@ -266,14 +289,7 @@ export const EmployeeAPI = {
     },
 
     fetchManagers: async (): Promise<Array<{ id: string; employeeCode: string; firstName: string; lastName: string; email: string; designation: string }>> => {
-        const headers: Record<string, string> = { "Content-Type": "application/json" }
-        if (typeof window !== "undefined") {
-            const token = localStorage.getItem("access_token")
-            if (token) headers["Authorization"] = `Bearer ${token}`
-            const slug = localStorage.getItem("tenant_slug")
-            if (slug) headers["X-Tenant-Slug"] = slug
-        }
-        const res = await fetch("/api/employees/managers", { headers })
+        const res = await fetch("/api/employees/managers", { headers: getNextRouteHeaders() })
         if (!res.ok) return []
         const json = await res.json()
         return json.data || json || []

@@ -330,6 +330,20 @@ All team routes proxy to Django via `proxyToDjango()`. They require Django JWT a
 
 - `GET /api/teams/org-chart` — Hierarchical employee → manager tree for org chart visualization
 
+### Onboarding (Django-backed)
+
+- `GET /api/v1/employees/onboarding/` — Get current employee's onboarding status and steps
+- `POST /api/v1/employees/onboarding/` — Submit onboarding step data (education, KYC, etc.)
+
+### RBAC Management (Django-backed)
+
+- `GET /api/v1/permissions/` — List all permission codenames for the current user
+- `GET/POST /api/v1/rbac/roles/` — List/create RBAC roles
+- `GET/PUT/DELETE /api/v1/rbac/roles/{id}/` — RBAC role detail
+- `GET/POST /api/v1/rbac/roles/{id}/permissions/` — Manage role permissions
+- `GET/POST /api/v1/users/{id}/roles/` — Manage user role assignments
+- `POST /api/v1/rbac/assign-default-roles/` — Bulk assign default roles to all users without roles
+
 ### Other Modules
 
 - `/api/leaves`
@@ -417,7 +431,11 @@ Defined in `lib/schemas/agent.ts`:
 | `/api/v1/workflows/instances/{id}/` | GET | Instance detail | `app/api/workflows/action/` |
 | `/api/v1/workflows/instances/{id}/action/` | POST | Approve/reject/return | `app/api/workflows/action/` |
 
-All feature API clients in `features/*/api/client.ts` call Django via `api.get/post/put/delete` from `lib/api-client.ts`.
+| `/api/v1/employees/onboarding/` | GET/POST | Onboarding status/submission | `app/api/onboarding/agent/` |
+| `/api/v1/rbac/assign-default-roles/` | POST | Bulk assign default roles | Admin tools |
+| `/api/v1/employees/relink-users/` | POST | Relink user accounts to employees | `app/api/employees/relink-users/` |
+
+All feature API clients in `features/*/api/client.ts` (22 domain modules) call Django via `api.get/post/put/delete` from `lib/api-client.ts`.
 
 ---
 

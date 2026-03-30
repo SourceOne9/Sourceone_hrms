@@ -107,7 +107,7 @@ export default async function middleware(req: NextRequest) {
         // Server-side route protection: check for JWT in Authorization header or cookie
         const authHeader = req.headers.get("authorization")
         const hasHeaderToken = authHeader?.startsWith("Bearer ")
-        const hasCookieToken = req.cookies.has("access_token")
+        const hasCookieToken = req.cookies.has("access_token") || req.cookies.has("ems_authenticated")
 
         if (!hasHeaderToken && !hasCookieToken) {
             // Embedded mode: redirect to parent platform's login
@@ -122,8 +122,46 @@ export default async function middleware(req: NextRequest) {
         }
     }
 
+    // CSRF protection: double-submit cookie pattern for state-mutating API requests
+    const mutatingMethods = ["POST", "PUT", "PATCH", "DELETE"]
+    if (pathname.startsWith("/api/") && mutatingMethods.includes(req.method)) {
+        // Skip CSRF for token-auth-only routes (cron, agent, SCIM) — they use Bearer tokens, not cookies
+        const skipCsrf = pathname.startsWith("/api/cron/") ||
+            pathname.startsWith("/api/agent/") ||
+            pathname.startsWith("/api/scim/") ||
+            pathname.startsWith("/api/worker/") ||
+            pathname.startsWith("/api/auth/")
+
+        if (!skipCsrf) {
+            const csrfCookie = req.cookies.get("csrf_token")?.value
+            const csrfHeader = req.headers.get("x-csrf-token")
+
+            // Only enforce if the request uses cookie-based auth (ems_authenticated cookie present)
+            if (req.cookies.has("ems_authenticated") && csrfCookie && csrfHeader !== csrfCookie) {
+                return addSecurityHeaders(
+                    NextResponse.json(
+                        { error: "CSRF token mismatch" },
+                        { status: 403 }
+                    )
+                )
+            }
+        }
+    }
+
     // Always add security headers
     const response = NextResponse.next()
+
+    // Set CSRF token cookie if not present (readable by JS for double-submit pattern)
+    if (!req.cookies.has("csrf_token")) {
+        const csrfToken = globalThis.crypto.randomUUID()
+        response.cookies.set("csrf_token", csrfToken, {
+            path: "/",
+            httpOnly: false, // JS must read this to send in header
+            sameSite: "lax",
+            secure: req.nextUrl.protocol === "https:",
+            maxAge: 60 * 60 * 24, // 24 hours
+        })
+    }
 
     // K11: Rate limiting for API routes
     if (pathname.startsWith("/api/")) {

@@ -17,7 +17,7 @@ export default function ChangePasswordPage() {
     const [error, setError] = React.useState("")
     const [success, setSuccess] = React.useState(false)
 
-    // If user doesn't require password change, redirect home
+    // If user doesn&apos;t require password change, redirect home
     React.useEffect(() => {
         if (user && !user.mustChangePassword && !success) {
             router.replace("/")
@@ -39,10 +39,12 @@ export default function ChangePasswordPage() {
 
         setLoading(true)
         try {
-            const { data } = await api.put('/users/password/', { newPassword, isFirstLogin: true }) as any
+            const { data } = await api.post('/users/password/', { newPassword, isFirstLogin: true }) as any
             setSuccess(true)
-            // User state will refresh on dashboard load via getMe()
-            setTimeout(() => router.replace("/"), 2000)
+            // Full page reload to refresh auth state (mustChangePassword cleared on server)
+            setTimeout(() => {
+                window.location.href = "/"
+            }, 2000)
         } catch (err: any) {
             const message = err?.data?.error || err?.message || "Something went wrong. Please try again."
             setError(message)

@@ -6,6 +6,9 @@
  * Returns the saved config regardless of Django sync outcome.
  */
 import { NextResponse } from "next/server"
+import { z } from "zod"
+import { withAuth, AuthContext } from "@/lib/security"
+import { Module, Action } from "@/lib/permissions"
 
 const DJANGO_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
 
@@ -35,6 +38,11 @@ const MODULE_TO_CODENAME: Record<string, string> = {
   feedback: "feedback",
 }
 
+const configureSchema = z.object({
+  enabledModules: z.record(z.string(), z.boolean()),
+  tenantSlug: z.string().min(1).max(100),
+})
+
 interface ConfigureRequest {
   enabledModules: Record<string, boolean>
   tenantSlug: string
@@ -63,17 +71,17 @@ async function syncFeatureToDjango(
   }
 }
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   try {
-    const body = (await req.json()) as ConfigureRequest
-    const { enabledModules, tenantSlug } = body
-
-    if (!enabledModules || !tenantSlug) {
+    const body = await req.json()
+    const parsed = configureSchema.safeParse(body)
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "enabledModules and tenantSlug are required" },
+        { error: parsed.error.issues.map(i => i.message).join("; ") },
         { status: 400 }
       )
     }
+    const { enabledModules, tenantSlug } = parsed.data
 
     // Build the codename→enabled map for Django
     const featureFlags: Record<string, boolean> = {}
@@ -115,3 +123,5 @@ export async function POST(req: Request) {
     )
   }
 }
+
+export const POST = withAuth({ module: Module.SETTINGS, action: Action.UPDATE }, handlePOST)

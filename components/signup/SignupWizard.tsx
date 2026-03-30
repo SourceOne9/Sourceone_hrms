@@ -57,6 +57,8 @@ export function SignupWizard() {
 
   const [isLaunching, setIsLaunching] = useState(false)
   const [launchError, setLaunchError] = useState("")
+  const [provisionStep, setProvisionStep] = useState("")
+  const [provisionProgress, setProvisionProgress] = useState(0)
 
   /** Send team invites (fire-and-forget — don't block launch) */
   const processTeamInvites = useCallback(async (token: string) => {
@@ -128,6 +130,7 @@ export function SignupWizard() {
         password: data.adminPassword,
         firstName: data.adminFirstName,
         lastName: data.adminLastName,
+        onProgress: (step: string, progress: number) => { setProvisionStep(step); setProvisionProgress(progress) },
       })
 
       // register() already returns tokens and saves them to localStorage + cookie
@@ -211,6 +214,9 @@ export function SignupWizard() {
             goToStep={goToStep}
             onLaunch={handleLaunch}
             isLaunching={isLaunching}
+            launchError={launchError}
+            provisionStep={provisionStep}
+            provisionProgress={provisionProgress}
           />
         )
       default:

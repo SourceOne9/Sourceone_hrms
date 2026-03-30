@@ -4,6 +4,65 @@ All notable changes to EMS Pro are documented here.
 
 ---
 
+## [5.5.0] - 2026-03-30
+
+### Added
+
+- **Employee Onboarding Flow** — Full onboarding system with `onboarding_status` and `onboarding_completed_at` fields on Employee model. New `EmployeeEducation` model with migration. `GET/POST /api/v1/employees/onboarding/` endpoint. Dashboard redirects incomplete onboarding users to `/onboarding` page with UI stubs and header
+- **RBAC Auto-Role Assignment** — `auto_assign_default_role` logic assigns default role on employee creation. New `POST /api/v1/rbac/assign-default-roles/` bulk-assign endpoint. Warning/logging in permission lookup for missing roles
+- **Reimbursement Detail Route** — `GET /api/reimbursements/{id}` proxy with deprecation warning
+- **Documents Scope Filter** — Documents API supports `scope` param (public/mine) and tolerates null `uploaded_by`
+- **Employee Experience Fields** — `previous_experience_years` and `total_experience_years` added to EmployeeProfile serializer
+- **Employee Previous CTC** — New `previous_ctc` field on Employee model with migration
+- **Auth Marker Helper** — `setAuthMarker()` utility added for client-side auth state tracking
+- **Core Features Batch** — PF view, time tracking improvements, notification system, admin dashboards, and various API route additions
+
+### Changed
+
+- **Auth & Permissions Enforcement** — All server routes now wrapped with `withAuth({ module, action })` and RBAC permissions. Admin pages (activity, integrations, performance, identity) use client-side `canAccessModule` checks with redirects
+- **Documents Page** — Replaced documents list page with role-based redirect to `/admin/documents` or `/employee/documents`
+- **Profile Page** — Many non-editable fields restricted to read-only; minimal editable-fields payload on PUT; revamped document upload flow (upload to storage then create Django document record)
+- **Teams UI Overhaul** — New header, compact stats row, redesigned team cards, improved search/count display, hover actions for edit/delete. Listing permission tightened to `teams.manage`
+- **Payroll Normalization** — Renamed `otherDed` → `otherDeductions` across types/forms/UI. Added numeric parsing/normalization helpers for payroll/PF/payslip records. Payslip download now includes auth headers. CSV import endpoints/headers fixed
+- **Backend Serializers** — DocumentSerializer exposes `url` and `upload_date`; Employee profile serializer adds experience fields, serializes assets, exposes additional profile fields; Employee view prefetches assets
+- **Cron Security** — Performance evaluation cron endpoint now validates `CRON_SECRET`
+- **Daily Activity Report** — Content wrapped in Suspense with Spinner for loading UX
+- **AgentActivityWidget** — Now fetches daily-report with today→yesterday fallback
+- **TimeTracker** — Heartbeat no longer posts to server (client-only idle detection)
+- **Auth Serializer** — Exposes `onboarding_status` in JWT/me response
+
+### Fixed
+
+- **Duplicate Module Imports** — Resolved multiple frontend import issues where `Module` was imported twice (affecting attendance, payroll, reimbursement and other pages)
+- **Auth Parsing Error** — Fixed syntax/parsing error in `lib/django-auth.ts` (extra brace) that broke client-side auth cleanup
+- **DB Router Resilience** — Made DB router resilient to single-DB/fallback scenarios
+- **Invite Email** — Improved invite email to point to onboarding and clarify login instructions
+
+### Security
+
+- Enforced `withAuth()` with module/action permissions across all previously unprotected API routes
+- Client-side permission checks added for admin pages to prevent unauthorized access
+- Cron endpoint secured with `CRON_SECRET` validation
+
+---
+
+## [5.4.1] - 2026-03-26
+
+### Documentation
+
+- **Full Documentation Refresh** — Updated all 11 docs/markdown files to reflect current codebase state:
+  - `CODEBASE_INDEX.md`: Complete rewrite with verified counts (142 route handlers, 93 component files, 22 feature modules, 41 lib files, 30 Django apps)
+  - `SYSTEM_ARCHITECTURE.md`: Migration status updated (18/18 done, 100% complete), route count corrected, Gemini model version fixed (2.0 Flash)
+  - `README.md`: Migration status updated to 100% complete, stats updated, 3 missing doc links added (Codebase Index, AI Agents, Performance Agent Architecture)
+  - `API_DOCUMENTATION.md`: Module count updated (22 domain modules)
+  - `CONTRIBUTING.md`: Backend path fixed (`backend/hiringnow/`), project structure tree updated with accurate file counts
+  - `AI_AGENTS.md`: Gemini model version corrected, migration status clarified
+  - `PROJECT_BACKLOG.md`: Updated to Sprint 2 in progress, last-updated date refreshed
+  - `backend/hiringnow/README.md`: Title changed to EMS Pro, Django version fixed (5.1), all 30 apps documented
+  - `PERFORMANCE_AGENT_ARCHITECTURE.md` and `USER_FLOWS.md`: Reviewed, confirmed accurate
+
+---
+
 ## [5.4.0] - 2026-03-23
 
 ### Added

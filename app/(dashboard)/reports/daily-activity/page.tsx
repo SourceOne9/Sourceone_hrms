@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { Suspense } from "react"
 import { PageHeader } from "@/components/ui/PageHeader"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { StatCard } from "@/components/ui/StatCard"
@@ -9,6 +10,10 @@ import { Input } from "@/components/ui/Input"
 import { BarChartIcon, ClockIcon, LaptopIcon } from "@radix-ui/react-icons"
 import { useSearchParams } from "next/navigation"
 import { api } from "@/lib/api-client"
+import { Spinner } from "@/components/ui/Spinner"
+import { useAuth } from "@/context/AuthContext"
+import { useRouter } from "next/navigation"
+import { canAccessModule, Module } from "@/lib/permissions"
 
 interface Report {
     id: string
@@ -34,7 +39,7 @@ function formatTime(s: number): string {
     return `${h}h ${m}m`
 }
 
-export default function DailyActivityReportPage() {
+function DailyActivityReportContent() {
     const searchParams = useSearchParams()
     const [date, setDate] = React.useState(searchParams.get("date") || new Date().toISOString().split("T")[0])
     const [report, setReport] = React.useState<Report | null>(null)
@@ -215,5 +220,17 @@ export default function DailyActivityReportPage() {
                 </div>
             )}
         </div>
+    )
+}
+
+export default function DailyActivityReportPage() {
+    const { user, isLoading } = useAuth()
+    const router = useRouter()
+    React.useEffect(() => { if (!isLoading && user && !canAccessModule(user.role, Module.REPORTS)) router.push("/") }, [user, isLoading, router])
+
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center py-20 gap-2 text-text-3"><Spinner size="lg" /> Loading...</div>}>
+            <DailyActivityReportContent />
+        </Suspense>
     )
 }

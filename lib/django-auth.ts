@@ -2,16 +2,29 @@
  * Django JWT authentication helpers.
  * Replaces NextAuth.js with direct Django SimpleJWT integration.
  *
- * TODO(security): Migrate JWT storage from localStorage to httpOnly cookies.
- * Current flow: login() stores tokens in localStorage, api-client.ts reads them.
- * Target flow: Django sets httpOnly cookies, api-client.ts sends credentials: 'include'.
- * Requires Django: SESSION_COOKIE_HTTPONLY=True, CSRF_COOKIE_HTTPONLY=False (for CSRF token).
- * See: docs/superpowers/plans/2026-03-23-security-fixes.md Task 12 Phase 2.
+ * Auth strategy (hybrid cookie + localStorage):
+ * - Django sets httpOnly cookies on login/register/refresh responses
+ * - Frontend sends `credentials: "include"` so cookies are sent automatically
+ * - localStorage fallback for cross-origin dev (when Django runs on a different port)
+ * - In same-origin production, httpOnly cookies take full precedence
+ * - `isCrossOrigin()` check ensures tokens only go to localStorage in dev
  */
 
 import { toCamelCase } from "./transform";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
+/** Check if Django backend is on a different origin (cross-origin dev).
+ *  In cross-origin mode, httpOnly cookies won't work, so we use localStorage. */
+function isCrossOrigin(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const backendOrigin = new URL(BASE_URL).origin;
+    return window.location.origin !== backendOrigin;
+  } catch {
+    return true;
+  }
+}
 
 /** Shared refresh promise — prevents concurrent refresh calls across the entire app.
  *  Both django-auth.ts and api-client.ts must use this to avoid race conditions
@@ -26,21 +39,24 @@ export function decodeJwtPayload(token: string): Record<string, unknown> {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return {};
-    const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    let payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    while (payload.length % 4) payload += '=';
     return JSON.parse(atob(payload));
   } catch {
     return {};
   }
 }
 
-/** Set a cookie so Next.js middleware can detect authentication */
-function setAuthCookie(token: string): void {
+/** Set a lightweight marker cookie for middleware auth detection */
+function setAuthMarker(): void {
   const maxAge = 60 * 60 * 24 * 7; // 7 days — matches refresh token lifetime
-  document.cookie = `access_token=${token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `ems_authenticated=1; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
 }
 
-/** Clear the auth cookie */
-function clearAuthCookie(): void {
+/** Clear the auth marker cookie */
+function clearAuthMarker(): void {
+  document.cookie = "ems_authenticated=; path=/; max-age=0; SameSite=Lax";
   document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax";
 }
 
@@ -67,6 +83,7 @@ export interface AuthUser {
   accentColor: string;
   bio: string;
   mustChangePassword: boolean;
+  onboardingStatus: string | null;
   lastLoginAt: string | null;
   tenantId: string;
   tenantSlug: string;
@@ -87,13 +104,18 @@ export interface RegisterPayload {
   password: string;
   firstName?: string;
   lastName?: string;
+  onProgress?: (step: string, progress: number) => void;
 }
 
 async function authFetch<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  // Registration creates a new DB + runs migrations — needs longer timeout
+  const timeoutMs = path.includes("/register") ? 60_000 : 15_000;
   const response = await fetch(`${BASE_URL}/api/v1/auth${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   const text = await response.text();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,34 +160,50 @@ export async function login(payload: LoginPayload): Promise<AuthTokens & { user:
     password: payload.password,
   });
 
-  localStorage.setItem("access_token", result.access);
-  localStorage.setItem("refresh_token", result.refresh);
-  setAuthCookie(result.access);
+  // Only store in localStorage for cross-origin dev (httpOnly cookies won't work cross-origin).
+  // In same-origin production, Django's httpOnly cookies handle auth automatically.
+  if (isCrossOrigin()) {
+    localStorage.setItem("access_token", result.access);
+    localStorage.setItem("refresh_token", result.refresh);
+  }
   persistTenantFromJwt(result.access, payload.tenantSlug);
+  setAuthMarker();
   scheduleProactiveRefresh(result.access);
 
   return result;
 }
 
 export async function register(payload: RegisterPayload): Promise<AuthTokens & { user: Record<string, unknown> }> {
-  const result = await authFetch<AuthTokens & { user: Record<string, unknown> }>("/register/", {
-    tenant_name: payload.tenantName,
-    tenant_slug: payload.tenantSlug,
-    email: payload.email,
-    password: payload.password,
-    first_name: payload.firstName || "",
-    last_name: payload.lastName || "",
+  const response = await fetch(`${BASE_URL}/api/v1/auth/register/`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
+    body: JSON.stringify({ tenant_name: payload.tenantName, tenant_slug: payload.tenantSlug,
+      email: payload.email, password: payload.password,
+      first_name: payload.firstName || "", last_name: payload.lastName || "" }),
+    signal: AbortSignal.timeout(15_000),
   });
-
-  localStorage.setItem("access_token", result.access);
-  localStorage.setItem("refresh_token", result.refresh);
-  setAuthCookie(result.access);
-  persistTenantFromJwt(result.access, payload.tenantSlug);
-  scheduleProactiveRefresh(result.access);
-
+  const text = await response.text();
+  const json = text ? JSON.parse(text) : {};
+  const data = json.data !== undefined ? json.data : json;
+  if (!response.ok && response.status !== 202) {
+    const errObj = json.error || json;
+    const detail = errObj.detail;
+    const message = Array.isArray(detail) ? detail.join(". ") : (typeof detail === "string" ? detail : JSON.stringify(errObj));
+    throw new Error(message || "Registration failed");
+  }
+  if (response.status === 202 || data.status === "provisioning") {
+    return await pollProvisioningStatus(payload.tenantSlug, payload.onProgress);
+  }
+  const result = data as AuthTokens & { user: Record<string, unknown> };
+  if (result.access) {
+    if (isCrossOrigin()) { localStorage.setItem("access_token", result.access); if (result.refresh) localStorage.setItem("refresh_token", result.refresh); }
+    persistTenantFromJwt(result.access, payload.tenantSlug); setAuthMarker(); scheduleProactiveRefresh(result.access);
+  }
   return result;
 }
 
+
+
+export async function pollProvisioningStatus(tenantSlug: string, onProgress?: (step: string, progress: number) => void): Promise<AuthTokens & { user: Record<string, unknown> }> { const maxAttempts = 120; for (let i = 0; i < maxAttempts; i++) { await new Promise(r => setTimeout(r, 2000)); const res = await fetch(`${BASE_URL}/api/v1/auth/register/status/${tenantSlug}/`, { credentials: "include" }); if (!res.ok) throw new Error("Failed to check provisioning status"); const json = await res.json(); const data = json.data !== undefined ? json.data : json; if (onProgress) onProgress(data.step || "unknown", data.progress || 0); if (data.step === "failed") throw new Error(data.error || "Provisioning failed"); if (data.step === "completed" && data.access) { const result = { access: data.access, refresh: data.refresh, user: data.user || {} }; if (isCrossOrigin()) { localStorage.setItem("access_token", result.access); if (result.refresh) localStorage.setItem("refresh_token", result.refresh); } persistTenantFromJwt(result.access, tenantSlug); setAuthMarker(); scheduleProactiveRefresh(result.access); return result as AuthTokens & { user: Record<string, unknown> }; } } throw new Error("Provisioning timed out"); }
 /** Schedule a proactive token refresh 2 minutes before expiry */
 function scheduleProactiveRefresh(accessToken: string): void {
   if (typeof window === "undefined") return;
@@ -188,20 +226,20 @@ function scheduleProactiveRefresh(accessToken: string): void {
 
 /** Core refresh logic — always use via refreshToken() which deduplicates */
 async function doRefresh(): Promise<string> {
-  const refresh = localStorage.getItem("refresh_token");
-  if (!refresh) throw new Error("No refresh token available");
+  // In cross-origin dev, send refresh token from localStorage.
+  // In same-origin prod, Django reads it from the httpOnly cookie automatically.
+  const refresh = isCrossOrigin() ? localStorage.getItem("refresh_token") : null;
+  const result = await authFetch<{ access: string; refresh?: string }>("/refresh/", refresh ? { refresh } : {});
 
-  const result = await authFetch<{ access: string; refresh?: string }>("/refresh/", {
-    refresh,
-  });
-
-  localStorage.setItem("access_token", result.access);
-  if (result.refresh) {
-    localStorage.setItem("refresh_token", result.refresh);
+  if (isCrossOrigin()) {
+    if (result.access) localStorage.setItem("access_token", result.access);
+    if (result.refresh) localStorage.setItem("refresh_token", result.refresh);
   }
-  setAuthCookie(result.access);
-  persistTenantFromJwt(result.access);
-  scheduleProactiveRefresh(result.access);
+  setAuthMarker();
+  if (result.access) {
+    persistTenantFromJwt(result.access);
+    scheduleProactiveRefresh(result.access);
+  }
 
   return result.access;
 }
@@ -217,64 +255,50 @@ export async function refreshToken(): Promise<string> {
 }
 
 export async function logout(): Promise<void> {
-  const refresh = localStorage.getItem("refresh_token");
-  if (refresh) {
-    try {
-      await authFetch("/logout/", { refresh });
-    } catch {
-      // Token already invalid — non-fatal
-    }
+  const refresh = isCrossOrigin() ? localStorage.getItem("refresh_token") : null;
+  try {
+    await authFetch("/logout/", refresh ? { refresh } : {});
+  } catch {
+    // non-fatal — server clears httpOnly cookies on its side
   }
   if (refreshTimerId) { clearTimeout(refreshTimerId); refreshTimerId = null; }
+  // Always clean up localStorage (may be empty in same-origin mode, but safe to call)
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
   localStorage.removeItem("tenant_slug");
   localStorage.removeItem("tenant_id");
-  clearAuthCookie();
+  clearAuthMarker();
 }
 
 export async function getMe(): Promise<AuthUser> {
-  let token = localStorage.getItem("access_token");
-  if (!token) throw new Error("Not authenticated");
-
-  // Check if token is expired or about to expire (< 30s left) — refresh proactively
-  const claims = decodeJwtPayload(token);
-  const exp = claims.exp as number | undefined;
-  if (exp && exp * 1000 - Date.now() < 30_000) {
-    try {
-      token = await refreshToken();
-    } catch {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      throw new Error("Session expired");
-    }
-  }
-
-  // Schedule proactive refresh for the current token (on initial page load)
-  scheduleProactiveRefresh(token);
-
+  // Use Authorization header (localStorage fallback for cross-origin dev)
+  // plus credentials: include for httpOnly cookie (same-origin prod)
+  const token = localStorage.getItem("access_token");
   const slug = localStorage.getItem("tenant_slug");
   const headers: Record<string, string> = {
-    Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   if (slug) headers["X-Tenant-Slug"] = slug;
 
-  const response = await fetch(`${BASE_URL}/api/v1/auth/me/`, { headers });
+  const response = await fetch(`${BASE_URL}/api/v1/auth/me/`, {
+    headers,
+    credentials: "include",
+  });
 
   if (response.status === 401) {
-    // Try refreshing the token — uses shared dedup
     try {
-      const newToken = await refreshToken();
-      headers["Authorization"] = `Bearer ${newToken}`;
-      const retryResponse = await fetch(`${BASE_URL}/api/v1/auth/me/`, { headers });
+      await refreshToken();
+      const retryResponse = await fetch(`${BASE_URL}/api/v1/auth/me/`, {
+        headers,
+        credentials: "include",
+      });
       if (!retryResponse.ok) throw new Error("Auth failed after refresh");
       const retryJson = await retryResponse.json();
       const retryPayload = retryJson.data !== undefined ? retryJson.data : retryJson;
       return toCamelCase<AuthUser>(retryPayload);
     } catch {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
+      clearAuthMarker();
       throw new Error("Session expired");
     }
   }
@@ -284,7 +308,8 @@ export async function getMe(): Promise<AuthUser> {
   const payload = json.data !== undefined ? json.data : json;
   return toCamelCase<AuthUser>(payload);
 }
-
 export function isAuthenticated(): boolean {
-  return !!localStorage.getItem("access_token");
+  if (typeof window === "undefined") return false;
+  // Check for the marker cookie (actual JWT is in httpOnly cookie)
+  return document.cookie.includes("ems_authenticated=1") || !!localStorage.getItem("access_token");
 }
