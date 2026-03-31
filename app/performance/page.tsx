@@ -13,7 +13,11 @@ export default function PerformancePage() {
     const router = useRouter()
     React.useEffect(() => { if (!isLoading && user && !canAccessModule(user.role, Module.PERFORMANCE)) router.push("/") }, [user, isLoading, router])
 
-    const role = user?.role
+    if (isLoading || !user) {
+        return <div className="flex items-center justify-center min-h-[400px]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" /></div>
+    }
+
+    const role = user.role
 
     if (role === Roles.CEO || role === Roles.HR || role === Roles.TEAM_LEAD) {
         return <AdminPerformanceView />

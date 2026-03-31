@@ -13,14 +13,11 @@ import { StatCard } from "@/components/ui/StatCard"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { DailyReviewForm } from "./DailyReviewForm"
 import { MonthlyReviewForm } from "./MonthlyReviewForm"
-import { SelfReviewForm } from "./SelfReviewForm"
 import { DailySelfReviewForm } from "./DailySelfReviewForm"
 import { ReviewDetailView } from "./ReviewDetailView"
 import { TeamReviewForm } from "./TeamReviewForm"
 import { LeaderMonthlySelfReview } from "./LeaderMonthlySelfReview"
 import { AppraisalForm } from "./AppraisalForm"
-import { PerformanceTemplateEditor } from "./PerformanceTemplateEditor"
-import { GearIcon } from "@radix-ui/react-icons"
 import { toast } from "sonner"
 import { format } from "date-fns"
 import { useAuth } from "@/context/AuthContext"
@@ -189,10 +186,11 @@ export function AdminPerformanceView() {
     // CEO/HR filter mode: "individual" or "team-wise"
     const [filterMode, setFilterMode] = React.useState<"individual" | "team-wise">("individual")
 
-    // Resolve the logged-in user's employee ID
-    const [selfEmployeeId, setSelfEmployeeId] = React.useState<string | null>(null)
+    // Resolve the logged-in user's employee ID (ref to avoid re-render cascade)
+    const selfEmployeeIdRef = React.useRef<string | null>(null)
 
     const fetchAll = React.useCallback(async () => {
+        if (!user?.role) return
         try {
             setIsLoading(true)
             const role = user?.role
@@ -204,13 +202,13 @@ export function AdminPerformanceView() {
                 // Resolve this user's employee ID first, then find their team
                 empPromise = (async () => {
                     // Get the logged-in user's employee ID
-                    let myEmployeeId: string | null = selfEmployeeId
+                    let myEmployeeId: string | null = selfEmployeeIdRef.current
                     if (!myEmployeeId) {
                         try {
                             const { data: profileData } = await api.get<any>('/employees/profile/')
                             const pData = profileData
                             myEmployeeId = pData?.employeeId || pData?.id || null
-                            if (myEmployeeId) setSelfEmployeeId(myEmployeeId)
+                            if (myEmployeeId) selfEmployeeIdRef.current = myEmployeeId
                         } catch { /* ignore */ }
                     }
 
@@ -226,7 +224,8 @@ export function AdminPerformanceView() {
                         if (myTeam) {
                             // Fetch team detail which includes members
                             const teamDetail = await TeamAPI.get(myTeam.id)
-                            return extractArray<any>(teamDetail.members || [])
+                            const members = extractArray<any>(teamDetail.members || [])
+                            return members
                         }
                     } catch { /* ignore */ }
                     return []
@@ -248,7 +247,20 @@ export function AdminPerformanceView() {
             let mapped: Employee[] = []
             if (empArr && empArr.length > 0) {
                 mapped = empArr.map((e: any) => {
-                    if (e.employee) {
+                    // Team member format: { employee: "uuid", employeeName: "...", designation: "..." }
+                    if (e.employee && typeof e.employee === "string") {
+                        const nameParts = (e.employeeName || "").split(/\s+/)
+                        return {
+                            id: e.employee,
+                            firstName: nameParts[0] || "",
+                            lastName: nameParts.slice(1).join(" ") || "",
+                            designation: e.designation || e.role || undefined,
+                            avatarUrl: e.avatarUrl || null,
+                            department: undefined,
+                        }
+                    }
+                    // Employee list format: { employee: { id, firstName, ... } }
+                    if (e.employee && typeof e.employee === "object") {
                         return {
                             id: e.employee.id,
                             firstName: e.employee.firstName,
@@ -279,7 +291,7 @@ export function AdminPerformanceView() {
                 }
             }
 
-            setEmployees(mapped)
+            setEmployees(prev => mapped.length > 0 ? mapped : prev)
 
             // Fetch teams for CEO/HR team-wise grouping
             if (role === "CEO" || role === "HR") {
@@ -312,19 +324,17 @@ export function AdminPerformanceView() {
 
     // Resolve self employee ID from profile API
     const resolveSelfEmployeeId = React.useCallback(async (): Promise<string | null> => {
-        if (selfEmployeeId) return selfEmployeeId
+        if (selfEmployeeIdRef.current) return selfEmployeeIdRef.current
         try {
             const { data } = await api.get<any>('/employees/profile/')
-            // flattenEmployee() can overwrite `id` with sub-model ids,
-            // so prefer `employeeId` (from EmployeeProfile/Address/Banking) first
             const empId = data?.employeeId || data?.id
             if (empId) {
-                setSelfEmployeeId(empId)
+                selfEmployeeIdRef.current = empId
                 return empId
             }
         } catch { /* non-critical */ }
         return null
-    }, [selfEmployeeId])
+    }, [])
 
     // Fetch performance template on mount
     const fetchTemplate = React.useCallback(async () => {
@@ -334,10 +344,11 @@ export function AdminPerformanceView() {
         } catch { /* non-critical -- forms fall back to hardcoded defaults */ }
     }, [])
 
-    // Eagerly resolve on mount
-    React.useEffect(() => { resolveSelfEmployeeId() }, [resolveSelfEmployeeId])
-
-    React.useEffect(() => { fetchAll() }, [fetchAll])
+    // Data fetch effect — resolveSelfEmployeeId populates the ref, then fetchAll uses it.
+    // The defensive setEmployees(prev => ...) in fetchAll prevents stale empty overwrites.
+    React.useEffect(() => {
+        resolveSelfEmployeeId().then(() => fetchAll())
+    }, [fetchAll, resolveSelfEmployeeId])
 
     React.useEffect(() => { fetchTemplate() }, [fetchTemplate])
 
@@ -418,11 +429,15 @@ export function AdminPerformanceView() {
         return employees.find(e => e.id === selectedEmployeeId) || null
     }, [employees, selectedEmployeeId])
 
+    // Derive selfEmployeeId for JSX from ref or auth context
+    const selfEmployeeId = selfEmployeeIdRef.current || user?.employeeId || null
+
     // Self reviews (self mode) — reviews where the TL reviewed themselves
     const selfReviews = React.useMemo(() => {
-        if (!selfEmployeeId) return []
-        return reviews.filter(r => r.employeeId === selfEmployeeId && r.reviewType === "SELF")
-    }, [reviews, selfEmployeeId])
+        const empId = selfEmployeeIdRef.current || user?.employeeId
+        if (!empId) return []
+        return reviews.filter(r => r.employeeId === empId && r.reviewType === "SELF")
+    }, [reviews, user?.employeeId])
 
     const selfAvgRating = React.useMemo(() => {
         if (selfReviews.length === 0) return 0
@@ -469,7 +484,7 @@ export function AdminPerformanceView() {
     const toggleDept = (dept: string) => {
         setCollapsedDepts(prev => {
             const next = new Set(prev)
-            next.has(dept) ? next.delete(dept) : next.add(dept)
+            if (next.has(dept)) next.delete(dept); else next.add(dept)
             return next
         })
     }

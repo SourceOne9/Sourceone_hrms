@@ -293,3 +293,50 @@
 - Session records stored in `UserSession` model
 - Admin session revocation via `/admin/identity`
 - Tenant context resolved from JWT claims on every request
+
+
+## Employee Self-Service
+
+### Submit Reimbursement
+
+1. Navigate to `/reimbursement`.
+2. Click **New Request**.
+3. Select expense category (Travel, Food, Equipment, Medical, Other).
+4. Enter amount and description, optionally upload receipt.
+5. Submit. Request appears as PENDING with ₹ amount displayed.
+
+### Submit Resignation
+
+1. Navigate to `/resignation`.
+2. Fill in reason, last working day, notice period willingness.
+3. Optionally request exit interview and provide confidential feedback.
+4. Click **Submit Resignation Request**.
+5. Review confirmation dialog showing all details.
+6. Click **I Confirm — Submit Resignation**.
+7. Status shows as PENDING with "under review by HR and manager" message.
+
+### Create Help Desk Ticket
+
+1. Navigate to `/help-desk`.
+2. Click **New Ticket**.
+3. Enter subject, select category (IT Support, HR, Payroll, Facilities, Other).
+4. Set priority (Low, Medium, High) and description.
+5. Submit. Ticket appears with ID (TKT-XXXXXX), status OPEN.
+
+## Team Lead
+
+### Review Team Performance
+
+1. Navigate to `/performance`.
+2. "List of Team Members" panel shows team members with names and designations.
+3. Click an employee to view their performance reviews.
+4. Click **Team Review** or **Monthly Review** to submit new reviews.
+
+### Give Feedback to Employee
+
+1. Navigate to `/feedback`.
+2. Click **Give Feedback**.
+3. Search and select an employee from the team member list.
+4. Set star rating (1-5) and write feedback text.
+5. Optionally check "Submit anonymously".
+6. Click **Submit Feedback**. Appears in "Sent" tab with employee name, rating, and date.

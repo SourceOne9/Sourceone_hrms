@@ -4,6 +4,28 @@ All notable changes to EMS Pro are documented here.
 
 ---
 
+## [5.6.0] - 2026-03-31
+
+### Added
+
+- **Bidirectional Flow Testing** — Full E2E verified flows between Employee and Team Lead portals: attendance check-in, leave request/approval, help desk tickets, reimbursement, resignation, feedback, teams, and performance management
+- **Performance TL Team Members** — Team Lead's Performance Management page now correctly displays team members fetched from Django Teams API with proper UUID-based employee mapping
+
+### Fixed
+
+- **Reimbursement POST 403 for Employees** — Changed Django `ReimbursementListCreateView` POST permission from `reimbursements.manage` to `reimbursements.view` so employees can submit their own claims
+- **Reimbursement `receipt_url: null` → 400** — Changed `ReimbursementCreateSerializer.receipt_url` from URLField to CharField with `allow_null=True` and added `validate_receipt_url()` to coerce null to empty string
+- **Resignation POST 403 for Employees** — Changed Django `ResignationListCreateView` POST permission from `resignations.manage` to `resignations.view` so employees can submit their own resignations
+- **Resignation Wrong Employee ID** — Fixed `app/resignation/page.tsx` passing `user.id` (User UUID) instead of `user.employeeId` (Employee UUID) to `EmployeeResignationView`
+- **Performance TL Empty Team List** — Fixed `AdminPerformanceView` team member mapping to handle Django's flat format (`employee` as UUID string + `employeeName`) instead of assuming nested object. Added `selfEmployeeId` to `fetchAll` dependency array to prevent stale closure overwrite
+- **Performance Page Auth Flash** — Added `isLoading` guard to `app/performance/page.tsx` to prevent rendering EmployeePerformanceView before auth resolves for Team Lead users
+
+### Known Issues
+
+- **Feedback page for EMPLOYEE role** — `/employees/` endpoint returns 403 for employees, blocking the employee picker in "Give Feedback" modal and cascading to hide received feedback in the UI (API data is present)
+
+---
+
 ## [5.5.0] - 2026-03-30
 
 ### Added

@@ -450,3 +450,19 @@ Current notable webhook events include:
 - `agent.device.registered`
 - `agent.command.executed`
 - `agent.report.generated`
+
+
+## Employee Self-Service Endpoints (Django)
+
+The following Django endpoints allow employees with only `*.view` permission to create their own records:
+
+| Endpoint | Method | Permission | Notes |
+|----------|--------|------------|-------|
+| `/api/v1/reimbursements/` | POST | `reimbursements.view` | Employee submits own claim; `employee_id` auto-resolved from JWT |
+| `/api/v1/resignations/` | POST | `resignations.view` | Employee submits own resignation; duplicate PENDING check |
+| `/api/v1/leaves/` | POST | `leaves.view` | Employee submits leave request |
+| `/api/v1/attendance/` | POST | `attendance.view` | Employee checks in/out |
+| `/api/v1/tickets/` | POST | `tickets.view` | Employee creates help desk ticket |
+| `/api/v1/feedback/` | POST | `feedback.view` | Employee/TL submits peer feedback |
+
+All these views auto-resolve `employee_id` from the authenticated user's `employee_profile` if not provided in the request body.

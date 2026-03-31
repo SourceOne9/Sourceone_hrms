@@ -65,6 +65,9 @@ pytest-cache-files-*
 .claude-flow/metrics/
 .claude-flow/security/
 
+# ── Playwright MCP ────────────────────────────────────────
+.playwright-mcp/
+
 # ── Temp / generated ──────────────────────────────────────
 /tmp/
 cookies.txt

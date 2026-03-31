@@ -517,7 +517,10 @@
       "Bash(curl -s -o /dev/null -w %{http_code} http://127.0.0.1:8000/api/v1/auth/login/)",
       "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login/ -H 'Content-Type: application/json' -d '{\"\"email\"\":\"\"employee@sourceoneai.com\"\",\"\"password\"\":\"\"Source@123\"\"}')",
       "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login/ -H 'Content-Type: application/json' -d '{\"\"email\"\":\"\"employee@sourceoneai.com\"\",\"\"password\"\":\"\"Source@123\"\",\"\"tenant_slug\"\":\"\"sourceoneai\"\"}')",
-      "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login/ -H 'Content-Type: application/json' -d '{\"\"email\"\":\"\"employee@sourceoneai.com\"\",\"\"password\"\":\"\"Source@1234\"\",\"\"tenant_slug\"\":\"\"sourceoneai\"\"}')"
+      "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login/ -H 'Content-Type: application/json' -d '{\"\"email\"\":\"\"employee@sourceoneai.com\"\",\"\"password\"\":\"\"Source@1234\"\",\"\"tenant_slug\"\":\"\"sourceoneai\"\"}')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/api/v1/teams/)",
+      "Bash(find . -name __pycache__ -not -path ./node_modules/*)",
+      "Bash(xargs basename:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Ashish Singh\\Desktop\\Employee directory\\app\\api\\reimbursements",

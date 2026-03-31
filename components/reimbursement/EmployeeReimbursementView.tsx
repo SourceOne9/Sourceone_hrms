@@ -11,7 +11,7 @@ import { format } from "date-fns"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Select } from "@/components/ui/Select"
-import { Card, CardContent } from "@/components/ui/Card"
+import { Card } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
 import { Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter } from "@/components/ui/Dialog"
 import { PageHeader } from "@/components/ui/PageHeader"
@@ -72,7 +72,7 @@ export function EmployeeReimbursementView() {
     const [isModalOpen, setIsModalOpen] = React.useState(false)
     const [submitting, setSubmitting] = React.useState(false)
     const [receiptFile, setReceiptFile] = React.useState<File | null>(null)
-    const [uploadingReceipt, setUploadingReceipt] = React.useState(false)
+    const [_uploadingReceipt, setUploadingReceipt] = React.useState(false)
     const [receiptPreview, setReceiptPreview] = React.useState<string | null>(null)
     const fileInputRef = React.useRef<HTMLInputElement>(null)
 
