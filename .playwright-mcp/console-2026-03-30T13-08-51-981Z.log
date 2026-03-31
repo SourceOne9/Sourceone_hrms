@@ -1,0 +1,12 @@
+[     789ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[     945ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[    1119ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/api/v1/employees/profile/:0
+[    1127ms] [ERROR] Fetch user error: Error: Server returned non-JSON response (500)
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1181:15)
+    at async SettingsPage.useCallback[fetchUser] (http://localhost:3000/_next/static/chunks/_041kb4p._.js:2294:34) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[    1223ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/api/v1/features/:0
+[    1223ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/api/v1/roles/capabilities/:0
+[    1234ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/api/v1/permissions/:0
+[    1235ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[    1244ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/api/v1/auth/me/:0
+[    1635ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0

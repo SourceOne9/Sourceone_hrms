@@ -89,6 +89,7 @@ export interface AuthUser {
   tenantSlug: string;
   isTenantAdmin: boolean;
   employeeId: string | null;
+  roleSlug?: string;
 }
 
 export interface LoginPayload {

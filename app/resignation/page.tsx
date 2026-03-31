@@ -22,7 +22,7 @@ export default function ResignationPage() {
             {hasPermission(user.role, Module.RESIGNATION, Action.UPDATE) ? (
                 <AdminResignationView />
             ) : (
-                <EmployeeResignationView employeeId={user.id} />
+                <EmployeeResignationView employeeId={user.employeeId || user.id} />
             )}
         </div>
     )

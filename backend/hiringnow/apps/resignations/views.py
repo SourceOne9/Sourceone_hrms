@@ -22,8 +22,7 @@ class ResignationListCreateView(APIView):
     """
 
     def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated(), HasPermission('resignations.manage')]
+        # Employees can submit their own resignation (POST)
         return [IsAuthenticated(), HasPermission('resignations.view')]
 
     def get(self, request):

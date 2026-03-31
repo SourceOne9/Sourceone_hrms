@@ -1,0 +1,101 @@
+employee_code,first_name,last_name,email,phone,designation,department,date_of_joining,status,reporting_to
+EMP-0101,Vihaan,Verma,vihaan.verma.101@sourceoneai.com,9872835478,VP of Engineering,Engineering,2025-09-11,active,
+EMP-0102,Reyansh,Bose,reyansh.bose.102@sourceoneai.com,9867873917,Eng Director,Engineering,2023-08-19,on_notice,EMP-0101
+EMP-0103,Ishaan,Patel,ishaan.patel.103@sourceoneai.com,9832527224,Eng Manager,Engineering,2025-06-23,on_notice,EMP-0102
+EMP-0104,Myra,Chauhan,myra.chauhan.104@sourceoneai.com,9888715063,Eng Manager,Engineering,2025-07-04,active,EMP-0102
+EMP-0105,Aadhya,Roy,aadhya.roy.105@sourceoneai.com,9883680965,Senior Engineer,Engineering,2023-11-01,active,EMP-0103
+EMP-0106,Priya,Singh,priya.singh.106@sourceoneai.com,9867566079,Senior Engineer,Engineering,2025-10-11,active,EMP-0103
+EMP-0107,Rohan,Reddy,rohan.reddy.107@sourceoneai.com,9845362025,Senior Engineer,Engineering,2023-07-28,active,EMP-0103
+EMP-0108,Nikhil,Dutta,nikhil.dutta.108@sourceoneai.com,9812515861,Software Engineer,Engineering,2024-10-14,active,EMP-0105
+EMP-0109,Vikram,Kumar,vikram.kumar.109@sourceoneai.com,9852206861,Software Engineer,Engineering,2026-01-04,active,EMP-0105
+EMP-0110,Pooja,Nair,pooja.nair.110@sourceoneai.com,9852456562,Software Engineer,Engineering,2024-03-20,active,EMP-0105
+EMP-0111,Meera,Chopra,meera.chopra.111@sourceoneai.com,9885068003,Software Engineer,Engineering,2026-12-11,active,EMP-0105
+EMP-0112,Divya,Gupta,divya.gupta.112@sourceoneai.com,9882465945,Junior Engineer,Engineering,2025-08-14,active,EMP-0108
+EMP-0113,Isha,Menon,isha.menon.113@sourceoneai.com,9885422642,Junior Engineer,Engineering,2025-05-02,pre_joining,EMP-0108
+EMP-0114,Yash,Malhotra,yash.malhotra.114@sourceoneai.com,9877716297,VP of Product,Product,2024-09-26,active,
+EMP-0115,Deepak,Agarwal,deepak.agarwal.115@sourceoneai.com,9877657595,Product Director,Product,2025-08-12,pre_joining,EMP-0114
+EMP-0116,Ajay,Iyer,ajay.iyer.116@sourceoneai.com,9851091806,Product Manager,Product,2026-04-20,active,EMP-0115
+EMP-0117,Vivaan,Kapoor,vivaan.kapoor.117@sourceoneai.com,9865479833,Product Manager,Product,2025-10-05,active,EMP-0115
+EMP-0118,Arjun,Joshi,arjun.joshi.118@sourceoneai.com,9883904368,Senior PM,Product,2024-05-27,pre_joining,EMP-0116
+EMP-0119,Ayaan,Das,ayaan.das.119@sourceoneai.com,9869654692,Senior PM,Product,2024-02-18,active,EMP-0116
+EMP-0120,Ananya,Sharma,ananya.sharma.120@sourceoneai.com,9814572501,Senior PM,Product,2026-01-21,pre_joining,EMP-0116
+EMP-0121,Sara,Verma,sara.verma.121@sourceoneai.com,9899887110,Product Analyst,Product,2023-09-17,active,EMP-0118
+EMP-0122,Kiara,Bose,kiara.bose.122@sourceoneai.com,9833153921,Product Analyst,Product,2026-06-25,active,EMP-0118
+EMP-0123,Neha,Patel,neha.patel.123@sourceoneai.com,9889995612,Product Analyst,Product,2024-06-07,on_notice,EMP-0118
+EMP-0124,Karan,Chauhan,karan.chauhan.124@sourceoneai.com,9818577631,Product Analyst,Product,2023-05-18,on_notice,EMP-0118
+EMP-0125,Amit,Roy,amit.roy.125@sourceoneai.com,9830676564,Associate PM,Product,2024-06-10,active,EMP-0121
+EMP-0126,Suresh,Singh,suresh.singh.126@sourceoneai.com,9842927068,Associate PM,Product,2024-06-27,active,EMP-0121
+EMP-0127,Sneha,Reddy,sneha.reddy.127@sourceoneai.com,9850961834,VP of Marketing,Marketing,2026-02-27,active,
+EMP-0128,Tara,Dutta,tara.dutta.128@sourceoneai.com,9857851026,Mktg Director,Marketing,2023-08-24,active,EMP-0127
+EMP-0129,Lakshmi,Kumar,lakshmi.kumar.129@sourceoneai.com,9839987791,Mktg Manager,Marketing,2025-01-06,active,EMP-0128
+EMP-0130,Akash,Nair,akash.nair.130@sourceoneai.com,9873342265,Mktg Manager,Marketing,2026-01-10,active,EMP-0128
+EMP-0131,Gaurav,Chopra,gaurav.chopra.131@sourceoneai.com,9812219183,Senior Marketer,Marketing,2024-01-12,active,EMP-0129
+EMP-0132,Ravi,Gupta,ravi.gupta.132@sourceoneai.com,9811379784,Senior Marketer,Marketing,2024-07-16,pre_joining,EMP-0129
+EMP-0133,Naveen,Menon,naveen.menon.133@sourceoneai.com,9839200148,Senior Marketer,Marketing,2026-08-20,active,EMP-0129
+EMP-0134,Aditya,Malhotra,aditya.malhotra.134@sourceoneai.com,9875009668,Mktg Analyst,Marketing,2025-04-18,pre_joining,EMP-0131
+EMP-0135,Sai,Agarwal,sai.agarwal.135@sourceoneai.com,9839938902,Mktg Analyst,Marketing,2023-09-24,on_notice,EMP-0131
+EMP-0136,Krishna,Iyer,krishna.iyer.136@sourceoneai.com,9878913513,Mktg Analyst,Marketing,2026-09-08,active,EMP-0131
+EMP-0137,Diya,Kapoor,diya.kapoor.137@sourceoneai.com,9882846320,Mktg Analyst,Marketing,2025-08-25,on_notice,EMP-0131
+EMP-0138,Aanya,Joshi,aanya.joshi.138@sourceoneai.com,9897173710,Mktg Intern,Marketing,2023-11-07,active,EMP-0134
+EMP-0139,Riya,Das,riya.das.139@sourceoneai.com,9824213376,Mktg Intern,Marketing,2024-01-13,on_notice,EMP-0134
+EMP-0140,Rahul,Sharma,rahul.sharma.140@sourceoneai.com,9884281092,VP of Sales,Sales,2026-02-05,active,
+EMP-0141,Dev,Verma,dev.verma.141@sourceoneai.com,9834610491,Sales Director,Sales,2024-07-17,active,EMP-0140
+EMP-0142,Raj,Bose,raj.bose.142@sourceoneai.com,9854213973,Sales Manager,Sales,2024-03-16,active,EMP-0141
+EMP-0143,Manish,Patel,manish.patel.143@sourceoneai.com,9861002264,Sales Manager,Sales,2024-11-22,active,EMP-0141
+EMP-0144,Kavya,Chauhan,kavya.chauhan.144@sourceoneai.com,9888125605,Account Exec,Sales,2023-02-08,active,EMP-0142
+EMP-0145,Nisha,Roy,nisha.roy.145@sourceoneai.com,9813650479,Account Exec,Sales,2025-08-01,pre_joining,EMP-0142
+EMP-0146,Swati,Singh,swati.singh.146@sourceoneai.com,9814767144,Account Exec,Sales,2024-01-28,pre_joining,EMP-0142
+EMP-0147,Harsh,Reddy,harsh.reddy.147@sourceoneai.com,9898105769,Sales Rep,Sales,2024-07-05,active,EMP-0144
+EMP-0148,Vishal,Dutta,vishal.dutta.148@sourceoneai.com,9843441246,Sales Rep,Sales,2023-09-05,active,EMP-0144
+EMP-0149,Sanjay,Kumar,sanjay.kumar.149@sourceoneai.com,9815632026,Sales Rep,Sales,2023-12-04,active,EMP-0144
+EMP-0150,Aarav,Nair,aarav.nair.150@sourceoneai.com,9862636610,Sales Rep,Sales,2024-08-18,on_notice,EMP-0144
+EMP-0151,Vihaan,Chopra,vihaan.chopra.151@sourceoneai.com,9825818678,SDR,Sales,2024-10-02,active,EMP-0147
+EMP-0152,Reyansh,Gupta,reyansh.gupta.152@sourceoneai.com,9853117808,SDR,Sales,2023-05-05,active,EMP-0147
+EMP-0153,Ishaan,Menon,ishaan.menon.153@sourceoneai.com,9821485581,VP of Finance,Finance,2024-07-05,active,
+EMP-0154,Myra,Malhotra,myra.malhotra.154@sourceoneai.com,9858796354,Finance Director,Finance,2024-05-19,on_notice,EMP-0153
+EMP-0155,Aadhya,Agarwal,aadhya.agarwal.155@sourceoneai.com,9893993360,Finance Manager,Finance,2026-01-08,pre_joining,EMP-0154
+EMP-0156,Priya,Iyer,priya.iyer.156@sourceoneai.com,9846529369,Finance Manager,Finance,2024-04-14,active,EMP-0154
+EMP-0157,Rohan,Kapoor,rohan.kapoor.157@sourceoneai.com,9826049281,Senior Accountant,Finance,2023-03-16,active,EMP-0155
+EMP-0158,Nikhil,Joshi,nikhil.joshi.158@sourceoneai.com,9817014618,Senior Accountant,Finance,2026-02-24,active,EMP-0155
+EMP-0159,Vikram,Das,vikram.das.159@sourceoneai.com,9815810056,Senior Accountant,Finance,2025-05-23,pre_joining,EMP-0155
+EMP-0160,Pooja,Sharma,pooja.sharma.160@sourceoneai.com,9847627603,Accountant,Finance,2024-08-04,active,EMP-0157
+EMP-0161,Meera,Verma,meera.verma.161@sourceoneai.com,9843241671,Accountant,Finance,2024-12-15,active,EMP-0157
+EMP-0162,Divya,Bose,divya.bose.162@sourceoneai.com,9820561725,Accountant,Finance,2026-05-24,active,EMP-0157
+EMP-0163,Isha,Patel,isha.patel.163@sourceoneai.com,9819349751,Accountant,Finance,2024-12-19,active,EMP-0157
+EMP-0164,Yash,Chauhan,yash.chauhan.164@sourceoneai.com,9824470588,Jr Accountant,Finance,2023-04-09,on_notice,EMP-0160
+EMP-0165,Deepak,Roy,deepak.roy.165@sourceoneai.com,9896257075,Jr Accountant,Finance,2023-08-20,pre_joining,EMP-0160
+EMP-0166,Ajay,Singh,ajay.singh.166@sourceoneai.com,9895326820,VP of HR,HR,2026-03-09,active,
+EMP-0167,Vivaan,Reddy,vivaan.reddy.167@sourceoneai.com,9872223342,HR Director,HR,2023-01-04,active,EMP-0166
+EMP-0168,Arjun,Dutta,arjun.dutta.168@sourceoneai.com,9857297651,HR Manager,HR,2026-06-06,active,EMP-0167
+EMP-0169,Ayaan,Kumar,ayaan.kumar.169@sourceoneai.com,9888067336,HR Manager,HR,2025-07-02,active,EMP-0167
+EMP-0170,Ananya,Nair,ananya.nair.170@sourceoneai.com,9898359381,HR Specialist,HR,2023-10-16,on_notice,EMP-0168
+EMP-0171,Sara,Chopra,sara.chopra.171@sourceoneai.com,9843478280,HR Specialist,HR,2023-11-23,active,EMP-0168
+EMP-0172,Kiara,Gupta,kiara.gupta.172@sourceoneai.com,9869933426,HR Specialist,HR,2026-11-24,active,EMP-0168
+EMP-0173,Neha,Menon,neha.menon.173@sourceoneai.com,9840510789,HR Associate,HR,2023-06-28,active,EMP-0170
+EMP-0174,Karan,Malhotra,karan.malhotra.174@sourceoneai.com,9892093955,HR Associate,HR,2023-11-06,active,EMP-0170
+EMP-0175,Amit,Agarwal,amit.agarwal.175@sourceoneai.com,9856779757,HR Associate,HR,2023-06-22,on_notice,EMP-0170
+EMP-0176,Suresh,Iyer,suresh.iyer.176@sourceoneai.com,9832663725,HR Associate,HR,2025-11-16,active,EMP-0170
+EMP-0177,Sneha,Kapoor,sneha.kapoor.177@sourceoneai.com,9885052855,HR Intern,HR,2026-11-23,active,EMP-0173
+EMP-0178,Tara,Joshi,tara.joshi.178@sourceoneai.com,9870384244,HR Intern,HR,2023-05-05,active,EMP-0173
+EMP-0179,Lakshmi,Das,lakshmi.das.179@sourceoneai.com,9812728589,VP of Operations,Operations,2025-10-16,on_notice,
+EMP-0180,Akash,Sharma,akash.sharma.180@sourceoneai.com,9841707349,Ops Director,Operations,2026-08-25,on_notice,EMP-0179
+EMP-0181,Gaurav,Verma,gaurav.verma.181@sourceoneai.com,9830642393,Ops Manager,Operations,2023-11-06,on_notice,EMP-0180
+EMP-0182,Ravi,Bose,ravi.bose.182@sourceoneai.com,9861793566,Ops Manager,Operations,2025-10-26,active,EMP-0180
+EMP-0183,Naveen,Patel,naveen.patel.183@sourceoneai.com,9829834183,Ops Lead,Operations,2026-11-06,active,EMP-0181
+EMP-0184,Aditya,Chauhan,aditya.chauhan.184@sourceoneai.com,9839837525,Ops Lead,Operations,2026-04-16,active,EMP-0181
+EMP-0185,Sai,Roy,sai.roy.185@sourceoneai.com,9892026563,Ops Lead,Operations,2026-08-11,active,EMP-0181
+EMP-0186,Krishna,Singh,krishna.singh.186@sourceoneai.com,9882446302,Ops Associate,Operations,2025-10-21,active,EMP-0183
+EMP-0187,Diya,Reddy,diya.reddy.187@sourceoneai.com,9828972543,Ops Associate,Operations,2026-07-15,active,EMP-0183
+EMP-0188,Aanya,Dutta,aanya.dutta.188@sourceoneai.com,9857069621,Ops Associate,Operations,2023-12-13,active,EMP-0183
+EMP-0189,Riya,Kumar,riya.kumar.189@sourceoneai.com,9886634944,Ops Associate,Operations,2023-09-05,active,EMP-0183
+EMP-0190,Rahul,Nair,rahul.nair.190@sourceoneai.com,9862319437,Ops Intern,Operations,2026-10-09,active,EMP-0186
+EMP-0191,Dev,Chopra,dev.chopra.191@sourceoneai.com,9848181402,Ops Intern,Operations,2023-03-03,active,EMP-0186
+EMP-0192,Raj,Gupta,raj.gupta.192@sourceoneai.com,9812079763,VP of Design,Design,2024-07-08,on_notice,
+EMP-0193,Manish,Menon,manish.menon.193@sourceoneai.com,9829042592,Design Director,Design,2023-01-22,active,EMP-0192
+EMP-0194,Kavya,Malhotra,kavya.malhotra.194@sourceoneai.com,9863579557,Design Manager,Design,2023-11-09,pre_joining,EMP-0193
+EMP-0195,Nisha,Agarwal,nisha.agarwal.195@sourceoneai.com,9861612688,Design Manager,Design,2025-06-14,active,EMP-0193
+EMP-0196,Swati,Iyer,swati.iyer.196@sourceoneai.com,9865553825,Senior Designer,Design,2025-03-05,on_notice,EMP-0194
+EMP-0197,Harsh,Kapoor,harsh.kapoor.197@sourceoneai.com,9821814791,Senior Designer,Design,2025-02-27,pre_joining,EMP-0194
+EMP-0198,Vishal,Joshi,vishal.joshi.198@sourceoneai.com,9862126776,Senior Designer,Design,2025-02-08,active,EMP-0194
+EMP-0199,Sanjay,Das,sanjay.das.199@sourceoneai.com,9874533906,UI Designer,Design,2023-12-18,active,EMP-0196
+EMP-0200,Aarav,Sharma,aarav.sharma.200@sourceoneai.com,9880658168,UI Designer,Design,2025-11-11,on_notice,EMP-0196

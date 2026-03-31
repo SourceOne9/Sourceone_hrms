@@ -64,7 +64,7 @@ export default function SettingsPage() {
             const { data } = await api.get<any>('/employees/profile/')
             setUser(data)
             profileForm.reset({
-                name: data.name || "",
+                name: data.name || [data.firstName, data.lastName].filter(Boolean).join(" ") || "",
                 bio: data.bio || "",
                 accentColor: data.accentColor || "blue",
             })
@@ -217,7 +217,7 @@ export default function SettingsPage() {
                                 <div className="flex items-start gap-6 mb-8">
                                     <div className="relative group">
                                         <div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent to-[#5856d6] flex items-center justify-center text-white text-2xl font-bold shadow-lg shrink-0 overflow-hidden">
-                                            {user?.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : user?.name?.substring(0, 2).toUpperCase() || "AD"}
+                                            {user?.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : (user?.firstName?.[0] || "").toUpperCase() + (user?.lastName?.[0] || "").toUpperCase() || user?.name?.substring(0, 2).toUpperCase() || "??"}
                                         </div>
                                         <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-[10px] font-bold opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity rounded-full">
                                             CHANGE
@@ -237,6 +237,29 @@ export default function SettingsPage() {
                                         />
                                     </div>
                                 </div>
+
+                                {/* Employee Details */}
+                                {user && (
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 pt-4 border-t border-border">
+                                        {[
+                                            { label: "Email", value: user.email },
+                                            { label: "Phone", value: user.phone },
+                                            { label: "Designation", value: user.designation },
+                                            { label: "Department", value: user.department?.name || user.department },
+                                            { label: "Employee Code", value: user.employeeCode, mono: true },
+                                            { label: "Joined", value: user.dateOfJoining ? new Date(user.dateOfJoining).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : null },
+                                            { label: "Status", value: user.status, cap: true },
+                                            { label: "Reports To", value: user.manager ? [user.manager.firstName, user.manager.lastName].join(" ") : null },
+                                        ].map((f, i) => (
+                                            <div key={i} className="p-3 rounded-xl bg-bg-2/50 border border-border/50 hover:border-accent/20 transition-colors">
+                                                <div className="text-[10px] font-semibold text-text-4 uppercase tracking-widest mb-1">{f.label}</div>
+                                                <div className={cn("text-sm font-medium text-text truncate", f.mono && "font-mono", f.cap && "capitalize")}>
+                                                    {f.value || <span className="text-text-4 italic text-xs">Not set</span>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
 
                                 <div className="flex justify-end pt-4 border-t border-border">
                                     <Button type="submit" loading={profileForm.formState.isSubmitting}>

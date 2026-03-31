@@ -38,7 +38,7 @@ class AttendanceListCreateView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'POST':
-            return [IsAuthenticated(), HasPermission('attendance.manage')]
+            return [IsAuthenticated(), HasPermission('attendance.view')]  # Employees can check-in
         return [IsAuthenticated(), HasPermission('attendance.view')]
 
     def get(self, request):

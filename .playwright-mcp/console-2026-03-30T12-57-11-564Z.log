@@ -1,0 +1,136 @@
+[     279ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[     366ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  168660ms] [ERROR] ./app/settings/page.tsx:278:39
+Expected '</', got 'jsx text'
+  276 |                                     </div>
+  277 |                                 )}
+> 278 |                                 </div>
+      |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 279 |
+      | ^
+> 280 |                                 <div className="flex justify-end pt-4 border-t border-bor...
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  281 |                                     <Button type="submit" loading={profileForm.formState....
+  282 |                                         {profileForm.formState.isSubmitting ? "Saving..."...
+  283 |                                     </Button>
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  168755ms] [ERROR] ./app/settings/page.tsx:278:39
+Expected '</', got 'jsx text'
+  276 |                                     </div>
+  277 |                                 )}
+> 278 |                                 </div>
+      |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 279 |
+      | ^
+> 280 |                                 <div className="flex justify-end pt-4 border-t border-bor...
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  281 |                                     <Button type="submit" loading={profileForm.formState....
+  282 |                                         {profileForm.formState.isSubmitting ? "Saving..."...
+  283 |                                     </Button>
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  169340ms] [ERROR] ./app/settings/page.tsx:278:39
+Expected '</', got 'jsx text'
+  276 |                                     </div>
+  277 |                                 )}
+> 278 |                                 </div>
+      |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 279 |
+      | ^
+> 280 |                                 <div className="flex justify-end pt-4 border-t border-bor...
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  281 |                                     <Button type="submit" loading={profileForm.formState....
+  282 |                                         {profileForm.formState.isSubmitting ? "Saving..."...
+  283 |                                     </Button>
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  170212ms] [ERROR] ./app/settings/page.tsx:278:39
+Expected '</', got 'jsx text'
+  276 |                                     </div>
+  277 |                                 )}
+> 278 |                                 </div>
+      |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 279 |
+      | ^
+> 280 |                                 <div className="flex justify-end pt-4 border-t border-bor...
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  281 |                                     <Button type="submit" loading={profileForm.formState....
+  282 |                                         {profileForm.formState.isSubmitting ? "Saving..."...
+  283 |                                     </Button>
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  170217ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/settings?_rsc=yiw3n:0
+[  170246ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/settings?_rsc=yiw3n:0
+[  170287ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/settings?_rsc=yiw3n:0
+[  170301ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/settings:0
+[  170412ms] [ERROR] Refused to execute script from 'http://localhost:3000/_next/static/development/_clientMiddlewareManifest.js' because its MIME type ('application/json') is not executable, and strict MIME type checking is enabled. @ http://localhost:3000/settings:0
+[  170574ms] Error: ./app/settings/page.tsx:278:39
+Expected '</', got 'jsx text'
+  276 |                                     </div>
+  277 |                                 )}
+> 278 |                                 </div>
+      |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 279 |
+      | ^
+> 280 |                                 <div className="flex justify-end pt-4 border-t border-bor...
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  281 |                                     <Button type="submit" loading={profileForm.formState....
+  282 |                                         {profileForm.formState.isSubmitting ? "Saving..."...
+  283 |                                     </Button>
+
+Parsing ecmascript source code failed
+
+
+    at <unknown> (Error: ./app/settings/page.tsx:278:39)
+    at Object.getCompilationErrors (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\hot-reloader-turbopack.js:1189:59)
+    at DevBundlerService.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\lib\dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:719:42)
+    at DevServer.findPageComponents (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:689:43)
+    at async DevServer.renderErrorToResponseImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\base-server.js:1745:26)
+[  170580ms] [ERROR] ./app/settings/page.tsx:278:39
+Expected '</', got 'jsx text'
+  276 |                                     </div>
+  277 |                                 )}
+> 278 |                                 </div>
+      |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 279 |
+      | ^
+> 280 |                                 <div className="flex justify-end pt-4 border-t border-bor...
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  281 |                                     <Button type="submit" loading={profileForm.formState....
+  282 |                                         {profileForm.formState.isSubmitting ? "Saving..."...
+  283 |                                     </Button>
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[  170686ms] [ERROR] ./app/settings/page.tsx:278:39
+Expected '</', got 'jsx text'
+  276 |                                     </div>
+  277 |                                 )}
+> 278 |                                 </div>
+      |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 279 |
+      | ^
+> 280 |                                 <div className="flex justify-end pt-4 border-t border-bor...
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  281 |                                     <Button type="submit" loading={profileForm.formState....
+  282 |                                         {profileForm.formState.isSubmitting ? "Saving..."...
+  283 |                                     </Button>
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[  185707ms] [ERROR] ./app/settings/page.tsx:278:39
+Expected '</', got 'jsx text'
+  276 |                                     </div>
+  277 |                                 )}
+> 278 |                                 </div>
+      |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 279 |
+      | ^
+> 280 |                                 <div className="flex justify-end pt-4 border-t border-bor...
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  281 |                                     <Button type="submit" loading={profileForm.formState....
+  282 |                                         {profileForm.formState.isSubmitting ? "Saving..."...
+  283 |                                     </Button>
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[  239307ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0

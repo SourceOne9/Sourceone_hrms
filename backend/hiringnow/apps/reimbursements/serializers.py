@@ -46,8 +46,12 @@ class ReimbursementCreateSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=0.01)
     category = serializers.ChoiceField(choices=Reimbursement.Category.choices)
     description = serializers.CharField(required=False, allow_blank=True, default='')
-    receipt_url = serializers.URLField(max_length=500, required=False, allow_blank=True, default='')
+    receipt_url = serializers.CharField(max_length=500, required=False, allow_blank=True, allow_null=True, default='')
     employee_id = serializers.UUIDField(required=False)
+
+    def validate_receipt_url(self, value):
+        """Convert null/None to empty string for the model field."""
+        return value or ''
 
     def create(self, validated_data):
         return Reimbursement.objects.create(
@@ -55,7 +59,7 @@ class ReimbursementCreateSerializer(serializers.Serializer):
             amount=validated_data['amount'],
             category=validated_data['category'],
             description=validated_data.get('description', ''),
-            receipt_url=validated_data.get('receipt_url', ''),
+            receipt_url=validated_data.get('receipt_url') or '',
             status=Reimbursement.Status.PENDING,
         )
 

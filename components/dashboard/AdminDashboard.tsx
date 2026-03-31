@@ -269,8 +269,8 @@ export function AdminDashboard() {
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-x-2 gap-y-1 w-full max-w-[200px] mt-2">
-                                    {deptData.map((d: any) => (
-                                        <div key={d.name} onClick={() => setSelectedDept(d.name === selectedDept ? null : d.name)}
+                                    {deptData.map((d: any, _dli: number) => (
+                                        <div key={`legend-${_dli}`} onClick={() => setSelectedDept(d.name === selectedDept ? null : d.name)}
                                             className={cn("flex items-center gap-1.5 text-xs text-text-2 cursor-pointer hover:opacity-80 transition-opacity", selectedDept && selectedDept !== d.name && "opacity-30")}>
                                             <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: d.color }} />
                                             <span className="truncate">{d.name}</span>
@@ -347,8 +347,8 @@ export function AdminDashboard() {
                                     </div>
                                 ))
                             ) : filteredDepts.length > 0 ? (
-                                filteredDepts.map((d: any, i: number) => (
-                                    <DeptRow key={d.name} name={d.name} count={d.count} pct={d.value} color={d.color} delay={`${0.1 * (i + 1)}s`} />
+                                filteredDepts.map((d: any, _di: number) => (
+                                    <DeptRow key={`dept-${_di}`} name={d.name} count={d.count} pct={d.value} color={d.color} delay={`${0.1 * (_di + 1)}s`} />
                                 ))
                             ) : (
                                 <p className="text-sm text-text-3 py-4 text-center">No departments matching filter</p>
@@ -378,8 +378,8 @@ export function AdminDashboard() {
                                     </div>
                                 ))
                             ) : filteredHires.length > 0 ? (
-                                filteredHires.map((h: any) => (
-                                    <HireRow key={h.name} initials={h.initials} name={h.name} role={h.role} date={h.date} color={h.color} />
+                                filteredHires.map((h: any, _hi: number) => (
+                                    <HireRow key={`hire-${_hi}`} initials={h.initials} name={h.name} role={h.role} date={h.date} color={h.color} />
                                 ))
                             ) : (
                                 <p className="text-sm text-text-3 py-4 text-center">No hires found{selectedDept ? ` in ${selectedDept}` : ""}</p>

@@ -1,0 +1,10 @@
+[     886ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[     989ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   41942ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   57911ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/auth/login/:0
+[   70015ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/auth/login/:0
+[   72907ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/auth/login/:0
+[   75856ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/auth/login/:0
+[   78874ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/auth/login/:0
+[   78879ms] [ERROR] Failed to load resource: the server responded with a status of 429 (Too Many Requests) @ http://127.0.0.1:8000/api/v1/auth/login/:0
+[  120465ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/auth/login/:0

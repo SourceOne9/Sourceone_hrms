@@ -25,7 +25,7 @@ class LeaveListCreateView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'POST':
-            return [IsAuthenticated(), HasPermission('leaves.manage')]
+            return [IsAuthenticated(), HasPermission('leaves.view')]  # Allow employees to create own leave requests
         return [IsAuthenticated(), HasPermission('leaves.view')]
 
     def get(self, request):
@@ -158,7 +158,7 @@ class LeaveDetailView(APIView):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated(), HasPermission('leaves.view')]
-        return [IsAuthenticated(), HasPermission('leaves.manage')]
+        return [IsAuthenticated(), HasPermission('leaves.view')]  # Allow employees to create own leave requests
 
     def _get_leave(self, pk):
         return get_object_or_404(

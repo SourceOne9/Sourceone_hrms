@@ -1,0 +1,12 @@
+[      64ms] [ERROR] Dashboard stats fetch failed: TypeError: Failed to fetch
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1118:26)
+    at Object.getStats (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:724:169)
+    at AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:804:175) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[      65ms] [ERROR] Dashboard logins fetch failed: TypeError: Failed to fetch
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1118:26)
+    at Object.getLogins (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:731:169)
+    at AdminDashboard.useCallback[fetchDashboardData] (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:810:175) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[     272ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[     399ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   11675ms] [WARNING] [React Flow]: It looks like you've created a new nodeTypes or edgeTypes object. If this wasn't on purpose please define the nodeTypes/edgeTypes outside of the component or memoize them. Help: https://reactflow.dev/error#002 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   11676ms] [WARNING] [React Flow]: It looks like you've created a new nodeTypes or edgeTypes object. If this wasn't on purpose please define the nodeTypes/edgeTypes outside of the component or memoize them. Help: https://reactflow.dev/error#002 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431

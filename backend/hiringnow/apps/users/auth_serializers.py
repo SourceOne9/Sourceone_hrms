@@ -170,6 +170,7 @@ class UserMeSerializer(serializers.ModelSerializer):
     employee_id = serializers.SerializerMethodField()
 
     onboarding_status = serializers.SerializerMethodField()
+    role_slug = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -178,7 +179,7 @@ class UserMeSerializer(serializers.ModelSerializer):
             'avatar', 'accent_color', 'bio',
             'must_change_password', 'last_login_at',
             'tenant_id', 'tenant_slug', 'is_tenant_admin',
-            'employee_id', 'onboarding_status',
+            'employee_id', 'onboarding_status', 'role_slug',
         ]
         read_only_fields = fields
 
@@ -205,6 +206,18 @@ class UserMeSerializer(serializers.ModelSerializer):
         if employee_profile:
             return employee_profile.onboarding_status
         return None
+
+    def get_role_slug(self, obj):
+        """Return the user's primary RBAC role slug from UserRole."""
+        try:
+            from apps.rbac.models import UserRole
+            user_role = UserRole.objects.filter(user=obj).select_related('role').first()
+            if user_role:
+                return user_role.role.slug
+        except Exception:
+            pass
+        return 'employee'  # default fallback
+
 
 class UpdateMeSerializer(serializers.ModelSerializer):
     class Meta:

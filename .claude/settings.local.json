@@ -506,7 +506,18 @@
       "Bash(curl -s http://127.0.0.1:8000/api/v1/auth/register/status/final-test-42/ --max-time 5)",
       "Bash(curl -s http://127.0.0.1:8000/api/v1/auth/register/status/livetest77/ --max-time 5)",
       "mcp__plugin_playwright_playwright__browser_type",
-      "Bash(curl -s http://127.0.0.1:8000/api/v1/auth/register/status/livetest88/ --max-time 5)"
+      "Bash(curl -s http://127.0.0.1:8000/api/v1/auth/register/status/livetest88/ --max-time 5)",
+      "mcp__plugin_playwright_playwright__browser_file_upload",
+      "Bash(python3 -c \":*)",
+      "Bash(rm -rf \"C:/Users/Ashish Singh/AppData/Local/ms-playwright/mcp-chrome-0cea514/SingletonLock\")",
+      "Bash(rm -rf \"C:/Users/Ashish Singh/AppData/Local/ms-playwright/mcp-chrome-0cea514/SingletonSocket\")",
+      "Bash(rm -rf \"C:/Users/Ashish Singh/AppData/Local/ms-playwright/mcp-chrome-0cea514/SingletonCookie\")",
+      "mcp__plugin_playwright_playwright__browser_close",
+      "Bash(ping -n 1 aws-1-ap-southeast-2.pooler.supabase.com)",
+      "Bash(curl -s -o /dev/null -w %{http_code} http://127.0.0.1:8000/api/v1/auth/login/)",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login/ -H 'Content-Type: application/json' -d '{\"\"email\"\":\"\"employee@sourceoneai.com\"\",\"\"password\"\":\"\"Source@123\"\"}')",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login/ -H 'Content-Type: application/json' -d '{\"\"email\"\":\"\"employee@sourceoneai.com\"\",\"\"password\"\":\"\"Source@123\"\",\"\"tenant_slug\"\":\"\"sourceoneai\"\"}')",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login/ -H 'Content-Type: application/json' -d '{\"\"email\"\":\"\"employee@sourceoneai.com\"\",\"\"password\"\":\"\"Source@1234\"\",\"\"tenant_slug\"\":\"\"sourceoneai\"\"}')"
     ],
     "additionalDirectories": [
       "c:\\Users\\Ashish Singh\\Desktop\\Employee directory\\app\\api\\reimbursements",

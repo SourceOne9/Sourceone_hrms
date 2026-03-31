@@ -1,0 +1,26 @@
+[     322ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[     426ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[     451ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://127.0.0.1:8000/api/v1/auth/me/:0
+[     459ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/auth/refresh/:0
+[   26384ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   26496ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   29057ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/agent/daily-report/?date=2026-03-30:0
+[   29411ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[   29433ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/kudos/:0
+[   32286ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/teams/:0
+[   32287ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/agent/daily-report/?date=2026-03-30:0
+[   32634ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/leaves/?per_page=100:0
+[   33407ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/agent/daily-report/?date=2026-03-29:0
+[   35609ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[   39145ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/agent/daily-report/?date=2026-03-29:0
+[   89600ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8000/api/v1/notifications/:0
+[  128193ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  170995ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  171294ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  173595ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/agent/daily-report/?date=2026-03-30:0
+[  177215ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:8000/api/v1/agent/daily-report/?date=2026-03-30:0
+[  178149ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/agent/daily-report/?date=2026-03-29:0
+[  180469ms] [ERROR] TimeTracker status fetch failed: Error: Request timed out. Please check your connection and try again.
+    at apiClient (http://localhost:3000/_next/static/chunks/_03pbnao._.js:1127:19)
+    at async Object.status (http://localhost:3000/_next/static/chunks/_0ri69k-._.js:2781:26) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[  183855ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8000/api/v1/agent/daily-report/?date=2026-03-29:0

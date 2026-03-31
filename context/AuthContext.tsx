@@ -228,7 +228,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fetchFeatureFlags(),
         ])
         if (!cancelled) {
-          const roleSlug = authUser.isTenantAdmin ? "admin" : "employee"
+          const roleSlug = authUser.isTenantAdmin ? "admin" : (authUser.roleSlug || "employee")
           setUser(mapUser(authUser, roleSlug, capabilities, codenames, flags))
         }
       } catch {
@@ -285,10 +285,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       fetchUserPermissions(),
       fetchFeatureFlags(),
     ])
-    const roleSlug = (result.user as Record<string, unknown>)?.roleSlug as string | undefined
+    const roleSlug = authUser.roleSlug || (result.user as Record<string, unknown>)?.roleSlug as string | undefined
     setUser(mapUser(
       authUser,
-      roleSlug || (authUser.isTenantAdmin ? "admin" : "employee"),
+      authUser.isTenantAdmin ? "admin" : (roleSlug || "employee"),
       capabilities,
       codenames,
       flags

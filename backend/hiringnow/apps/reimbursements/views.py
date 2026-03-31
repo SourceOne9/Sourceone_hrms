@@ -22,8 +22,7 @@ class ReimbursementListCreateView(APIView):
     """
 
     def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated(), HasPermission('reimbursements.manage')]
+        # Employees can submit their own reimbursement requests (POST)
         return [IsAuthenticated(), HasPermission('reimbursements.view')]
 
     def get(self, request):

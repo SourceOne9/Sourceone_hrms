@@ -38,7 +38,11 @@ function getStatusVariant(status: string) {
     switch (status) {
         case "Active": return "success"
         case "On Leave": return "warning"
+        case "On Notice": return "warning"
+        case "Pre-Joining": return "purple"
         case "Resigned": return "neutral"
+        case "Terminated": return "danger"
+        case "Exited": return "neutral"
         default: return "danger"
     }
 }
@@ -196,7 +200,7 @@ export const EmployeeList = React.memo(function EmployeeList({
             onPageChange={onPageChange}
             filterFields={[
                 { id: "dept", label: "Departments", options: departments.map(d => d.name) },
-                { id: "status", label: "Status", options: ["Active", "On Leave", "Resigned", "Terminated"] }
+                { id: "status", label: "Status", options: ["Active", "On Leave", "On Notice", "Pre-Joining", "Resigned", "Terminated"] }
             ]}
             actions={
                 <>

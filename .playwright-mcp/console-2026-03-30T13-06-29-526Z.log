@@ -1,0 +1,33 @@
+[     570ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/settings:0
+[     634ms] Error: The default export is not a React Component in "/settings/page"
+    at errorMissingDefaultExport (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:65:20093)
+    at createComponentTreeInternal (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:65:28794)
+    at async (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:65:31024)
+    at async createComponentTreeInternal (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:65:30241)
+    at async (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:65:31024)
+    at async createComponentTreeInternal (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:65:30241)
+    at async getRSCPayload (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:69:42190)
+    at async (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:69:73965)
+    at async renderToHTMLOrFlightImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:69:56895)
+    at async doRender (file://C:\Users\Ashish Singh\Desktop\Employee directory\.next\dev\server\chunks\ssr\node_modules_0~8bzr0._.js:5160:28)
+    at async AppPageRouteModule.handleResponse (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:71:63567)
+    at async handleResponse (file://C:\Users\Ashish Singh\Desktop\Employee directory\.next\dev\server\chunks\ssr\node_modules_0~8bzr0._.js:5435:32)
+    at async Module.handler (file://C:\Users\Ashish Singh\Desktop\Employee directory\.next\dev\server\chunks\ssr\node_modules_0~8bzr0._.js:5838:20)
+    at async DevServer.renderToResponseWithComponentsImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\base-server.js:1454:9)
+    at async DevServer.renderPageComponent (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\base-server.js:1506:24)
+    at async DevServer.renderToResponseImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\base-server.js:1556:32)
+    at async DevServer.pipeImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\base-server.js:1043:25)
+    at async NextNodeServer.handleCatchallRenderRequest (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\next-server.js:338:17)
+    at async DevServer.handleRequestImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\base-server.js:934:17)
+    at async (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:394:20)
+    at async Span.traceAsyncFn (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\trace\trace.js:164:20)
+    at async DevServer.handleRequest (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\dev\next-dev-server.js:390:24)
+    at async invokeRender (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\lib\router-server.js:253:21)
+    at async handleRequest (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\lib\router-server.js:452:24)
+    at async requestHandlerImpl (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\lib\router-server.js:501:13)
+    at async Server.requestListener (file://C:\Users\Ashish Singh\Desktop\Employee directory\node_modules\next\dist\server\lib\start-server.js:225:13)
+[     642ms] [ERROR] Refused to execute script from 'http://localhost:3000/_next/static/development/_clientMiddlewareManifest.js' because its MIME type ('application/json') is not executable, and strict MIME type checking is enabled. @ http://localhost:3000/settings:0
+[   80155ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[   80309ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ http://localhost:3000/manifest.json:0
+[  104273ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://127.0.0.1:8000/api/v1/employees/profile/:0
+[  140563ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:8000/api/v1/notifications/:0
