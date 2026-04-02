@@ -150,7 +150,7 @@ export default function LoginPage() {
 
             {/* Login Card */}
             <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
+                initial={false}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className="relative z-10 w-full max-w-[360px] shadow-2xl rounded-[16px] overflow-hidden bg-[#0d162a]"
