@@ -65,6 +65,7 @@ INSTALLED_APPS = [
 # The MIDDLEWARE setting is a list of all the middleware that is used in the project.
 # Middleware is used to process the requests and responses.
 MIDDLEWARE = [
+    'config.health_middleware.HealthcheckBypassMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
