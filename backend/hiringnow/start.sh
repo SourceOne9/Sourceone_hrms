@@ -3,6 +3,33 @@ set -e
 
 echo "=== EMS Pro Django Backend — Railway Start ==="
 
+echo "Checking custom user table state on default DB..."
+python - <<'PY'
+import os
+import psycopg2
+
+conn = psycopg2.connect(
+    dbname=os.environ["DB_NAME"],
+    user=os.environ["DB_USER"],
+    password=os.environ["DB_PASSWORD"],
+    host=os.environ["DB_HOST"],
+    port=os.environ.get("DB_PORT", "5432"),
+)
+conn.autocommit = True
+
+with conn.cursor() as cur:
+    cur.execute("SELECT to_regclass('public.users')")
+    users_table = cur.fetchone()[0]
+
+    if users_table is None:
+        print("users table is missing; resetting users migration history on default DB...")
+        cur.execute("DELETE FROM django_migrations WHERE app IN ('users', 'user_sessions')")
+    else:
+        print("users table exists; keeping users migration history intact.")
+
+conn.close()
+PY
+
 echo "Priming custom user model migrations on default DB..."
 python manage.py migrate users --database=default
 
