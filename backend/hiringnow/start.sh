@@ -18,14 +18,21 @@ conn = psycopg2.connect(
 conn.autocommit = True
 
 with conn.cursor() as cur:
-    cur.execute("SELECT to_regclass('public.users')")
-    users_table = cur.fetchone()[0]
+    # Check if django_migrations table exists (fresh DB won't have it)
+    cur.execute("SELECT to_regclass('public.django_migrations')")
+    migrations_table = cur.fetchone()[0]
 
-    if users_table is None:
-        print("users table is missing; resetting users migration history on default DB...")
-        cur.execute("DELETE FROM django_migrations WHERE app IN ('users', 'user_sessions')")
+    if migrations_table is None:
+        print("Fresh database — django_migrations does not exist yet. Skipping pre-check.")
     else:
-        print("users table exists; keeping users migration history intact.")
+        cur.execute("SELECT to_regclass('public.users')")
+        users_table = cur.fetchone()[0]
+
+        if users_table is None:
+            print("users table is missing; resetting users migration history on default DB...")
+            cur.execute("DELETE FROM django_migrations WHERE app IN ('users', 'user_sessions')")
+        else:
+            print("users table exists; keeping users migration history intact.")
 
 conn.close()
 PY
