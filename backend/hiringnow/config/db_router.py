@@ -56,12 +56,16 @@ class TenantDatabaseRouter:
         db2 = self._db_for_model(type(obj2))
         return db1 == db2
 
+    # Apps that MUST exist on default DB because Django built-in apps
+    # (admin, auth) have foreign keys to the User model and token tables.
+    _default_required_apps = frozenset({"tenants", "users", "user_sessions", "token_blacklist"})
+
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         if db == "default":
             # In single-DB mode (no tenant DBs configured), allow all migrations on default
             if len(settings.DATABASES) == 1:
                 return True
-            return app_label == "tenants" or app_label in _BUILTIN_APP_LABELS
+            return app_label in self._default_required_apps or app_label in _BUILTIN_APP_LABELS
         if app_label in ("contenttypes", "auth"):
             return True
         if app_label in self.tenant_scoped_apps:
