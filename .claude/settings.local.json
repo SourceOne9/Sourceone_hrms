@@ -530,7 +530,10 @@
       "Bash(echo \"Backend PID: $!\")",
       "Bash(echo \"Frontend PID: $!\")",
       "Bash(taskkill //F //IM \"chromium.exe\")",
-      "Bash(taskkill //F //IM \"chrome.exe\")"
+      "Bash(taskkill //F //IM \"chrome.exe\")",
+      "Bash(npx kill-port:*)",
+      "Bash(grep -l \"class.*Model\" \"c:/Users/Ashish Singh/Desktop/Sourceone_hrms/backend/hiringnow/apps\"/*/*models.py)",
+      "Bash(psql \"postgresql://postgres:nCmjXrjnsdcPNrQHmzikaGjmfKYcAwJF@interchange.proxy.rlwy.net:36257/railway\" -c \"CREATE DATABASE railway_sourceoneai OWNER postgres;\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\Ashish Singh\\Desktop\\Employee directory\\app\\api\\reimbursements",
