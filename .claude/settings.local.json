@@ -520,7 +520,17 @@
       "Bash(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login/ -H 'Content-Type: application/json' -d '{\"\"email\"\":\"\"employee@sourceoneai.com\"\",\"\"password\"\":\"\"Source@1234\"\",\"\"tenant_slug\"\":\"\"sourceoneai\"\"}')",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/api/v1/teams/)",
       "Bash(find . -name __pycache__ -not -path ./node_modules/*)",
-      "Bash(xargs basename:*)"
+      "Bash(xargs basename:*)",
+      "Bash(git -C \"c:/Users/Ashish Singh/Desktop/Sourceone_hrms\" log --oneline -20)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/api/v1/)",
+      "Bash(curl -s -o /dev/null -w \"Backend: %{http_code}\\\\n\" http://127.0.0.1:8000/api/v1/)",
+      "Bash(curl -s -o /dev/null -w \"Frontend: %{http_code}\\\\n\" http://localhost:3000)",
+      "Bash(taskkill //F //IM \"python.exe\")",
+      "Bash(taskkill //F //IM \"node.exe\")",
+      "Bash(echo \"Backend PID: $!\")",
+      "Bash(echo \"Frontend PID: $!\")",
+      "Bash(taskkill //F //IM \"chromium.exe\")",
+      "Bash(taskkill //F //IM \"chrome.exe\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\Ashish Singh\\Desktop\\Employee directory\\app\\api\\reimbursements",

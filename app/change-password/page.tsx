@@ -39,7 +39,7 @@ export default function ChangePasswordPage() {
 
         setLoading(true)
         try {
-            const { data } = await api.post('/users/password/', { newPassword, isFirstLogin: true }) as any
+            const { data } = await api.post('/auth/change-password/', { new_password: newPassword }) as any
             setSuccess(true)
             // Full page reload to refresh auth state (mustChangePassword cleared on server)
             setTimeout(() => {

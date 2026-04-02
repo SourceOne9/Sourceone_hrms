@@ -23,15 +23,13 @@ COPY --from=builder /install /usr/local
 # Copy application code
 COPY hiringnow/ .
 
-# Collect static files (optional, Nginx can serve these)
+# Collect static files (optional, start.sh also runs this)
 RUN python manage.py collectstatic --noinput --settings=config.settings.base 2>/dev/null || true
 
 EXPOSE 8001
 
-# Run with Gunicorn (4 workers, bind to 0.0.0.0:8001)
-CMD ["gunicorn", "config.wsgi:application", \
-     "--bind", "0.0.0.0:8001", \
-     "--workers", "4", \
-     "--timeout", "120", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-"]
+# Copy start script (handles migrations + seed + gunicorn)
+COPY hiringnow/start.sh .
+RUN chmod +x start.sh
+
+CMD ["bash", "start.sh"]

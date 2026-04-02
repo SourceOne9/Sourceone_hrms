@@ -3,6 +3,17 @@ from .base import *
 # The DEBUG setting is a boolean that is used to determine if the production server should be run.
 DEBUG = False
 
+# WhiteNoise — serve static files directly from Django (no Nginx needed)
+MIDDLEWARE.insert(
+    MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+)
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 # The ALLOWED_HOSTS setting is a list of all the hosts that are allowed to access the production server.
 # Set ALLOWED_HOSTS in .env as comma-separated (e.g. yourapp.com,api.yourapp.com).
 # Set ALLOWED_HOSTS_WILDCARD for subdomain tenants (e.g. .yourapp.com allows acme.yourapp.com, globex.yourapp.com).
