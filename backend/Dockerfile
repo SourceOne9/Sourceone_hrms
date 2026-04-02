@@ -20,7 +20,8 @@ WORKDIR /app
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
-# Copy application code
+# Copy application code (cache-bust on every deploy)
+ARG CACHEBUST=1
 COPY hiringnow/ .
 
 # Collect static files (optional, start.sh also runs this)
