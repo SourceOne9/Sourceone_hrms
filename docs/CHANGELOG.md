@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to EMS Pro are documented here.
+All notable changes to SourceOne Hr are documented here.
 
 ---
 
@@ -80,7 +80,7 @@ All notable changes to EMS Pro are documented here.
   - `CONTRIBUTING.md`: Backend path fixed (`backend/hiringnow/`), project structure tree updated with accurate file counts
   - `AI_AGENTS.md`: Gemini model version corrected, migration status clarified
   - `PROJECT_BACKLOG.md`: Updated to Sprint 2 in progress, last-updated date refreshed
-  - `backend/hiringnow/README.md`: Title changed to EMS Pro, Django version fixed (5.1), all 30 apps documented
+  - `backend/hiringnow/README.md`: Title changed to SourceOne Hr, Django version fixed (5.1), all 30 apps documented
   - `PERFORMANCE_AGENT_ARCHITECTURE.md` and `USER_FLOWS.md`: Reviewed, confirmed accurate
 
 ---

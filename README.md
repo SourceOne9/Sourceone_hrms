@@ -1,8 +1,8 @@
-# EMS Pro - Employee Management System
+# SourceOne Hr - Employee Management System
 
 ## Overview
 
-EMS Pro is a production-grade, multi-tenant Employee Management System. The **frontend** is built with **Next.js 16**, **React 19**, and **TailwindCSS 3.4**. The **backend** runs on **Django 6.0 + Django REST Framework** with DB-per-tenant PostgreSQL isolation. The system includes 7 roles, 18 permissioned modules (63 codenames), 142 API route handlers, 38 pages, 30 Django apps (85+ models), structured performance reviews, a workflow engine, employee onboarding, and a desktop agent-based workforce activity tracking surface.
+SourceOne Hr is a production-grade, multi-tenant Employee Management System. The **frontend** is built with **Next.js 16**, **React 19**, and **TailwindCSS 3.4**. The **backend** runs on **Django 6.0 + Django REST Framework** with DB-per-tenant PostgreSQL isolation. The system includes 7 roles, 18 permissioned modules (63 codenames), 142 API route handlers, 38 pages, 30 Django apps (85+ models), structured performance reviews, a workflow engine, employee onboarding, and a desktop agent-based workforce activity tracking surface.
 
 ## Build Status
 

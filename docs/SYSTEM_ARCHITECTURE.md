@@ -1,8 +1,8 @@
-# System Architecture - EMS Pro
+# System Architecture - SourceOne Hr
 
 ## Overview
 
-EMS Pro is a multi-tenant HRMS with a **Next.js 16 / React 19 / TailwindCSS 3.4** frontend and a **Django 6.0 + Django REST Framework** backend (`backend/`) using DB-per-tenant PostgreSQL isolation, SimpleJWT authentication, and dynamic RBAC. The system has 7 roles, 18 modules (63 permission codenames, with self-service POST allowed for employees on reimbursement/resignation/leave/attendance/tickets), 142 API route handlers, 85+ database models, AI-assisted workflows, a multi-step approval workflow engine, and a desktop agent telemetry/reporting pipeline. 18 of 18 modules are fully migrated to Django (100% complete).
+SourceOne Hr is a multi-tenant HRMS with a **Next.js 16 / React 19 / TailwindCSS 3.4** frontend and a **Django 6.0 + Django REST Framework** backend (`backend/`) using DB-per-tenant PostgreSQL isolation, SimpleJWT authentication, and dynamic RBAC. The system has 7 roles, 18 modules (63 permission codenames, with self-service POST allowed for employees on reimbursement/resignation/leave/attendance/tickets), 142 API route handlers, 85+ database models, AI-assisted workflows, a multi-step approval workflow engine, and a desktop agent telemetry/reporting pipeline. 18 of 18 modules are fully migrated to Django (100% complete).
 
 ---
 

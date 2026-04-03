@@ -1,6 +1,6 @@
 # EMS Time Agent
 
-Desktop productivity tracking agent for EMS Pro.
+Desktop productivity tracking agent for SourceOne Hr.
 
 ## Features
 - Application tracking (active window monitoring)

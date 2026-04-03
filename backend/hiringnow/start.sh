@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "=== EMS Pro Django Backend — Railway Start ==="
+echo "=== SourceOne Hr Django Backend — Railway Start ==="
 
 echo "Checking custom user table state on default DB..."
 python - <<'PY'

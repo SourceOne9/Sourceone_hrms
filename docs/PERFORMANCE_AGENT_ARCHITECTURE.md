@@ -2,7 +2,7 @@
 
 ## Overview
 
-EMS Pro includes a weekly AI-driven performance evaluation pipeline. This is separate from the desktop agent tracking and daily activity reporting system.
+SourceOne Hr includes a weekly AI-driven performance evaluation pipeline. This is separate from the desktop agent tracking and daily activity reporting system.
 
 The performance agent:
 - processes active employees in batches

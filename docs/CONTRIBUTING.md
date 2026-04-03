@@ -1,4 +1,4 @@
-# Contributing to EMS Pro
+# Contributing to SourceOne Hr
 
 ## Local Development Setup
 

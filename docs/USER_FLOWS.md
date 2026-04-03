@@ -1,4 +1,4 @@
-# User Flows - EMS Pro
+# User Flows - SourceOne Hr
 
 ## CEO / HR
 

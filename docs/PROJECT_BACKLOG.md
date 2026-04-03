@@ -1,4 +1,4 @@
-# EMS Pro — Project Backlog
+# SourceOne Hr — Project Backlog
 
 **Last Updated**: March 26, 2026
 **Methodology**: Agile Scrum | 2-week sprints
@@ -804,4 +804,4 @@ Backlog:   79 SP (24%)
 
 ---
 
-*Generated: March 16, 2026 | EMS Pro v1.0.0*
+*Generated: March 16, 2026 | SourceOne Hr v1.0.0*

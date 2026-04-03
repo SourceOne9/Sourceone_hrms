@@ -1,6 +1,6 @@
-# EMS Pro — Django Backend
+# SourceOne Hr — Django Backend
 
-Multi-tenant SaaS backend for the EMS Pro Employee Management System. Built with Django 5.1, Django REST Framework, SimpleJWT, and PostgreSQL using a **DB-per-tenant** architecture.
+Multi-tenant SaaS backend for the SourceOne Hr Employee Management System. Built with Django 5.1, Django REST Framework, SimpleJWT, and PostgreSQL using a **DB-per-tenant** architecture.
 
 ## Tech stack
 

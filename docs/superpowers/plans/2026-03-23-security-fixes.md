@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Fix all CRITICAL and HIGH security vulnerabilities found in the EMS Pro security audit without breaking existing functionality.
+**Goal:** Fix all CRITICAL and HIGH security vulnerabilities found in the SourceOne Hr security audit without breaking existing functionality.
 
 **Architecture:** Incremental, file-by-file fixes with test verification after each change. No schema migrations required. Changes are isolated — each task touches 1–2 files max.
 

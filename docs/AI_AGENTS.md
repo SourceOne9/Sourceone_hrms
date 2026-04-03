@@ -1,8 +1,8 @@
-# AI Agents - EMS Pro
+# AI Agents - SourceOne Hr
 
 ## Overview
 
-EMS Pro currently includes both AI-driven and automation-driven agent systems:
+SourceOne Hr currently includes both AI-driven and automation-driven agent systems:
 
 - HR chatbot
 - weekly performance evaluation agent
