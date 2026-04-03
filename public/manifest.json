@@ -1,7 +1,7 @@
 {
-  "name": "EMS Pro",
-  "short_name": "EMS",
-  "description": "Enterprise Management System Premium",
+  "name": "SourceOne Hr",
+  "short_name": "SourceOne",
+  "description": "SourceOne Hr - Enterprise HR Management",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

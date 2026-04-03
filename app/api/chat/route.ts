@@ -12,11 +12,11 @@ const chatSchema = z.object({
     })).min(1, "At least one message required").max(50),
 })
 
-const SYSTEM_PROMPT = `You are EMS Pro Assistant — a helpful, concise HR management AI embedded in an Employee Management System.
+const SYSTEM_PROMPT = `You are SourceOne Hr Assistant — a helpful, concise HR management AI embedded in an Employee Management System.
 
 You help users with:
 - HR policies, leave balance, attendance, payroll questions
-- How to use EMS Pro features (employees, departments, teams, training, documents, etc.)
+- How to use SourceOne Hr features (employees, departments, teams, training, documents, etc.)
 - General workplace guidance and best practices
 - Generating quick summaries or explanations
 

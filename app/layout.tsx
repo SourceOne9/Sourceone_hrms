@@ -8,7 +8,7 @@ import { AOSProvider } from "@/components/AOSProvider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "EMS Pro – Enterprise Dashboard",
+  title: "SourceOne Hr – Enterprise Dashboard",
   description: "Enterprise Management System",
   manifest: "/manifest.json",
 };

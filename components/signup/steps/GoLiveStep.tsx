@@ -107,7 +107,7 @@ export default function GoLiveStep({
   const teamCount = data.teamInvites.length + 1
   const activeModules = Object.entries(data.enabledModules).filter(([, v]) => v)
   const activeModuleCount = activeModules.length
-  const planLabel = "EMS Pro"
+  const planLabel = "SourceOne Hr"
   const planPrice = PLAN_PRICES["growth"]?.[data.billingCycle] ?? "₹500/user/mo"
 
   /* ---- Review rows ---- */

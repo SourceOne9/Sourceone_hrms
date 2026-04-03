@@ -202,7 +202,7 @@ async function handlePOST(req: Request) {
       // Send invite email
       const emailSent = await sendEmail({
         to: invite.email,
-        subject: `You're invited to join ${organizationName} on EMS Pro`,
+        subject: `You're invited to join ${organizationName} on SourceOne Hr`,
         html: buildInviteEmail({
           name,
           email: invite.email,

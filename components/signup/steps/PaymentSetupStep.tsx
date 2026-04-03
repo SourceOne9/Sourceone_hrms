@@ -108,7 +108,7 @@ export function PaymentSetupStep({ data, updateData, errors }: StepProps) {
         <div className="relative rounded-2xl overflow-hidden border border-[var(--accent)] shadow-[0_0_30px_rgba(0,122,255,0.12)]">
           {/* Header */}
           <div className="bg-gradient-to-br from-[var(--accent)]/15 to-purple-500/5 p-6 pb-5 text-center">
-            <h4 className="font-bold text-text text-xl">EMS Pro</h4>
+            <h4 className="font-bold text-text text-xl">SourceOne Hr</h4>
             <p className="text-xs text-text-3 mt-1">Everything you need to manage your team</p>
 
             {/* Price */}

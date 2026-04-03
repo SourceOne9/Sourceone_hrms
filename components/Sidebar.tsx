@@ -180,8 +180,8 @@ export function NavContent({
             <img src="/logo.svg" alt="EMS Logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-lg text-text tracking-tight leading-tight">EMS Pro</span>
-            <span className="text-xs text-text-3">Enterprise Edition</span>
+            <span className="font-bold text-lg text-text tracking-tight leading-tight">SourceOne Hr</span>
+            <span className="text-xs text-text-3">Enterprise</span>
           </div>
         </div>
       </div>

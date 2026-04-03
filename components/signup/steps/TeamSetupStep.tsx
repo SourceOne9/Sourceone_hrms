@@ -31,9 +31,9 @@ const SEAT_LIMITS: Record<string, number> = {
 }
 
 const TIER_LABELS: Record<string, string> = {
-  starter: "EMS Pro",
-  growth: "EMS Pro",
-  enterprise: "EMS Pro",
+  starter: "SourceOne Hr",
+  growth: "SourceOne Hr",
+  enterprise: "SourceOne Hr",
 }
 
 const PlusIcon = () => (

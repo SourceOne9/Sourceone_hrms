@@ -15,7 +15,7 @@ export function AIChatbot() {
             id: "welcome",
             role: "assistant",
             content:
-                "Hey there! 👋 I'm your EMS Pro Assistant. Ask me anything about HR, your leave balance, attendance, payroll, or how to use any feature!",
+                "Hey there! 👋 I'm your SourceOne Hr Assistant. Ask me anything about HR, your leave balance, attendance, payroll, or how to use any feature!",
         },
     ])
     const [input, setInput] = useState("")
@@ -124,7 +124,7 @@ export function AIChatbot() {
                     transform: isOpen ? "rotate(90deg) scale(0.9)" : "scale(1)",
                 }}
                 aria-label={isOpen ? "Close chat" : "Open AI assistant"}
-                title="EMS Pro AI Assistant"
+                title="SourceOne Hr AI Assistant"
             >
                 {isOpen ? (
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -186,7 +186,7 @@ export function AIChatbot() {
                             🤖
                         </div>
                         <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: 700, fontSize: 15, fontFamily: "var(--font)" }}>EMS Pro Assistant</div>
+                            <div style={{ fontWeight: 700, fontSize: 15, fontFamily: "var(--font)" }}>SourceOne Hr Assistant</div>
                             <div style={{ fontSize: 12, opacity: 0.85 }}>Powered by Gemini AI</div>
                         </div>
                         <button
