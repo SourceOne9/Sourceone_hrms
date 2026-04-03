@@ -245,11 +245,11 @@ export default function SettingsPage() {
                                             { label: "Email", value: user.email },
                                             { label: "Phone", value: user.phone },
                                             { label: "Designation", value: user.designation },
-                                            { label: "Department", value: user.department?.name || user.department },
+                                            { label: "Department", value: typeof user.department === "object" ? user.department?.name : user.department },
                                             { label: "Employee Code", value: user.employeeCode, mono: true },
                                             { label: "Joined", value: user.dateOfJoining ? new Date(user.dateOfJoining).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : null },
                                             { label: "Status", value: user.status, cap: true },
-                                            { label: "Reports To", value: user.manager ? [user.manager.firstName, user.manager.lastName].join(" ") : null },
+                                            { label: "Reports To", value: user.manager ? (typeof user.manager === "object" ? [user.manager.firstName, user.manager.lastName].filter(Boolean).join(" ") : user.manager) : null },
                                         ].map((f, i) => (
                                             <div key={i} className="p-3 rounded-xl bg-bg-2/50 border border-border/50 hover:border-accent/20 transition-colors">
                                                 <div className="text-[10px] font-semibold text-text-4 uppercase tracking-widest mb-1">{f.label}</div>
