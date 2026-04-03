@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
           key: "Content-Security-Policy",
           value: process.env.NODE_ENV === "development"
             ? "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: *.supabase.co lh3.googleusercontent.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' *.supabase.co *.upstash.io localhost:* 127.0.0.1:*; frame-ancestors 'self'"
-            : "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: *.supabase.co lh3.googleusercontent.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' *.supabase.co *.upstash.io *.up.railway.app; frame-ancestors 'self'; upgrade-insecure-requests; block-all-mixed-content",
+            : "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: *.supabase.co lh3.googleusercontent.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' *.supabase.co *.upstash.io *.up.railway.app; frame-ancestors 'self'; upgrade-insecure-requests; block-all-mixed-content",
         },
       ],
     },
