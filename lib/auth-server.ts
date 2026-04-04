@@ -102,13 +102,18 @@ export async function getServerSession(): Promise<ServerSession | null> {
       fetchHeaders["X-Tenant-Slug"] = tenantSlug
     }
 
+    console.log(`[auth-server] Calling ${DJANGO_BASE_URL}/api/v1/auth/me/ with slug=${tenantSlug || 'NONE'}, token=${token.slice(0,10)}...`)
     const response = await fetch(`${DJANGO_BASE_URL}/api/v1/auth/me/`, {
       headers: fetchHeaders,
       // Short timeout to avoid blocking the request pipeline
       signal: AbortSignal.timeout(5000),
     })
 
-    if (!response.ok) return null
+    if (!response.ok) {
+      const errText = await response.text().catch(() => "")
+      console.error(`[auth-server] Django /auth/me/ failed: ${response.status} ${errText.slice(0,200)}`)
+      return null
+    }
 
     const json = await response.json()
     // Unwrap Django envelope: {"data":{...},"error":null,"meta":{}}
