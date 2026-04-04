@@ -11,7 +11,7 @@ import { headers } from "next/headers"
 import type { Role } from "@/lib/permissions"
 import { DJANGO_ROLE_MAP } from "@/lib/permissions"
 
-const DJANGO_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
+const DJANGO_BASE_URL = process.env.DJANGO_INTERNAL_URL || process.env.DJANGO_GATEWAY_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
 
 export interface ServerSession {
   user: {
