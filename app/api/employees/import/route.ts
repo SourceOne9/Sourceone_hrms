@@ -494,4 +494,6 @@ async function handlePOST(req: Request) {
     }
 }
 
+export const maxDuration = 300 // 5 minutes — bulk import makes ~100+ sequential API calls
+
 export const POST = withAuth({ module: Module.EMPLOYEES, action: Action.CREATE }, handlePOST)

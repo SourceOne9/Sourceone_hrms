@@ -250,4 +250,6 @@ async function handlePOST(req: Request) {
     }
 }
 
+export const maxDuration = 120
+
 export const POST = withAuth({ module: Module.EMPLOYEES, action: Action.VIEW }, handlePOST)
