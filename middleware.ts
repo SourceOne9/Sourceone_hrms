@@ -125,8 +125,11 @@ export default async function middleware(req: NextRequest) {
     // CSRF protection: double-submit cookie pattern for state-mutating API requests
     const mutatingMethods = ["POST", "PUT", "PATCH", "DELETE"]
     if (pathname.startsWith("/api/") && mutatingMethods.includes(req.method)) {
-        // Skip CSRF for token-auth-only routes (cron, agent, SCIM) — they use Bearer tokens, not cookies
-        const skipCsrf = pathname.startsWith("/api/cron/") ||
+        // Skip CSRF for token-auth-only routes (cron, agent, SCIM) and Bearer token requests
+        // Bearer token auth is not vulnerable to CSRF — only cookie-based auth needs CSRF protection
+        const hasBearerToken = req.headers.get("authorization")?.startsWith("Bearer ")
+        const skipCsrf = hasBearerToken ||
+            pathname.startsWith("/api/cron/") ||
             pathname.startsWith("/api/agent/") ||
             pathname.startsWith("/api/scim/") ||
             pathname.startsWith("/api/worker/") ||
