@@ -102,27 +102,20 @@ export async function getServerSession(): Promise<ServerSession | null> {
       fetchHeaders["X-Tenant-Slug"] = tenantSlug
     }
 
-    console.log(`[auth-server] Calling ${DJANGO_BASE_URL}/api/v1/auth/me/ with slug=${tenantSlug || 'NONE'}, token=${token.slice(0,10)}...`)
     const response = await fetch(`${DJANGO_BASE_URL}/api/v1/auth/me/`, {
       headers: fetchHeaders,
       // Short timeout to avoid blocking the request pipeline
       signal: AbortSignal.timeout(5000),
     })
 
-    if (!response.ok) {
-      const errText = await response.text().catch(() => "")
-      console.error(`[auth-server] Django /auth/me/ failed: ${response.status} ${errText.slice(0,200)}`)
-      return null
-    }
+    if (!response.ok) return null
 
     const json = await response.json()
     // Unwrap Django envelope: {"data":{...},"error":null,"meta":{}}
     const data = json.data !== undefined ? json.data : json
-    console.log(`[auth-server] Django /auth/me/ response:`, JSON.stringify(data).slice(0, 300))
 
     // 5. Map Django user data to our ServerSession shape
     const djangoUser = snakeToCamelKeys(data) as Record<string, unknown>
-    console.log(`[auth-server] Mapped: tenantId=${djangoUser.tenantId}, tenantSlug=${djangoUser.tenantSlug}, isTenantAdmin=${djangoUser.isTenantAdmin}, employeeId=${djangoUser.employeeId}`)
     const isTenantAdmin = djangoUser.isTenantAdmin === true
     const roleSlug = isTenantAdmin ? "admin" : ((djangoUser.roleSlug as string) || "employee")
     const role: Role = DJANGO_ROLE_MAP[roleSlug] || "EMPLOYEE"
